@@ -106,10 +106,12 @@ app/  main, config, db, logs, errors (з label-check)
       llm/              base, gemini, groq, fallback, fake (з pet), prompt.py
       parse.py          текст → ConstraintSpec (кеш, валідація, unparsed)
       formulate.py      run_formulate(text|spec) — спільне для API і eval
+      pretty.py         читабельний вивід відповіді (python -m app.pretty, scripts/ask.sh)
       routers/          formulate, ingredients, templates, health
 data/ ingredients.yaml, references.yaml, templates.yaml, PRICES.md (джерела цін)
 eval/ requests/{dev,test}/*.yaml, run.py, metrics.py, reports/, cache/
 docs/ OVERVIEW, SPEC, NOTES, steps/, proof.md (генерується)
+scripts/ ask.sh — запит словами → читабельна відповідь (make ask Q="…")
 ```
 
 ## Статус кроків
@@ -128,4 +130,4 @@ docs/ OVERVIEW, SPEC, NOTES, steps/, proof.md (генерується)
 | B4b | раннер, метрики, proof.md | [x] |
 | B5 | замір dev, одне покращення, фінальний test | [x] |
 | B5b | виправлення після фінального заміру (proof.md не змінено) | [x] |
-| B6 | README, звірка з кодом, чистий клон | [ ] |
+| B6 | README, звірка з кодом, чистий клон; scripts/ask.sh | [x] |
