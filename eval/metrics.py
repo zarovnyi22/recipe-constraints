@@ -456,6 +456,13 @@ def summary(report: dict, m: dict) -> list[str]:
             "",
         ]
         if report.get("after_fixes")
+        else [
+            "> **Поточний код; відповіді моделі — з фінального заміру.** Розбір — ті самі "
+            "відповіді моделі (кеш), код і дані — поточні; чесне число фінального заміру — "
+            "`docs/proof.md`.",
+            "",
+        ]
+        if report.get("head")
         else []
     )
     return [

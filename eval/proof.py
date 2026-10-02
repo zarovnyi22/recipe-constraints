@@ -5,6 +5,7 @@
 Renders the newest eval/reports/<split>_*.json (make eval first). The test split goes to
 docs/proof.md, dev to docs/proof_dev.md. --after-fixes renders the newest
 <split>_<date>_after_fixes.json to docs/proof_after_fixes.md (for information only).
+--head renders <split>_<date>_head.json to docs/proof_head.md (current code, stored model answers).
 """
 
 import argparse
@@ -126,6 +127,8 @@ def render(report: dict) -> str:
     title = f"# Доказ відповідності рецептур запиту — {report['split']}, {report['date']}"
     if report.get("after_fixes"):
         title += " (після фіксів B5b, для інформації)"
+    elif report.get("head"):
+        title += " (поточний код; відповіді моделі — з фінального заміру)"
     lines = [title, ""]
     lines += [
         "Кожна рецептура нижче пройшла незалежну перевірку (`app/verify.py`: рахує з грамів і "
@@ -143,11 +146,15 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--split", choices=("dev", "test"), default="test")
     parser.add_argument("--after-fixes", action="store_true")
+    parser.add_argument("--head", action="store_true")
     args = parser.parse_args(argv)
-    path = latest_report(args.split, suffix="_after_fixes" if args.after_fixes else "")
+    suffix = "_after_fixes" if args.after_fixes else "_head" if args.head else ""
+    path = latest_report(args.split, suffix=suffix)
     report = json.loads(path.read_text(encoding="utf-8"))
     if args.after_fixes:
         target = DOCS / f"proof_after_fixes{'' if args.split == 'test' else '_' + args.split}.md"
+    elif args.head:
+        target = DOCS / f"proof_head{'' if args.split == 'test' else '_' + args.split}.md"
     else:
         target = DOCS / ("proof.md" if args.split == "test" else f"proof_{args.split}.md")
     target.write_text(render(report), encoding="utf-8")

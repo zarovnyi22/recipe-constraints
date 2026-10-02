@@ -1,5 +1,5 @@
 # Everything runs in Docker: the host needs only docker compose (no Python, no uv).
-.PHONY: up down logs health ask test lint fmt eval eval-live eval-after-fixes proof
+.PHONY: up down logs health ask test lint fmt eval eval-live proof
 
 up:      ## build and start db + api in the background
 	docker compose up --build -d
@@ -25,14 +25,11 @@ lint:    ## ruff only
 fmt:     ## apply ruff formatting and safe fixes
 	docker compose run --rm test sh -c "ruff check --fix . && ruff format ."
 
-eval:      ## eval from the parse cache only, no model calls: make eval SPLIT=dev [LIMIT=3]
-	docker compose run --rm --build tools python -m eval.run --split $(SPLIT) $(if $(LIMIT),--limit $(LIMIT))
+eval:      ## current code + the stored model answers of the final measurement, no model calls: make eval SPLIT=test [LIMIT=3] -> docs/proof_head.md
+	docker compose run --rm --build tools sh -c "python -m eval.run --split $(SPLIT) --head $(if $(LIMIT),--limit $(LIMIT)) && python -m eval.proof --split $(SPLIT) --head"
 
 eval-live: ## eval, LIVE model for the requests missing from the cache: make eval-live SPLIT=dev [LIMIT=3]
 	docker compose run --rm --build tools python -m eval.run --split $(SPLIT) --live $(if $(LIMIT),--limit $(LIMIT))
-
-eval-after-fixes: ## B5b: [SPLIT=test] from the cache even if the prompt changed -> docs/proof_after_fixes.md (info only)
-	docker compose run --rm --build tools sh -c "python -m eval.run --split $(or $(SPLIT),test) --after-fixes && python -m eval.proof --split $(or $(SPLIT),test) --after-fixes"
 
 proof:     ## docs/proof.md from the newest eval report: make proof [SPLIT=test] (dev -> docs/proof_dev.md)
 	docker compose run --rm --build tools python -m eval.proof --split $(or $(SPLIT),test)

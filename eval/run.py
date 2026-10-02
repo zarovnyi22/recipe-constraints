@@ -1,7 +1,7 @@
 """Eval runner: every request through parse → run_formulate (no HTTP, no DB audit).
 
     python -m eval.run --split dev|test [--live] [--limit N]
-        make eval SPLIT=dev            # from eval/cache only, no model calls
+        make eval SPLIT=dev            # --head: eval/cache answers (any prompt), current code
         make eval-live SPLIT=dev [LIMIT=3]
 
 The model's raw answer for a request is cached in eval/cache/<split>/<id>.json (committed: a clean
@@ -171,11 +171,13 @@ async def run_requests(
     return rows
 
 
-def write_report(split: str, rows: list[dict], live: bool, after_fixes: bool = False) -> Path:
+def write_report(
+    split: str, rows: list[dict], live: bool, after_fixes: bool = False, head: bool = False
+) -> Path:
     from eval.metrics import write_markdown
 
     REPORTS.mkdir(exist_ok=True)
-    suffix = "_after_fixes" if after_fixes else ""
+    suffix = "_after_fixes" if after_fixes else "_head" if head else ""
     path = REPORTS / f"{split}_{date.today().isoformat()}{suffix}.json"
     report = {
         "split": split,
@@ -184,6 +186,7 @@ def write_report(split: str, rows: list[dict], live: bool, after_fixes: bool = F
         "data_version": get_data().data_version,
         "live": live,
         "after_fixes": after_fixes,
+        "head": head,
         "units": rows,
         "errors": sum(r["status"] == "error" for r in rows),
     }
@@ -203,9 +206,17 @@ async def main(argv: list[str] | None = None) -> int:
         help="cache only, even if the prompt changed since; report <split>_<date>_after_fixes "
         "(for information: the honest number is the original report)",
     )
+    parser.add_argument(
+        "--head",
+        action="store_true",
+        help="cache only, even if the prompt changed since: the model answers of the final "
+        "measurement on the CURRENT code and data; report <split>_<date>_head",
+    )
     args = parser.parse_args(argv)
-    if args.after_fixes and args.live:
-        parser.error("--after-fixes is cache-only")
+    if (args.after_fixes or args.head) and args.live:
+        parser.error("--after-fixes / --head are cache-only")
+    if args.after_fixes and args.head:
+        parser.error("--after-fixes and --head are exclusive")
 
     requests = load_dir(REQUESTS / args.split)[: args.limit]
     llm = pool = None
@@ -226,7 +237,7 @@ async def main(argv: list[str] | None = None) -> int:
             pool=pool,
             live=args.live,
             pause_seconds=pause,
-            any_prompt=args.after_fixes,
+            any_prompt=args.after_fixes or args.head,
         )
     except NotCachedError as exc:
         print(exc, file=sys.stderr)
@@ -236,7 +247,7 @@ async def main(argv: list[str] | None = None) -> int:
             await llm.aclose()
         if pool is not None:
             await pool.close()
-    path = write_report(args.split, rows, args.live, args.after_fixes)
+    path = write_report(args.split, rows, args.live, args.after_fixes, args.head)
     errors = sum(r["status"] == "error" for r in rows)
     print(f"{len(rows)} requests, {errors} errors -> {_rel(path)}, {_rel(path.with_suffix('.md'))}")
     return 0

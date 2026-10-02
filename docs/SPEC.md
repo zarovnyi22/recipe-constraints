@@ -164,4 +164,4 @@ unsupported: [{phrase: "щільної текстури", reason: "..."}]   # з
   - **нічого не загублено:** частка запитів, де кожна змістовна фраза є в spec/unparsed/unsupported.
 - `make proof` → `docs/proof.md`: для кожного test-запиту — текст, spec, рецептура, таблиця
   checks; зверху зведення метрик. Це «доказ» для здачі.
-- Кеш LLM-розбору у `eval/cache/` (комітиться) → `make eval` відтворює без ключа.
+- Кеш LLM-розбору у `eval/cache/` (комітиться) → `make eval SPLIT=test` відтворює без ключа (`docs/proof_head.md`; чесний замір — тег `final-test-eval`, див. README).
