@@ -44,6 +44,12 @@ async def test_unsupported_names_the_phrase_and_the_reason():
     assert "unsupported" in text and "ковбаса" in text and "Рецептура на 1000 г" not in text
 
 
+async def test_template_rule_is_printed_once_without_a_doubled_prefix():
+    text = render(await _answer(TASK_SPEC))
+    (line,) = [x for x in text.splitlines() if "правило шаблону" in x]
+    assert line.count("правило шаблону") == 1 and line.count("не послаблюється") == 1
+
+
 def test_error_body():
     assert render({"error": {"code": "llm_bad_output", "message": "x"}}) == "💥 llm_bad_output: x"
 

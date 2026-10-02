@@ -115,7 +115,7 @@ def render(out: dict) -> str:
             phrase = f"  («{c['source_phrase']}»)" if c.get("source_phrase") else ""
             lines.append(f"  • {c['label_uk']}{phrase}")
         for rule in out.get("template_rules", []):
-            lines.append(f"  • правило шаблону (не послаблюється): {rule}")
+            lines.append(f"  • {rule}")  # the rule text already says what it is
         if out.get("explanation"):
             lines.append(f"  ℹ️  {out['explanation']}")
 
