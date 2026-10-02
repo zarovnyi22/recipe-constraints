@@ -22,7 +22,7 @@ AllergenCategory = Literal[
 ATWATER_TOLERANCE = 0.15
 ATWATER_ABS_TOLERANCE_KCAL = 2.0
 FIBRE_KCAL_MAX = 2.0
-POLYOL_KCAL_MAX = 2.4
+POLYOL_KCAL_MAX = 3.0  # polyols 2.4 (erythritol 0), organic acids 3 — Reg. 1169/2011 Annex XIV
 GRAMS_TOLERANCE = 0.15  # base recipe mass vs the template's batch mass
 
 
@@ -33,7 +33,7 @@ class DataError(Exception):
 def energy_bounds(
     protein: float, fat: float, carbs: float, fibre: float, polyols: float = 0.0
 ) -> tuple[float, float]:
-    """Atwater energy range: fibre counts 0–2 kcal/g, polyols/organic acids 0–2.4 kcal/g."""
+    """Atwater energy range: fibre counts 0–2 kcal/g, polyols/organic acids 0–3 kcal/g."""
     low = 4 * protein + 9 * fat + 4 * carbs
     return low, low + FIBRE_KCAL_MAX * fibre + POLYOL_KCAL_MAX * polyols
 
@@ -53,6 +53,7 @@ def _check_energy(label: str, n: "Nutrients | RefNutrients") -> list[str]:
     if n.saturates > n.fat + 1e-9:
         problems.append(f"{label}: saturates {n.saturates} > fat {n.fat}")
     total = n.protein + n.fat + n.carbs + n.fibre + n.salt + polyols
+    total += getattr(n, "water", None) or 0.0
     if total > 100.0 + 1e-9:
         problems.append(f"{label}: nutrients sum to {total:.1f} g per 100 g")
     return problems
@@ -73,6 +74,17 @@ class RefNutrients(BaseModel):
 
 class Nutrients(RefNutrients):
     polyols: float = Field(default=0, ge=0)
+    # explicit moisture, g/100 g, where "100 − macronutrients" is wrong (minerals, powders)
+    water: float | None = Field(default=None, ge=0, le=100)
+
+    @property
+    def moisture(self) -> float:
+        """Moisture, g/100 g: explicit, or what the macronutrients leave (ash other than salt is
+        not in the data). Only baked templates use it (water balance, RR1 #3)."""
+        if self.water is not None:
+            return self.water
+        solids = self.protein + self.fat + self.carbs + self.fibre + self.polyols + self.salt
+        return max(0.0, 100.0 - solids)
 
 
 class Ingredient(BaseModel):
@@ -151,10 +163,18 @@ class Template(BaseModel):
     reference: str
     sweetness_min: float = Field(ge=0)
     moisture_loss_pct: float = Field(ge=0, lt=50)
+    # finished product moisture limit, % (with moisture_loss_pct: the water balance, RR1 #3)
+    max_moisture_pct: float | None = Field(default=None, gt=0, lt=100)
     dose_limits_pct: dict[str, float] = {}
     pairings: list[Pairing] = []
     roles: dict[str, Role] = Field(min_length=1)
     base_recipe: dict[str, float]
+
+    @model_validator(mode="after")
+    def _water_balance(self) -> Self:
+        if self.moisture_loss_pct and self.max_moisture_pct is None:
+            raise ValueError(f"{self.id}: moisture_loss_pct needs max_moisture_pct")
+        return self
 
     @property
     def batch_mass_g(self) -> float:
@@ -287,6 +307,18 @@ class DataBundle(BaseModel):
                 p.append(f"{t}: role {name} {pct:.2f} % outside [{role.min_pct}, {role.max_pct}]")
             if role.mode == "one_of" and used_by_role[name] > 1:
                 p.append(f"{t}: role {name} is one_of but uses {used_by_role[name]} ingredients")
+        if tpl.moisture_loss_pct:
+            water = sum(
+                g * self.ingredients[i].per_100g.moisture / 100
+                for i, g in tpl.base_recipe.items()
+                if i in self.ingredients
+            )
+            loss = mass - 1000.0
+            left = 100 * (water - loss) / 1000
+            if water < loss - 1e-9:
+                p.append(f"{t}: {water:.1f} g of water cannot lose {loss:.1f} g")
+            elif left > tpl.max_moisture_pct + 1e-9:
+                p.append(f"{t}: finished moisture {left:.1f} % > {tpl.max_moisture_pct} %")
         sweet_per_100g = sweet / 10  # g sucrose-eq per 1000 g finished product → per 100 g
         if sweet_per_100g < tpl.sweetness_min - 1e-9:
             p.append(f"{t}: sweetness {sweet_per_100g:.2f} < sweetness_min {tpl.sweetness_min}")

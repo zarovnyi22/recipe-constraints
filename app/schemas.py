@@ -231,6 +231,8 @@ class Infeasible(BaseModel):
     other_options: list[Change]
     # the recipe found with `relaxations` applied (None if there is no joint relaxation)
     relaxed_recipe: Recipe | None = None
+    # template rules (hard, never relaxed) the conflict runs into, with the value it would need
+    template_rules: list[str] = []
 
 
 # --- response (docs/SPEC.md §1, §5) -------------------------------------------------------------
@@ -299,6 +301,7 @@ class FormulateOut(BaseModel):
     alternatives: list[Change] = []  # "it is enough to change one of…" (each verified)
     other_options: list[Change] = []  # allergen/diet: only with a warning
     relaxed_recipe: RelaxedRecipe | None = None
+    template_rules: list[str] = []  # the template's rules in the conflict (not relaxed)
     assumptions: list[str] = []
     model: str | None = None
     data_version: str

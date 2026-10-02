@@ -16,8 +16,8 @@ from collections.abc import Iterable
 
 from app import claims as C
 from app.allergens import allergens_in_name
-from app.data import AllergenCategory, DataBundle, Ingredient, Template
-from app.expand import find_template, match_ingredients
+from app.data import AllergenCategory, DataBundle, Ingredient, Role, Template
+from app.expand import find_template, match_ingredients, resolve_flavor
 from app.schemas import Change, Check, ConstraintSpec, RecipeLine, Totals
 
 NUTRIENTS = ("energy_kcal", "protein", "fat", "saturates", "carbs", "sugars", "fibre", "salt")
@@ -155,6 +155,8 @@ class _Verifier:
                 )
         for i, ing in self.known.items():
             self.dose(i, ing)
+        if tpl.moisture_loss_pct:
+            self.water_balance()
         sweet = sum(g * self.known[i].sweetness for i, g in self._known()) / 10
         if tpl.sweetness_min > 0:
             self.add(
@@ -168,6 +170,25 @@ class _Verifier:
             self.pairing(pair.role, pair.then, pair.by_group)
         if self.spec.product.flavor:
             self.flavor(self.spec.product.flavor)
+
+    def water_balance(self) -> None:
+        """Water in the dough (moisture = 100 − macronutrients, g/100 g) vs the baking loss."""
+        water = 0.0
+        for i, g in self._known():
+            n = self.known[i].per_100g
+            solids = n.protein + n.fat + n.carbs + n.fibre + n.polyols + n.salt
+            moisture = n.water if n.water is not None else max(0.0, 100 - solids)
+            water += g * moisture / 100
+        loss = self.mass - 1000.0
+        left = 100 * (water - loss) / 1000
+        top = self.tpl.max_moisture_pct
+        self.add(
+            "water_balance",
+            "hard",
+            f"вода в тісті ≥ {_n(loss)} г втрати, вологість продукту ≤ {_n(top)} %",
+            f"вода {_n(water)} г, вологість {_n(left)} %",
+            _holds(water, ">=", loss) and _holds(left, "<=", top),
+        )
 
     def dose(self, i: str, ing: Ingredient) -> None:
         top = self.tpl.dose_limits_pct.get(i, ing.max_dose_pct)
@@ -199,17 +220,18 @@ class _Verifier:
 
     def flavor(self, flavor: str) -> None:
         ings = [self.data.ingredients[i] for r in self.tpl.roles.values() for i in r.ingredients]
-        found = match_ingredients(flavor, ings)
-        roles = {self.tpl.role_of(i.id) for i in found}
-        if not found or len(roles) != 1:
+        found = resolve_flavor(flavor, self.tpl, ings)
+        if not found:
             return  # unsupported in expand: the phrase is reported there
-        role = self.tpl.roles[roles.pop()]
+        role = self.tpl.roles[self.tpl.role_of(found[0].id)]
         ids = [i.id for i in found]
         share = self.pct(ids)
         others = {o: self.grams.get(o, 0.0) for o in role.ingredients if o not in ids}
         top_other = max(others.values(), default=0.0)
         mine = sum(self.grams.get(i, 0.0) for i in ids)
-        minimum = role.flavor_min_pct or 0.0
+        minimum = role.flavor_min_pct
+        if minimum is None:  # no minimum in the template: 5 %, or what the template allows
+            minimum = min(MUST_INCLUDE_DEFAULT_PCT, self.cap(role, ids))
         self.add(
             "flavor",
             "hard",
@@ -218,6 +240,15 @@ class _Verifier:
             _holds(share, ">=", minimum) and mine >= top_other - 1e-9,
             self.spec.product.source_phrase,
         )
+
+    def cap(self, role: Role, ids: list[str]) -> float:
+        """The most of `ids` the template allows: the role's max, or the sum of their doses."""
+        doses = [
+            self.tpl.dose_limits_pct.get(i, self.data.ingredients[i].max_dose_pct) for i in ids
+        ]
+        if all(d is not None for d in doses):
+            return min(role.max_pct, sum(doses))
+        return role.max_pct
 
     def reported_cost(self, reported: float) -> None:
         self.add(
@@ -391,7 +422,8 @@ class _Verifier:
         everything = list(self.data.ingredients.values())
         for k, req in enumerate(self.spec.exclude_ingredients):
             ids = {i.id for i in match_ingredients(req.ingredient, everything)}
-            bad = [i for i in self.known if i in ids]
+            cats = allergens_in_name(req.ingredient)  # «молоко», «лактоза», «глютен»
+            bad = [i for i, ing in self.known.items() if i in ids or cats & self.allergens(ing)]
             self.excluded(
                 f"exclude:{k}:{req.ingredient}", f"без «{req.ingredient}»", bad, req.source_phrase
             )
@@ -422,13 +454,7 @@ class _Verifier:
             minimum = req.min_pct
             if minimum is None:
                 want = max(MUST_INCLUDE_DEFAULT_PCT, role.min_pct, role.flavor_min_pct or 0)
-                caps = [
-                    tpl.dose_limits_pct.get(i, self.data.ingredients[i].max_dose_pct) for i in ids
-                ]
-                cap = role.max_pct
-                if all(c is not None for c in caps):
-                    cap = min(cap, sum(caps))
-                minimum = min(want, cap)
+                minimum = min(want, self.cap(role, ids))
             gid = f"must_include:{k}:{name}"
             limit = self.new_rhs.get(gid, minimum)
             share = self.pct(ids)

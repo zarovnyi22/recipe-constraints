@@ -452,8 +452,8 @@
   name_uk: Полідекстроза (Е1200)
   aliases: [полідекстроза]
   group: sweeteners
-  per_100g: {energy_kcal: 100, protein: 0, fat: 0, saturates: 0, carbs: 4.0, sugars: 0, fibre: 90.0, salt: 0, polyols: 0}
-  nutrients_source: "корпус pet (spec-polydextrose.md): 1 ккал/г, клітковина 90 г"
+  per_100g: {energy_kcal: 196, protein: 0, fat: 0, saturates: 0, carbs: 4.0, sugars: 0, fibre: 90.0, salt: 0, polyols: 0}
+  nutrients_source: "корпус pet (spec-polydextrose.md): клітковина 90 г; енергія за Рег. 1169/2011 дод. XIV (клітковина 2 ккал/г): 90×2 + 4×4 = 196 (US FDA — 1 ккал/г)"
   allergens: []
   may_contain: []
   vegan: true
@@ -469,8 +469,8 @@
   name_uk: Стевіолові глікозиди (Reb A 95 %, Е960а)
   aliases: [стевія]
   group: sweeteners
-  per_100g: {energy_kcal: 0, protein: 0, fat: 0, saturates: 0, carbs: 0, sugars: 0, fibre: 0, salt: 0, polyols: 0}
-  nutrients_source: "корпус pet (spec-stevia.md): внесок поживних речовин нульовий при дозах ≤ 0,05 %"
+  per_100g: {energy_kcal: 0, protein: 0, fat: 0, saturates: 0, carbs: 0, sugars: 0, fibre: 0, salt: 0, polyols: 0, water: 0}
+  nutrients_source: "корпус pet (spec-stevia.md): внесок поживних речовин нульовий при дозах ≤ 0,05 %; сухий порошок"
   allergens: []
   may_contain: []
   vegan: true
@@ -520,8 +520,8 @@
   name_uk: Лимонна кислота (Е330)
   aliases: [лимонна кислота]
   group: additives
-  per_100g: {energy_kcal: 247, protein: 0, fat: 0, saturates: 0, carbs: 0, sugars: 0, fibre: 0, salt: 0, polyols: 100.0}
-  nutrients_source: "довідкове значення 2,47 ккал/г; Рег. 1169/2011 дод. XIV (органічні кислоти — окремий коефіцієнт)"
+  per_100g: {energy_kcal: 300, protein: 0, fat: 0, saturates: 0, carbs: 0, sugars: 0, fibre: 0, salt: 0, polyols: 100.0}
+  nutrients_source: "Рег. 1169/2011 дод. XIV: органічні кислоти 3 ккал/г (для маркування, не фізіологічні 2,47)"
   allergens: []
   may_contain: []
   vegan: true
@@ -537,8 +537,8 @@
   name_uk: Пектин яблучний (Е440)
   aliases: [пектин]
   group: additives
-  per_100g: {energy_kcal: 170, protein: 0, fat: 0, saturates: 0, carbs: 5.0, sugars: 0, fibre: 85.0, salt: 0, polyols: 0}
-  nutrients_source: "довідкове значення: клітковина 2 ккал/г; типова специфікація (оцінка)"
+  per_100g: {energy_kcal: 190, protein: 0, fat: 0, saturates: 0, carbs: 5.0, sugars: 0, fibre: 85.0, salt: 0, polyols: 0}
+  nutrients_source: "типова специфікація (оцінка); енергія за Рег. 1169/2011 дод. XIV: 85×2 + 5×4 = 190"
   allergens: []
   may_contain: []
   vegan: true
@@ -571,8 +571,8 @@
   name_uk: Ксантанова камедь (Е415)
   aliases: [ксантан]
   group: additives
-  per_100g: {energy_kcal: 20, protein: 0, fat: 0, saturates: 0, carbs: 5.0, sugars: 0, fibre: 80.0, salt: 0.3, polyols: 0}
-  nutrients_source: "типова специфікація ксантану (оцінка; енергія майже нульова)"
+  per_100g: {energy_kcal: 180, protein: 0, fat: 0, saturates: 0, carbs: 5.0, sugars: 0, fibre: 80.0, salt: 0.3, polyols: 0}
+  nutrients_source: "типова специфікація ксантану (оцінка); енергія за Рег. 1169/2011 дод. XIV: 80×2 + 5×4 = 180"
   allergens: []
   may_contain: []
   vegan: true
@@ -589,8 +589,8 @@
   name_uk: Борошно пшеничне вищого ґатунку
   aliases: [борошно, пшеничне борошно]
   group: bakery
-  per_100g: {energy_kcal: 345, protein: 10.0, fat: 1.0, saturates: 0.2, carbs: 67.0, sugars: 0.7, fibre: 4.0, salt: 0.01, polyols: 0}
-  nutrients_source: "корпус pet (spec-wheat-flour.md); карбс = 71 − клітковина 4"
+  per_100g: {energy_kcal: 345, protein: 10.0, fat: 1.0, saturates: 0.2, carbs: 67.0, sugars: 0.7, fibre: 4.0, salt: 0.01, polyols: 0, water: 13.0}
+  nutrients_source: "корпус pet (spec-wheat-flour.md); карбс = 71 − клітковина 4; вологість 13 % (типово 13–14 %, ДСТУ 46.004: не більше 15 %)"
   allergens: [cereals]
   may_contain: []
   vegan: true
@@ -719,8 +719,8 @@
   name_uk: Сода харчова (розпушувач, Е500)
   aliases: [розпушувач, сода]
   group: additives
-  per_100g: {energy_kcal: 0, protein: 0, fat: 0, saturates: 0, carbs: 0, sugars: 0, fibre: 0, salt: 68.0, polyols: 0}
-  nutrients_source: "розрахунок: NaHCO3 — Na 27 % × 2,5 = 68 г солі-еквівалента/100 г"
+  per_100g: {energy_kcal: 0, protein: 0, fat: 0, saturates: 0, carbs: 0, sugars: 0, fibre: 0, salt: 68.0, polyols: 0, water: 0}
+  nutrients_source: "розрахунок: NaHCO3 — Na 27 % × 2,5 = 68 г солі-еквівалента/100 г; вільної води немає"
   allergens: []
   may_contain: []
   vegan: true
@@ -770,8 +770,8 @@
   name_uk: Оцет спиртовий 9 %
   aliases: [оцет]
   group: sauce
-  per_100g: {energy_kcal: 20, protein: 0, fat: 0, saturates: 0, carbs: 0, sugars: 0, fibre: 0, salt: 0, polyols: 9.0}
-  nutrients_source: "розрахунок: оцтова кислота 9 г × ≈ 2,2–3 ккал/г; Рег. 1169/2011 дод. XIV"
+  per_100g: {energy_kcal: 27, protein: 0, fat: 0, saturates: 0, carbs: 0, sugars: 0, fibre: 0, salt: 0, polyols: 9.0}
+  nutrients_source: "розрахунок: оцтова кислота 9 г × 3 ккал/г (органічні кислоти, Рег. 1169/2011 дод. XIV)"
   allergens: []
   may_contain: []
   vegan: true

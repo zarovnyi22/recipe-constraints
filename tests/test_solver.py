@@ -66,7 +66,7 @@ def _assert_holds(exp: Expansion, recipe: Recipe, bundle=REAL) -> None:
             assert value >= row.rhs - tol, (row.id, value, row.rhs)
     # Σ = batch mass to the centigram, in integers (no float drift)
     assert sum(round(g * 100) for g in grams.values()) == round(exp.batch_mass_g * 10) * 10
-    assert math.fsum(grams.values()) == recipe.total_g == round(exp.batch_mass_g, 1)
+    assert round(math.fsum(grams.values()), 2) == recipe.total_g == round(exp.batch_mass_g, 1)
     for ing, g in grams.items():  # 0.1 g steps, 0.01 g below 1 g
         assert g > 0
         assert round(g * 100) == pytest.approx(g * 100)

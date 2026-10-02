@@ -208,7 +208,7 @@
   reference: cereal_bar
   sweetness_min: 12.0
   moisture_loss_pct: 0
-  dose_limits_pct: {erythritol: 10}
+  dose_limits_pct: {erythritol: 10, salt: 0.5}  # salt/soda: typical doses, not a cheap filler (RR1 #8)
   roles:
     cereal:
       mode: blend
@@ -265,7 +265,8 @@
   reference: cookie
   sweetness_min: 15.0
   moisture_loss_pct: 10
-  dose_limits_pct: {erythritol: 15, polydextrose: 10}
+  max_moisture_pct: 10  # soft cookies 8–12 %, shortbread 3–6 %: the upper bound (assumption)
+  dose_limits_pct: {erythritol: 15, polydextrose: 10, salt: 0.5, baking_soda: 0.5}  # salt/soda: typical doses, not a cheap filler (RR1 #8)
   roles:
     flour:
       mode: blend
@@ -307,7 +308,7 @@
       min_pct: 0
       max_pct: 15
       ingredients: [water]
-  base_recipe: {wheat_flour: 500, butter_82: 250, sugar: 200, whole_egg: 100, salt: 2, baking_soda: 2, water: 57.1}
+  base_recipe: {wheat_flour: 557.1, butter_82: 250, sugar: 200, whole_egg: 100, salt: 2, baking_soda: 2}
 
 - id: ketchup_sauce
   name_uk: Кетчуп
@@ -317,7 +318,7 @@
   reference: ketchup_sauce
   sweetness_min: 10.0
   moisture_loss_pct: 0
-  dose_limits_pct: {erythritol: 8}
+  dose_limits_pct: {erythritol: 8, salt: 2.5}  # salt/soda: typical doses, not a cheap filler (RR1 #8)
   roles:
     tomato:
       mode: blend

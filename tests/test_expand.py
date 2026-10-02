@@ -206,6 +206,7 @@ def test_unknown_flavor_is_unsupported(data):
 
 def test_moisture_loss_scales_percent_but_not_nutrients(data):
     data.templates["yog"].moisture_loss_pct = 10
+    data.templates["yog"].max_moisture_pct = 85
     exp = expand(
         _spec(
             nutrients=[{"nutrient": "fat", "op": "<=", "value": 3, "source_phrase": "жиру до 3"}]
@@ -424,7 +425,8 @@ def test_exclude_ingredient(data):
         data,
     )
     assert set(_row(exp, "exclude:0:honey").coeffs) == {"honey"}
-    assert any("palm_oil" in a for a in exp.assumptions)
+    # not in the database and not an allergen word: cannot be guaranteed (RR1 #2)
+    assert [u.id for u in exp.unsupported] == ["exclude:1:palm_oil"]
 
 
 def test_must_include(data):

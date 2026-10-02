@@ -8,6 +8,7 @@ technologist's requirements are soft. Every requirement becomes rows, a note in 
 """
 
 from app import claims as C
+from app.allergens import allergens_in_name
 from app.data import AllergenCategory, DataBundle, Ingredient, RefNutrients, Role, Template
 from app.schemas import ConstraintSpec, Expansion, LinearConstraint, Unsupported
 
@@ -56,6 +57,21 @@ def match_ingredients(name: str, ingredients: list[Ingredient]) -> list[Ingredie
         return exact
     prefixed = [i for i in ingredients if i.id.startswith(key + "_")]
     return prefixed or [i for i in ingredients if i.group == key]
+
+
+def resolve_flavor(flavor: str, tpl: Template, ings: list[Ingredient]) -> list[Ingredient]:
+    """The characteristic ingredient(s) of the template for a flavor: one role only. If the name
+    matches several roles («apple»: apple puree is fruit, apple juice the base), the role with a
+    flavor minimum wins, then the fruit; still ambiguous → [] (unsupported)."""
+    found = match_ingredients(flavor, ings)
+    for prefer in (
+        lambda i: tpl.roles[tpl.role_of(i.id)].flavor_min_pct is not None,
+        lambda i: i.group == "fruit",
+    ):
+        if len({tpl.role_of(i.id) for i in found}) <= 1:
+            break
+        found = [i for i in found if prefer(i)] or found
+    return found if len({tpl.role_of(i.id) for i in found}) == 1 else []
 
 
 def is_sweetener(ing: Ingredient) -> bool:
@@ -217,6 +233,8 @@ class _Builder:
                     f"{ing.name_uk} не більше {_fmt(top)} %",
                     kind="hard",
                 )
+        if tpl.moisture_loss_pct:
+            self.water_balance()
         if tpl.sweetness_min > 0:
             self.row(
                 "sweetness_min",
@@ -230,33 +248,58 @@ class _Builder:
         if self.spec.product.flavor:
             self.flavor(self.spec.product.flavor, self.spec.product.source_phrase)
 
+    def water_balance(self) -> None:
+        """Baking loses water only: the dough has at least that much water, and what is left is
+        within the product's moisture limit (RR1 #3: «reduced energy» by diluting with water)."""
+        water = {i.id: i.per_100g.moisture / 100 for i in self.ings}
+        loss = self.mass - 1000.0
+        top = loss + 10 * self.tpl.max_moisture_pct
+        self.row(
+            "water_loss",
+            water,
+            ">=",
+            loss,
+            "г",
+            f"вода в тісті не менше {_fmt(loss)} г (стільки випаровується)",
+            kind="hard",
+        )
+        self.row(
+            "moisture_max",
+            water,
+            "<=",
+            top,
+            "г",
+            f"вологість готового продукту не більше {_fmt(self.tpl.max_moisture_pct)} %",
+            kind="hard",
+        )
+
     def flavor(self, flavor: str, phrase: str) -> None:
         """The characteristic ingredient: at least the role's flavor minimum, and the largest
         ingredient of its role (a strawberry yogurt has more strawberry than any other fruit)."""
-        found = match_ingredients(flavor, self.ings)
-        roles = {self.tpl.role_of(i.id) for i in found}
-        if not found or len(roles) != 1:
+        found = resolve_flavor(flavor, self.tpl, self.ings)
+        if not found:
             fruit = [i.id for i in self.ings if i.group == "fruit"]
             why = (
                 self.not_in_template(flavor)
-                if not found
-                else f"смак «{flavor}» не відповідає інгредієнтам шаблону «{self.tpl.name_uk}»"
+                if not match_ingredients(flavor, self.ings)
+                else f"смак «{flavor}» неоднозначний у шаблоні «{self.tpl.name_uk}»"
             )
             self.unsupported_(
                 "flavor", phrase, why + (f" (є: {', '.join(fruit)})" if fruit else "")
             )
             return
-        role_name = roles.pop()
+        role_name = self.tpl.role_of(found[0].id)
         role = self.tpl.roles[role_name]
         ids = [i.id for i in found]
         minimum = role.flavor_min_pct
-        if minimum is None and role.min_pct == 0:
-            self.unsupported_(
-                "flavor",
-                phrase,
-                f"для ролі «{role_name}» шаблону не задано мінімум характерного інгредієнта",
+        if minimum is None:
+            # no flavor minimum in the template: as must_include without a share (RR1 #7 — a
+            # peanut bar without peanuts)
+            minimum = min(MUST_INCLUDE_DEFAULT_PCT, self.default_include_pct(role, ids))
+            self.assumptions.append(
+                f"«{phrase}»: мінімум характерного інгредієнта шаблоном не задано — прийнято "
+                f"не менше {_fmt(minimum)} %"
             )
-            return
         names = ", ".join(i.name_uk for i in found)
         if minimum is not None:
             self.row(
@@ -562,19 +605,26 @@ class _Builder:
     def exclusions(self) -> None:
         everything = list(self.data.ingredients.values())
         for k, req in enumerate(self.spec.exclude_ingredients):
-            found = match_ingredients(req.ingredient, everything)
-            if not found:
+            gid, term = f"exclude:{k}:{req.ingredient}", req.ingredient
+            found = {i.id for i in match_ingredients(term, everything)}
+            # «без молока / лактози / глютену» as an ingredient: the word names an allergen, so
+            # everything with that allergen goes, not only the ingredient that has the alias
+            cats = allergens_in_name(term)
+            if cats:
+                found |= {i.id for i in self.ings if cats & set(i.allergens + i.may_contain)}
                 self.assumptions.append(
-                    f"«{req.source_phrase}»: «{req.ingredient}» немає в базі інгредієнтів — "
-                    "у рецептурі його не буде"
+                    f"«{req.source_phrase}»: «{term}» — алерген {', '.join(sorted(cats))}: "
+                    "виключено все, що його містить або може містити"
+                )
+            if not found:
+                self.unsupported_(
+                    gid,
+                    req.source_phrase,
+                    f"«{term}» немає в базі інгредієнтів і це не алерген — "
+                    "гарантувати виключення не можемо",
                 )
                 continue
-            self.exclude(
-                f"exclude:{k}:{req.ingredient}",
-                {i.id for i in found},
-                f"без «{req.ingredient}»",
-                req.source_phrase,
-            )
+            self.exclude(gid, found, f"без «{term}»", req.source_phrase, auto_relax=not cats)
         sw = self.spec.sweeteners
         if sw is not None and sw.allowed:
             self.assumptions.append(

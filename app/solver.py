@@ -41,6 +41,7 @@ TOL = 1e-7  # row check tolerance, relative to max(1, |rhs|)
 MICRO_G = 1.0  # below this, round to 0.01 g instead of 0.1 g
 MASS_TOL_G = 0.05  # the batch mass is rounded to 0.1 g (1111.1 g for a 10 % moisture loss)
 DROP_WEIGHT = 10.0  # the elastic LP prefers moving a number to dropping a requirement
+REPAIRS = 4  # rounds of "tighten the rows rounding broke" per margin
 NUDGES = 3  # outward steps tried when a proposed number fails the re-solve after rounding
 
 
@@ -94,8 +95,8 @@ def _tightenable(row: LinearConstraint) -> bool:
     return not (row.op == "<=" and row.rhs == 0 and all(c > 0 for c in row.coeffs.values()))
 
 
-def _rhs(row: LinearConstraint, margin: float) -> float:
-    if not margin or not _tightenable(row):
+def _rhs(row: LinearConstraint, margin: float, only: set[str] | None = None) -> float:
+    if not margin or not _tightenable(row) or (only is not None and row.id not in only):
         return row.rhs
     delta = margin * abs(row.rhs) if row.rhs else MARGIN_ABS
     return row.rhs - delta if row.op == "<=" else row.rhs + delta
@@ -108,6 +109,7 @@ def _lp(
     *,
     elastic: dict[str, float] | None = None,
     margin: float = 0.0,
+    only: set[str] | None = None,
 ) -> tuple[np.ndarray, dict[str, float]] | None:
     """Minimise cost (None: any feasible point) or, with `elastic` {row id: objective weight},
     the weighted slacks of those rows. Returns (x, slack by row id) or None if infeasible."""
@@ -130,7 +132,7 @@ def _lp(
         if r.id in col:
             a[col[r.id]] = -1.0  # a·x − s ≤ b, or a·x + s ≥ b
         a_ub.append(a)
-        b_ub.append(sign * _rhs(r, margin))
+        b_ub.append(sign * _rhs(r, margin, only))
     c = np.zeros(width)
     if elastic:
         for rid in slack_ids:
@@ -166,7 +168,12 @@ def _holds(row: LinearConstraint, grams: dict[str, float]) -> bool:
 
 
 def _round(
-    exp: Expansion, data: DataBundle, v: _Variant, x: np.ndarray, margin: float
+    exp: Expansion,
+    data: DataBundle,
+    v: _Variant,
+    x: np.ndarray,
+    margin: float,
+    broken_out: set[str] | None = None,
 ) -> Recipe | None:
     """0.1 g steps, 0.01 g below 1 g (stevia, DVS cultures are weighed to the centigram), in
     integer hundredths; the remainder goes to the largest base ingredient (the largest overall
@@ -182,7 +189,10 @@ def _round(
     if units[sink] < 0:
         return None
     grams = {i: u / 100 for i, u in units.items()}
-    if not all(_holds(r, grams) for r in v.rows):
+    broken = {r.id for r in v.rows if not _holds(r, grams)}
+    if broken_out is not None:
+        broken_out |= broken
+    if broken:
         return None
     if any(0 < grams[i] < low - 1e-9 for i, low in exp.min_dose_g.items()):
         return None
@@ -233,14 +243,39 @@ def best_recipe(exp: Expansion, data: DataBundle) -> Recipe | None:
             solved.append((float(cost @ found[0]), len(solved), v, found[0]))
     solved.sort(key=lambda s: s[:2])
     for _, _, v, x in solved:
-        if recipe := _round(exp, data, v, x, 0.0):
+        if recipe := _repair(exp, data, v, x, cost):
             return recipe
-        for margin in MARGINS:
-            found = _lp(exp, v, cost, margin=margin)
-            if found is not None and (recipe := _round(exp, data, v, found[0], margin)):
-                return recipe
     if solved:
         raise AppError(500, "rounding_failed", "rounding to 0.1 g breaks the constraints")
+    return None
+
+
+def _repair(
+    exp: Expansion, data: DataBundle, v: _Variant, x: np.ndarray, cost: np.ndarray
+) -> Recipe | None:
+    """Round; if that breaks rows, re-solve with a margin on THOSE rows only (a margin on every
+    row, cost included, made tight but feasible requests infeasible — RR1 #4), adding rows as
+    they break; then a margin on every row; then the same with the larger margin."""
+    broken: set[str] = set()
+    if recipe := _round(exp, data, v, x, 0.0, broken):
+        return recipe
+    for margin in MARGINS:
+        tighten = set(broken)
+        for _ in range(REPAIRS):
+            if not tighten:
+                break
+            found = _lp(exp, v, cost, margin=margin, only=tighten)
+            if found is None:
+                break
+            now: set[str] = set()
+            if recipe := _round(exp, data, v, found[0], margin, now):
+                return recipe
+            if now <= tighten:
+                break
+            tighten |= now
+        found = _lp(exp, v, cost, margin=margin)
+        if found is not None and (recipe := _round(exp, data, v, found[0], margin)):
+            return recipe
     return None
 
 
@@ -340,6 +375,14 @@ def _elastic(
             drops.add(row.group)
         else:
             rhs[rid] = _outward(row, row.rhs + s if row.op == "<=" else row.rhs - s)
+    if drops:
+        # The numbers above were paid for a PARTIAL drop (a drop row's slack is continuous):
+        # with the dropped groups gone, move the numbers again, as little as now needed
+        # (RR1 #5: «drop fat_free + cost 35 → 113» where 42.44 was enough).
+        rest = [r for r in rows if r.group not in drops and r.relax == "value"]
+        again = _elastic(_without(exp, drops), rest) if rest else (set(), {})
+        if again is not None:
+            return drops, again[1]
     return drops, rhs
 
 
@@ -436,6 +479,23 @@ def _single(exp: Expansion, data: DataBundle, g: str, rows: list[LinearConstrain
     return None if verified is None else (drops, *verified)
 
 
+def _template_rules(exp: Expansion, others: set[str]) -> list[str]:
+    """The template's own rules the conflict runs into (RR1 #6: ketchup «без гірчиці» fails on
+    «спеції ≥ 0,5 %», all spice blends may contain mustard). With only the conflicting
+    requirements, the smallest move of the hard rows that would make it feasible — shown, never
+    offered: technology is not relaxed."""
+    core = _without(exp, others)
+    hard = [r for r in core.constraints if r.kind == "hard" and r.op != "=="]
+    relaxed = _elastic(core, hard) if hard else None
+    if relaxed is None:
+        return []
+    by_id = {r.id: r for r in hard}
+    return [
+        f"{by_id[rid].label_uk} (щоб виконати запит, мало б бути {_fmt(v)} {by_id[rid].unit})"
+        for rid, v in relaxed[1].items()
+    ]
+
+
 def explain(exp: Expansion, data: DataBundle) -> Infeasible:
     groups = _soft_groups(exp)
     if not _feasible(_without(exp, set(groups))):
@@ -445,6 +505,7 @@ def explain(exp: Expansion, data: DataBundle) -> Infeasible:
             f"template {exp.template_id}: its own hard constraints have no solution",
         )
     conflict = _conflict(exp, groups)
+    template_rules = _template_rules(exp, set(groups) - set(conflict))
     relaxations: list[Change] = []
     relaxed_recipe = None
     # The smallest joint change: first among the conflicting requirements, then among all.
@@ -483,6 +544,7 @@ def explain(exp: Expansion, data: DataBundle) -> Infeasible:
         alternatives=alternatives,
         other_options=other,
         relaxed_recipe=relaxed_recipe,
+        template_rules=template_rules,
     )
 
 
