@@ -111,8 +111,7 @@ REFERENCE = Reference(
 )
 
 
-@pytest.fixture
-def data() -> DataBundle:
+def tiny_data() -> DataBundle:
     # deep copies: tests edit the template and the reference in place
     return DataBundle(
         ingredients={i.id: i for i in INGREDIENTS},
@@ -120,6 +119,11 @@ def data() -> DataBundle:
         references={"yog": REFERENCE.model_copy(deep=True)},
         data_version="test",
     )
+
+
+@pytest.fixture
+def data() -> DataBundle:
+    return tiny_data()
 
 
 def _spec(**fields) -> ConstraintSpec:

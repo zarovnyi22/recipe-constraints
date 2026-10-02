@@ -116,6 +116,9 @@ class LinearConstraint(BaseModel):
     # Set on rows of an either-or requirement (Expansion.either_or): the row applies only when
     # the solver picks this alternative of its group.
     alt: str | None = None
+    # How a relaxation moves it: "value" — a new rhs (cost 45 → 52 UAH/kg); "drop" — the whole
+    # requirement goes (a claim either holds or not; an exclusion is lifted).
+    relax: Literal["value", "drop"] = "value"
 
 
 class Expansion(BaseModel):
@@ -133,3 +136,64 @@ class Expansion(BaseModel):
     reference_id: str | None = None
     unsupported: list[Unsupported] = []
     assumptions: list[str] = []
+
+
+# --- solver results (docs/SPEC.md §4) ---------------------------------------------------------
+
+
+class RecipeItem(BaseModel):
+    ingredient: str
+    name_uk: str
+    role: str
+    grams: float  # per batch (= per 1000 g of finished product), 0.1 g steps (0.01 g below 1 g)
+
+
+class Recipe(BaseModel):
+    template_id: str
+    batch_mass_g: float
+    items: list[RecipeItem]  # used ingredients only, largest first
+    total_g: float
+    cost_uah_per_kg: float  # of the rounded recipe
+    choices: dict[str, str]  # one_of role -> ingredient, either-or group -> alternative
+    margin_pct: float = 0.0  # ε the rows were tightened by so that rounding keeps them
+    binding: list[str] = []  # soft groups at their limit: what to relax to make it cheaper
+
+
+class RowChange(BaseModel):
+    id: str
+    label_uk: str
+    unit: str
+    op: Literal["<=", ">="]
+    from_rhs: float
+    to_rhs: float
+
+
+class Change(BaseModel):
+    """One requirement changed: relaxed to a number or dropped. Never offered unless a re-solve
+    with the change found a recipe (`verified`, `cost_uah_per_kg` of that recipe)."""
+
+    group: str
+    action: Literal["relax", "drop"]
+    label_uk: str
+    source_phrase: Phrase | None
+    rows: list[RowChange] = []  # relax: old → new rhs per row of the group
+    verified: bool
+    cost_uah_per_kg: float
+    warning: str | None = None
+
+
+class ConflictItem(BaseModel):
+    group: str
+    label_uk: str
+    source_phrase: Phrase | None
+
+
+class Infeasible(BaseModel):
+    # a minimal set of requirements that cannot hold together (with the template)
+    conflict: list[ConflictItem]
+    # the smallest joint relaxation (elastic LP), verified together
+    relaxations: list[Change]
+    # "it is enough to change one of": each verified alone
+    alternatives: list[Change]
+    # not offered automatically (allergen, diet): only "another option" with a warning
+    other_options: list[Change]

@@ -95,6 +95,7 @@ class _Builder:
         phrase: str | None = None,
         auto_relax: bool = True,
         alt: str | None = None,
+        relax: str = "value",
     ) -> None:
         coeffs = {i: c for i, c in coeffs.items() if c != 0}
         self.rows.append(
@@ -110,6 +111,7 @@ class _Builder:
                 source_phrase=phrase,
                 auto_relax=auto_relax,
                 alt=alt,
+                relax=relax,
             )
         )
 
@@ -157,6 +159,7 @@ class _Builder:
             f"{label}: виключено {names}",
             phrase=phrase,
             auto_relax=auto_relax,
+            relax="drop",
         )
 
     # --- template (hard) ----------------------------------------------------------------------
@@ -338,6 +341,12 @@ class _Builder:
         )
 
     def claims(self) -> None:
+        start = len(self.rows)
+        self._claims()
+        for row in self.rows[start:]:
+            row.relax = "drop"  # a claim holds at the legal threshold or is not made
+
+    def _claims(self) -> None:
         liquid = C.is_liquid(self.tpl.form)
         if liquid and self.spec.claims:
             self.assumptions.append(
