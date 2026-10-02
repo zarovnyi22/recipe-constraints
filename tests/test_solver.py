@@ -179,6 +179,23 @@ def test_fibre_claim_may_hold_per_100_kcal_only():
 # --- infeasible -----------------------------------------------------------------------------
 
 
+def test_soy_yogurt_without_milk_free_has_no_milk():
+    """«соєвий йогурт» alone: the plant base takes a plant culture, not the cheaper dairy one."""
+    soy = [{"ingredient_or_role": "soy_drink", "min_pct": 55, "source_phrase": "соєвий йогурт"}]
+    exp = _real(flavor="strawberry", must_include=soy)
+    recipe = solve(exp, REAL)
+    assert isinstance(recipe, Recipe)
+    _assert_holds(exp, recipe)
+    assert recipe.choices == {"base": "soy_drink", "culture": "dvs_culture_plant"}
+    assert not any("milk" in REAL.ingredients[i.ingredient].allergens for i in recipe.items)
+
+
+def test_dairy_base_never_takes_the_plant_culture():
+    recipe = solve(_real(flavor="strawberry"), REAL)
+    assert recipe.choices["base"].startswith("milk_")
+    assert recipe.choices["culture"] != "dvs_culture_plant"
+
+
 def test_task_example_is_explained():
     exp = _real(flavor="strawberry", **TASK)
     result = solve(exp, REAL)

@@ -131,6 +131,8 @@ class Expansion(BaseModel):
     constraints: list[LinearConstraint] = []
     one_of: dict[str, list[str]] = {}  # role -> candidates: exactly one is used (solver enumerates)
     min_dose_g: dict[str, float] = {}  # if the ingredient is used at all, at least this much
+    # one_of picks that cannot go together (template pairings: plant base → plant culture)
+    forbidden_pairs: list[tuple[str, str]] = []
     # group -> alternatives: rows of exactly one alternative apply (an OR, solver enumerates)
     either_or: dict[str, list[str]] = {}
     reference_id: str | None = None

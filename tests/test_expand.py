@@ -486,8 +486,25 @@ def test_must_include_absent_ingredient_is_unsupported(data):
         data,
     )
     reasons = {u.phrase: u.reason for u in exp.unsupported}
-    assert "не передбачено шаблоном" in reasons["з манго"]
+    assert "є в базі, але шаблон «Йогурт» його не передбачає" in reasons["з манго"]
     assert "немає в базі" in reasons["з ківі"]
+
+
+def test_flavor_in_the_database_but_not_in_the_template(data):
+    data.ingredients["mango"] = _ing(
+        "mango", (60, 0.8, 0.4, 0.1, 15, 14, 1.6, 0), roles=["fruit"], price=90, group="fruit"
+    )
+    spec = _spec(product={"template": "yog", "flavor": "mango", "source_phrase": "манговий"})
+    (u,) = expand(spec, data).unsupported
+    assert "є в базі, але шаблон «Йогурт» його не передбачає" in u.reason
+
+
+def test_template_pairings_become_forbidden_pairs():
+    data = get_data()
+    exp = expand(_spec(product={"template": "drinking_yogurt", "source_phrase": "йогурт"}), data)
+    assert ("oat_drink", "bulk_starter_milk") in exp.forbidden_pairs
+    assert ("milk_whole_3_5", "dvs_culture_plant") in exp.forbidden_pairs
+    assert expand(_spec(), tiny_data()).forbidden_pairs == []
 
 
 def test_nothing_is_lost_silently(data):

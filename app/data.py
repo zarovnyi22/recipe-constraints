@@ -129,6 +129,17 @@ class Role(BaseModel):
         return self
 
 
+class Pairing(BaseModel):
+    """Technology (hard): the pick of one_of role `role` decides which ingredients of one_of role
+    `then` are allowed, by the picked ingredient's group (plant base → plant culture only)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    role: str
+    then: str
+    by_group: dict[str, list[str]] = Field(min_length=1)
+
+
 class Template(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -141,6 +152,7 @@ class Template(BaseModel):
     sweetness_min: float = Field(ge=0)
     moisture_loss_pct: float = Field(ge=0, lt=50)
     dose_limits_pct: dict[str, float] = {}
+    pairings: list[Pairing] = []
     roles: dict[str, Role] = Field(min_length=1)
     base_recipe: dict[str, float]
 
@@ -148,6 +160,15 @@ class Template(BaseModel):
     def batch_mass_g(self) -> float:
         """Mass of the raw recipe that yields 1000 g of finished product."""
         return 1000.0 / (1 - self.moisture_loss_pct / 100)
+
+    def forbidden_pairs(self, ingredients: dict[str, "Ingredient"]) -> list[tuple[str, str]]:
+        """(pick of `role`, pick of `then`) combinations the pairings rule out."""
+        out = []
+        for pair in self.pairings:
+            for a in self.roles[pair.role].ingredients:
+                allowed = pair.by_group.get(ingredients[a].group, [])
+                out += [(a, b) for b in self.roles[pair.then].ingredients if b not in allowed]
+        return out
 
     def role_of(self, ingredient_id: str) -> str | None:
         for name, role in self.roles.items():
@@ -210,7 +231,30 @@ class DataBundle(BaseModel):
                 p.append(f"{t}: dose limit for {iid}, which is not in the template")
             elif ing.max_dose_pct is not None and limit > ing.max_dose_pct:
                 p.append(f"{t}: dose limit {limit} for {iid} is looser than the ingredient's")
-        p += self._base_recipe_problems(tpl, seen)
+        pairing = self._pairing_problems(tpl)
+        p += pairing + self._base_recipe_problems(tpl, seen)
+        if not pairing and not p:
+            for a, b in tpl.forbidden_pairs(self.ingredients):
+                if a in tpl.base_recipe and b in tpl.base_recipe:
+                    p.append(f"{t}: base_recipe has {a} with {b}, which a pairing forbids")
+        return p
+
+    def _pairing_problems(self, tpl: Template) -> list[str]:
+        p: list[str] = []
+        for pair in tpl.pairings:
+            t = f"template {tpl.id} pairing {pair.role}→{pair.then}"
+            role, then = tpl.roles.get(pair.role), tpl.roles.get(pair.then)
+            if role is None or then is None or role.mode != "one_of" or then.mode != "one_of":
+                p.append(f"{t}: both roles must exist and be one_of")
+                continue
+            for iid in role.ingredients:
+                ing = self.ingredients.get(iid)
+                if ing is not None and ing.group not in pair.by_group:
+                    p.append(f"{t}: group {ing.group} of {iid} has no allowed {pair.then}")
+            for group, ids in pair.by_group.items():
+                stray = set(ids) - set(then.ingredients)
+                if stray:
+                    p.append(f"{t}: {group} allows {sorted(stray)}, not in role {pair.then}")
         return p
 
     def _base_recipe_problems(self, tpl: Template, role_of: dict[str, str]) -> list[str]:

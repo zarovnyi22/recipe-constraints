@@ -139,6 +139,14 @@ class _Builder:
             )
         return getattr(self.reference.per_100g, nutrient)
 
+    def not_in_template(self, name: str) -> str:
+        elsewhere = match_ingredients(name, list(self.data.ingredients.values()))
+        if elsewhere:
+            names = ", ".join(i.name_uk for i in elsewhere)
+            template = self.tpl.name_uk
+            return f"«{name}» ({names}) є в базі, але шаблон «{template}» його не передбачає"
+        return f"«{name}» немає в базі інгредієнтів"
+
     def exclude(
         self, group: str, ids: set[str], label: str, phrase: str, *, auto_relax: bool = True
     ) -> None:
@@ -229,11 +237,12 @@ class _Builder:
         roles = {self.tpl.role_of(i.id) for i in found}
         if not found or len(roles) != 1:
             fruit = [i.id for i in self.ings if i.group == "fruit"]
-            self.unsupported_(
-                phrase,
-                f"смак «{flavor}» не відповідає інгредієнтам шаблону «{self.tpl.name_uk}»"
-                + (f" (є: {', '.join(fruit)})" if fruit else ""),
+            why = (
+                self.not_in_template(flavor)
+                if not found
+                else f"смак «{flavor}» не відповідає інгредієнтам шаблону «{self.tpl.name_uk}»"
             )
+            self.unsupported_(phrase, why + (f" (є: {', '.join(fruit)})" if fruit else ""))
             return
         role_name = roles.pop()
         role = self.tpl.roles[role_name]
@@ -571,9 +580,7 @@ class _Builder:
             else:
                 found = match_ingredients(name, self.ings)
                 if not found:
-                    elsewhere = match_ingredients(name, list(self.data.ingredients.values()))
-                    why = "не передбачено шаблоном" if elsewhere else "немає в базі інгредієнтів"
-                    self.unsupported_(req.source_phrase, f"«{name}» {why} «{self.tpl.name_uk}»")
+                    self.unsupported_(req.source_phrase, self.not_in_template(name))
                     continue
                 ids = [i.id for i in found]
                 role = self.tpl.roles[self.tpl.role_of(ids[0])]
@@ -636,6 +643,7 @@ class _Builder:
             constraints=self.rows,
             one_of=one_of,
             min_dose_g=min_dose,
+            forbidden_pairs=self.tpl.forbidden_pairs(self.data.ingredients),
             either_or=self.either_or,
             reference_id=self.reference.id if self.reference else None,
             unsupported=self.unsupported,

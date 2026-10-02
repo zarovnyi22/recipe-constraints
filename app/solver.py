@@ -69,8 +69,11 @@ def _variants(exp: Expansion) -> list[_Variant]:
             500, "solver_error", f"rows of an unknown alternative: {', '.join(sorted(orphans))}"
         )
     roles, alts = list(exp.one_of.items()), list(exp.either_or.items())
+    forbidden = {frozenset(p) for p in exp.forbidden_pairs}
     out = []
     for picked in itertools.product(*(ids for _, ids in roles)):
+        if any(frozenset(p) in forbidden for p in itertools.combinations(picked, 2)):
+            continue  # technology: e.g. a dairy culture in a plant base
         bounds: list[tuple[float, float | None]] = [(0.0, None)] * len(exp.variables)
         for (_, ids), chosen in zip(roles, picked, strict=True):
             for i in ids:

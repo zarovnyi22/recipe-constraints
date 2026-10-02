@@ -17,6 +17,12 @@
   sweetness_min: 7.0
   moisture_loss_pct: 0
   dose_limits_pct: {erythritol: 8}
+  pairings:  # technology: plant base → plant culture only, dairy base → dairy culture
+    - role: base
+      then: culture
+      by_group:
+        dairy_bases: [bulk_starter_milk, dvs_culture_dairy]
+        plant_bases: [dvs_culture_plant]
   roles:
     base:
       mode: one_of
@@ -65,6 +71,12 @@
   sweetness_min: 6.0
   moisture_loss_pct: 0
   dose_limits_pct: {erythritol: 8}
+  pairings:  # technology: plant base → plant culture only, dairy base → dairy culture
+    - role: base
+      then: culture
+      by_group:
+        dairy_bases: [bulk_starter_milk, dvs_culture_dairy]
+        plant_bases: [dvs_culture_plant]
   roles:
     base:
       mode: one_of

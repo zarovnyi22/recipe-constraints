@@ -296,3 +296,30 @@ async def test_get_templates_with_cost_and_reference(data):
     )
     assert yogurt["reference_product"]["per_100g"]["protein"] > 0
     assert by_id["cookie"]["batch_mass_g"] == pytest.approx(1111.1, abs=0.1)
+
+
+def test_rejects_pairing_that_leaves_a_base_group_without_a_culture(tmp_path):
+    def mutate(items):
+        del _find(items, "yogurt_spoonable")["pairings"][0]["by_group"]["plant_bases"]
+
+    with pytest.raises(DataError, match="plant_bases of soy_drink has no allowed culture"):
+        load_data(_broken_copy(tmp_path, _edit("templates.yaml", mutate)))
+
+
+def test_rejects_base_recipe_against_a_pairing(tmp_path):
+    def mutate(items):
+        recipe = _find(items, "yogurt_spoonable")["base_recipe"]
+        recipe["dvs_culture_plant"] = recipe.pop("dvs_culture_dairy")
+
+    with pytest.raises(DataError, match="pairing forbids"):
+        load_data(_broken_copy(tmp_path, _edit("templates.yaml", mutate)))
+
+
+def test_yogurt_pairings_forbid_dairy_cultures_in_plant_bases():
+    data = get_data()
+    pairs = set(data.templates["yogurt_spoonable"].forbidden_pairs(data.ingredients))
+    assert ("soy_drink", "bulk_starter_milk") in pairs
+    assert ("soy_drink", "dvs_culture_dairy") in pairs
+    assert ("milk_2_5", "dvs_culture_plant") in pairs
+    assert ("milk_2_5", "dvs_culture_dairy") not in pairs
+    assert ("oat_drink", "dvs_culture_plant") not in pairs
