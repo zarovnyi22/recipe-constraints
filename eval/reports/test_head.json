@@ -2,7 +2,7 @@
  "split": "test",
  "date": "2026-10-02",
  "prompt_version": "p3",
- "data_version": "2a0190f7c83e",
+ "data_version": "4ae11e0037eb",
  "live": false,
  "after_fixes": false,
  "head": true,
@@ -212,8 +212,8 @@
      "«без доданого цукру»: якщо цукри природно присутні, на етикетці потрібен напис «містить природні цукри» (Наказ МОЗ № 1145)"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "2a0190f7c83e",
-    "duration_ms": 4,
+    "data_version": "4ae11e0037eb",
+    "duration_ms": 9,
     "error": null
    },
    "relax_check": []
@@ -597,8 +597,8 @@
      "«вегетаріанський»: шаблон «Йогурт питний» не містить таких інгредієнтів — виконано автоматично"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "2a0190f7c83e",
-    "duration_ms": 9,
+    "data_version": "4ae11e0037eb",
+    "duration_ms": 8,
     "error": null
    },
    "relax_check": []
@@ -1006,8 +1006,8 @@
      "«з арахісом»: частку не вказано — прийнято Арахіс смажений не менше 10 % (max(5 %, мінімум ролі), не більше дозволеного шаблоном)"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "2a0190f7c83e",
-    "duration_ms": 3,
+    "data_version": "4ae11e0037eb",
+    "duration_ms": 2,
     "error": null
    },
    "relax_check": []
@@ -1444,8 +1444,8 @@
      "втрата вологи при випіканні 10 %: 1111,11 г рецептури дають 1000 г продукту"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "2a0190f7c83e",
-    "duration_ms": 8,
+    "data_version": "4ae11e0037eb",
+    "duration_ms": 3,
     "error": null
    },
    "relax_check": []
@@ -1831,7 +1831,7 @@
      "«полуниця»: частку не вказано — прийнято Полуниця заморожена (IQF) без цукру не менше 35 % (max(5 %, мінімум ролі), не більше дозволеного шаблоном)"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "2a0190f7c83e",
+    "data_version": "4ae11e0037eb",
     "duration_ms": 3,
     "error": null
    },
@@ -2281,8 +2281,8 @@
      "еталон «звичайного»: Звичайний фруктовий йогурт 2,5 % (з цукром) — типові значення фруктових йогуртів 2–3 % жиру (асортимент UA-ритейлу, оцінка автора); звірено за порядком з USDA FDC (yogurt, fruit, lowfat)"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "2a0190f7c83e",
-    "duration_ms": 62,
+    "data_version": "4ae11e0037eb",
+    "duration_ms": 58,
     "error": null
    },
    "relax_check": [
@@ -2561,7 +2561,7 @@
     "explanation": null,
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "2a0190f7c83e",
+    "data_version": "4ae11e0037eb",
     "duration_ms": 4,
     "error": null
    },
@@ -3081,8 +3081,8 @@
     "explanation": null,
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "2a0190f7c83e",
-    "duration_ms": 17,
+    "data_version": "4ae11e0037eb",
+    "duration_ms": 16,
     "error": null
    },
    "relax_check": [
@@ -3511,8 +3511,8 @@
      "«з медом»: частку не вказано — прийнято Мед натуральний не менше 5 % (max(5 %, мінімум ролі), не більше дозволеного шаблоном)"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "2a0190f7c83e",
-    "duration_ms": 7,
+    "data_version": "4ae11e0037eb",
+    "duration_ms": 6,
     "error": null
    },
    "relax_check": [
@@ -4012,7 +4012,7 @@
      "втрата вологи при випіканні 10 %: 1111,11 г рецептури дають 1000 г продукту"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "2a0190f7c83e",
+    "data_version": "4ae11e0037eb",
     "duration_ms": 10,
     "error": null
    },
@@ -4536,8 +4536,8 @@
     "explanation": null,
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "2a0190f7c83e",
-    "duration_ms": 76,
+    "data_version": "4ae11e0037eb",
+    "duration_ms": 79,
     "error": null
    },
    "relax_check": [
@@ -4946,7 +4946,7 @@
      "«яблука»: частку не вказано — прийнято Яблучний сік (відновлений із концентрату) не менше 10 % (max(5 %, мінімум ролі), не більше дозволеного шаблоном)"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "2a0190f7c83e",
+    "data_version": "4ae11e0037eb",
     "duration_ms": 2,
     "error": null
    },
@@ -5319,7 +5319,7 @@
      "втрата вологи при випіканні 10 %: 1111,11 г рецептури дають 1000 г продукту"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "2a0190f7c83e",
+    "data_version": "4ae11e0037eb",
     "duration_ms": 2,
     "error": null
    },
@@ -5709,7 +5709,7 @@
      "еталон «звичайного»: Звичайний фруктовий йогурт 2,5 % (з цукром) — типові значення фруктових йогуртів 2–3 % жиру (асортимент UA-ритейлу, оцінка автора); звірено за порядком з USDA FDC (yogurt, fruit, lowfat)"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "2a0190f7c83e",
+    "data_version": "4ae11e0037eb",
     "duration_ms": 10,
     "error": null
    },
@@ -6038,7 +6038,7 @@
      "«без пальмової олії»: шаблон «Соковмісний напій» не містить таких інгредієнтів — виконано автоматично"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "2a0190f7c83e",
+    "data_version": "4ae11e0037eb",
     "duration_ms": 3,
     "error": null
    },
@@ -6125,7 +6125,7 @@
     "explanation": null,
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "2a0190f7c83e",
+    "data_version": "4ae11e0037eb",
     "duration_ms": 0,
     "error": null
    },
@@ -6216,7 +6216,7 @@
     "explanation": null,
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "2a0190f7c83e",
+    "data_version": "4ae11e0037eb",
     "duration_ms": 0,
     "error": null
    },
@@ -6317,7 +6317,7 @@
     "explanation": null,
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "2a0190f7c83e",
+    "data_version": "4ae11e0037eb",
     "duration_ms": 0,
     "error": null
    },
@@ -6414,7 +6414,7 @@
     "explanation": null,
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "2a0190f7c83e",
+    "data_version": "4ae11e0037eb",
     "duration_ms": 0,
     "error": null
    },
@@ -6528,7 +6528,7 @@
     "explanation": null,
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "2a0190f7c83e",
+    "data_version": "4ae11e0037eb",
     "duration_ms": 0,
     "error": null
    },

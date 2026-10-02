@@ -6,7 +6,7 @@
 #             допускає діапазон 0…2,4 ккал/г для них і 0…2 ккал/г для клітковини.
 # sweetness — сахарозний еквівалент на 1 г інгредієнта (сахароза = 1): Σ x_i·sweetness_i = «г цукру-
 #   еквівалента». Розраховано: г цукрів/100 × відносна солодкість цукру (лактоза 0,16; мальтоза 0,4;
-#   глюкоза 0,7; сахароза 1; фруктоза 1,2; поліоли/інтенсивні — з довідників і spec-*.md з pet).
+#   глюкоза 0,7; сахароза 1; фруктоза 1,2; поліоли/інтенсивні — з довідників і корпусу специфікацій spec-*.md).
 # min_dose_pct / max_dose_pct — частка маси продукту, якщо інгредієнт у рецептурі взагалі є.
 # Ціни — ОЦІНКИ (грн/кг, дата price_date), порядок цифр — у PRICES.md.
 
@@ -16,7 +16,7 @@
   aliases: [молоко, коров'яче молоко]
   group: dairy_bases
   per_100g: {energy_kcal: 53, protein: 2.9, fat: 2.5, saturates: 1.6, carbs: 4.7, sugars: 4.7, fibre: 0, salt: 0.11, polyols: 0}
-  nutrients_source: &n_pet "корпус pet (spec-*.md), перераховано в конвенцію ЄС; USDA FDC для звірки порядку"
+  nutrients_source: &n_pet "корпус специфікацій (spec-*.md), перераховано в конвенцію ЄС; USDA FDC для звірки порядку"
   allergens: [milk]
   may_contain: []
   vegan: false
@@ -48,7 +48,7 @@
   aliases: [соєве молоко]
   group: plant_bases
   per_100g: {energy_kcal: 33, protein: 3.0, fat: 1.8, saturates: 0.3, carbs: 0.7, sugars: 0.5, fibre: 0.6, salt: 0.07, polyols: 0}
-  nutrients_source: "корпус pet (spec-soy-drink.md)"
+  nutrients_source: "корпус специфікацій (spec-soy-drink.md)"
   allergens: [soybeans]
   may_contain: []
   vegan: true
@@ -64,7 +64,7 @@
   aliases: [вівсяне молоко]
   group: plant_bases
   per_100g: {energy_kcal: 46, protein: 1.0, fat: 1.5, saturates: 0.2, carbs: 6.7, sugars: 4.0, fibre: 0.8, salt: 0.1, polyols: 0}
-  nutrients_source: "корпус pet (spec-oat-drink.md)"
+  nutrients_source: "корпус специфікацій (spec-oat-drink.md)"
   allergens: [cereals]
   may_contain: []
   vegan: true
@@ -80,7 +80,7 @@
   aliases: [кокосове молоко (напій)]
   group: plant_bases
   per_100g: {energy_kcal: 20, protein: 0.2, fat: 1.1, saturates: 1.0, carbs: 2.0, sugars: 1.8, fibre: 0, salt: 0.08, polyols: 0}
-  nutrients_source: "корпус pet (spec-milk-2-5.md, таблиця замінників: білок 0,2–0,5 г); USDA FDC (coconut milk beverage)"
+  nutrients_source: "корпус специфікацій (spec-milk-2-5.md, таблиця замінників: білок 0,2–0,5 г); USDA FDC (coconut milk beverage)"
   allergens: []
   may_contain: []
   vegan: true
@@ -112,7 +112,7 @@
   aliases: [напій з гороху]
   group: plant_bases
   per_100g: {energy_kcal: 36, protein: 2.5, fat: 2.0, saturates: 0.2, carbs: 1.0, sugars: 0.5, fibre: 0.3, salt: 0.1, polyols: 0}
-  nutrients_source: "корпус pet (spec-soy-drink.md: «pea protein drink 2,0–2,5 г білка»); типова специфікація"
+  nutrients_source: "корпус специфікацій (spec-soy-drink.md: «pea protein drink 2,0–2,5 г білка»); типова специфікація"
   allergens: []
   may_contain: []
   vegan: true
@@ -129,7 +129,7 @@
   aliases: [СЗМ, сухе молоко]
   group: protein
   per_100g: {energy_kcal: 358, protein: 35.0, fat: 0.8, saturates: 0.5, carbs: 52.0, sugars: 52.0, fibre: 0, salt: 1.3, polyols: 0}
-  nutrients_source: "USDA FDC (milk, dry, nonfat), типові значення; pet spec-milk-2-5.md (1–2 % СЗМ)"
+  nutrients_source: "USDA FDC (milk, dry, nonfat), типові значення; корпус специфікацій spec-milk-2-5.md (1–2 % СЗМ)"
   allergens: [milk]
   may_contain: []
   vegan: false
@@ -215,7 +215,7 @@
   aliases: [материнська закваска]
   group: cultures
   per_100g: {energy_kcal: 55, protein: 3.0, fat: 2.5, saturates: 1.6, carbs: 4.0, sugars: 3.6, fibre: 0, salt: 0.1, polyols: 0}
-  nutrients_source: "корпус pet (spec-yogurt-starter.md)"
+  nutrients_source: "корпус специфікацій (spec-yogurt-starter.md)"
   allergens: [milk]
   may_contain: []
   vegan: false
@@ -233,7 +233,7 @@
   aliases: [DVS закваска, йогуртова культура]
   group: cultures
   per_100g: {energy_kcal: 360, protein: 25.0, fat: 1.0, saturates: 0.7, carbs: 55.0, sugars: 50.0, fibre: 0, salt: 1.0, polyols: 0}
-  nutrients_source: "корпус pet (spec-yogurt-starter.md: носій — сухе знежирене молоко); значення оцінка"
+  nutrients_source: "корпус специфікацій (spec-yogurt-starter.md: носій — сухе знежирене молоко); значення оцінка"
   allergens: [milk]
   may_contain: []
   vegan: false
@@ -251,7 +251,7 @@
   aliases: [веганська закваска, рослинна культура]
   group: cultures
   per_100g: {energy_kcal: 380, protein: 2.0, fat: 0.5, saturates: 0.1, carbs: 90.0, sugars: 5.0, fibre: 0, salt: 0, polyols: 0}
-  nutrients_source: "корпус pet (spec-yogurt-starter.md)"
+  nutrients_source: "корпус специфікацій (spec-yogurt-starter.md)"
   allergens: []
   may_contain: []
   vegan: true
@@ -270,7 +270,7 @@
   aliases: [полуниця, суниця]
   group: fruit
   per_100g: {energy_kcal: 35, protein: 0.4, fat: 0.1, saturates: 0, carbs: 7.0, sugars: 4.6, fibre: 2.1, salt: 0, polyols: 0}
-  nutrients_source: "корпус pet (spec-strawberry-frozen.md); карбс = 9,1 − клітковина 2,1"
+  nutrients_source: "корпус специфікацій (spec-strawberry-frozen.md); карбс = 9,1 − клітковина 2,1"
   allergens: []
   may_contain: []
   vegan: true
@@ -388,7 +388,7 @@
   aliases: [цукор, цукор-пісок]
   group: sweeteners
   per_100g: {energy_kcal: 400, protein: 0, fat: 0, saturates: 0, carbs: 100.0, sugars: 100.0, fibre: 0, salt: 0, polyols: 0}
-  nutrients_source: "корпус pet (spec-sucrose.md)"
+  nutrients_source: "корпус специфікацій (spec-sucrose.md)"
   allergens: []
   may_contain: []
   vegan: true
@@ -436,7 +436,7 @@
   aliases: [еритритол]
   group: sweeteners
   per_100g: {energy_kcal: 0, protein: 0, fat: 0, saturates: 0, carbs: 0, sugars: 0, fibre: 0, salt: 0, polyols: 100.0}
-  nutrients_source: "корпус pet (spec-erythritol.md): 0 ккал/г, солодкість 0,6–0,7"
+  nutrients_source: "корпус специфікацій (spec-erythritol.md): 0 ккал/г, солодкість 0,6–0,7"
   allergens: []
   may_contain: []
   vegan: true
@@ -454,7 +454,7 @@
   aliases: [полідекстроза]
   group: sweeteners
   per_100g: {energy_kcal: 196, protein: 0, fat: 0, saturates: 0, carbs: 4.0, sugars: 0, fibre: 90.0, salt: 0, polyols: 0}
-  nutrients_source: "корпус pet (spec-polydextrose.md): клітковина 90 г; енергія за Рег. 1169/2011 дод. XIV (клітковина 2 ккал/г): 90×2 + 4×4 = 196 (US FDA — 1 ккал/г)"
+  nutrients_source: "корпус специфікацій (spec-polydextrose.md): клітковина 90 г; енергія за Рег. 1169/2011 дод. XIV (клітковина 2 ккал/г): 90×2 + 4×4 = 196 (US FDA — 1 ккал/г)"
   allergens: []
   may_contain: []
   vegan: true
@@ -471,7 +471,7 @@
   aliases: [стевія]
   group: sweeteners
   per_100g: {energy_kcal: 0, protein: 0, fat: 0, saturates: 0, carbs: 0, sugars: 0, fibre: 0, salt: 0, polyols: 0, water: 0}
-  nutrients_source: "корпус pet (spec-stevia.md): внесок поживних речовин нульовий при дозах ≤ 0,05 %; сухий порошок"
+  nutrients_source: "корпус специфікацій (spec-stevia.md): внесок поживних речовин нульовий при дозах ≤ 0,05 %; сухий порошок"
   allergens: []
   may_contain: []
   vegan: true
@@ -596,7 +596,7 @@
   aliases: [борошно, пшеничне борошно]
   group: bakery
   per_100g: {energy_kcal: 345, protein: 10.0, fat: 1.0, saturates: 0.2, carbs: 67.0, sugars: 0.7, fibre: 4.0, salt: 0.01, polyols: 0, water: 13.0}
-  nutrients_source: "корпус pet (spec-wheat-flour.md); карбс = 71 − клітковина 4; вологість 13 % (типово 13–14 %, ДСТУ 46.004: не більше 15 %)"
+  nutrients_source: "корпус специфікацій (spec-wheat-flour.md); карбс = 71 − клітковина 4; вологість 13 % (типово 13–14 %, ДСТУ 46.004: не більше 15 %)"
   allergens: [cereals]
   may_contain: []
   vegan: true
@@ -660,7 +660,7 @@
   aliases: [масло, вершкове масло]
   group: bakery
   per_100g: {energy_kcal: 740, protein: 0.7, fat: 82.0, saturates: 52.0, carbs: 0.6, sugars: 0.6, fibre: 0, salt: 0.02, polyols: 0}
-  nutrients_source: "корпус pet (spec-butter.md)"
+  nutrients_source: "корпус специфікацій (spec-butter.md)"
   allergens: [milk]
   may_contain: []
   vegan: false
@@ -676,7 +676,7 @@
   aliases: [маргарин]
   group: bakery
   per_100g: {energy_kcal: 722, protein: 0.2, fat: 80.0, saturates: 32.0, carbs: 0.5, sugars: 0.3, fibre: 0, salt: 0.2, polyols: 0}
-  nutrients_source: "корпус pet (spec-butter.md: рослинний блок 80 % жиру, перевірити лецитин сої); типова специфікація"
+  nutrients_source: "корпус специфікацій (spec-butter.md: рослинний блок 80 % жиру, перевірити лецитин сої); типова специфікація"
   allergens: [soybeans]   # лецитин сої (консервативно)
   may_contain: []
   vegan: true
@@ -729,7 +729,7 @@
   aliases: [яйце, яйця]
   group: bakery
   per_100g: {energy_kcal: 143, protein: 12.6, fat: 9.5, saturates: 3.1, carbs: 0.7, sugars: 0.4, fibre: 0, salt: 0.36, polyols: 0}
-  nutrients_source: "корпус pet (spec-whole-egg.md)"
+  nutrients_source: "корпус специфікацій (spec-whole-egg.md)"
   allergens: [eggs]
   may_contain: []
   vegan: false
@@ -746,7 +746,7 @@
   aliases: [відвар нуту]
   group: bakery
   per_100g: {energy_kcal: 20, protein: 1.2, fat: 0.2, saturates: 0, carbs: 3.2, sugars: 0.4, fibre: 0, salt: 0.05, polyols: 0}
-  nutrients_source: "корпус pet (spec-aquafaba.md)"
+  nutrients_source: "корпус специфікацій (spec-aquafaba.md)"
   allergens: []
   may_contain: []
   vegan: true

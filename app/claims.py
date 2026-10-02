@@ -1,6 +1,6 @@
 """Nutrition claims of MoH Order 1145 (= annex of Reg. 1924/2006): thresholds and conditions only.
 
-Ported from label-check (app/rules/claims.py); finding claims in text is the LLM's job here
+Finding claims in text is the LLM's job here
 (it maps a phrase to a claim id). Limits are per 100 g (solids) or per 100 ml (liquids: the
 recipe is per 100 g, so a liquid's limit is divided by the template's density).
 """
@@ -18,7 +18,7 @@ MAX_LIMITS: dict[str, tuple[str, float, float]] = {
 SATFAT_LIMITS = (1.5, 0.75)  # g, solid / liquid
 SATFAT_MAX_ENERGY_PCT = 10.0
 # The law limits saturates + trans fats; the data has no trans fats, so the recipe keeps this
-# much room under the limit (g), as label-check does.
+# much room under the limit (g).
 SATFAT_MARGIN = 0.1
 PROTEIN_MIN_ENERGY_PCT = {"protein_source": 12.0, "protein_high": 20.0}
 # Fibre: at least this much per 100 g OR per 100 kcal (solid, liquid are the same in the law).

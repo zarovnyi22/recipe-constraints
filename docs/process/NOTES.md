@@ -95,7 +95,7 @@
   — дозвіл: рядок у assumptions, перевірки не потребує (раніше покриття за фразою його б завалило).
 - `run_formulate(spec, pool=None)` — без БД для eval (run_id None); `solve_fn` для FakeSolver.
 
-## Рев'ю RR1 (`docs/reviews/RR1.md`, регресії — `tests/test_rr1.py`)
+## Рев'ю RR1 (`docs/process/reviews/RR1.md`, регресії — `tests/test_rr1.py`)
 - `exclude_ingredients`: слово-алерген (за словником) → виключено все з алергеном, `auto_relax`
   false; не алерген і немає в базі → unsupported.
 - Печиво: водний баланс (`water_loss`, `moisture_max`; verify `water_balance`), `max_moisture_pct`

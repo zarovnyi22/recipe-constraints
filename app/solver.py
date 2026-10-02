@@ -4,7 +4,7 @@ x_i — grams of ingredient i per batch. The objective is cost + λ·Σ|x_i − 
 base_recipe; |·| through auxiliary d_i ≥ ±(x_i − b_i)): among recipes of (almost) the same cost the
 one closest to the working recipe wins, not an arbitrary vertex of the LP. λ = LAMBDA is small
 enough that cost stays first: Σ|x − b| ≤ 2·batch mass, so the chosen recipe costs at most
-2·LAMBDA·mass ≈ 0.2 UAH/kg more than the cheapest one (docs/NOTES.md). `one_of` roles and
+2·LAMBDA·mass ≈ 0.2 UAH/kg more than the cheapest one (docs/process/NOTES.md). `one_of` roles and
 `either_or` requirements are enumerated: each combination ("variant") is a plain LP (scipy
 linprog, HiGHS); the best feasible variant wins. The recipe is rounded to 0.1 g (0.01 g below
 1 g), the remainder goes to the largest base ingredient, and every row is checked again on the

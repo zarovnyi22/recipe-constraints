@@ -14,8 +14,8 @@ EXCLUSIONS mask the false word of a phrase that is not that allergen ("коко�
 карамель" = E150d).
 Not listed because no stem matches them anyway: гречка, какао-масло, соняшникова олія.
 
-Ported from label-check (app/rules/allergen_dict.py); `allergens_in_name` replaces its
-find_allergens. Added: «без X» masks X, and «мигдалев-» joins the plant-milk exclusions.
+`allergens_in_name` finds the categories in an ingredient's name. Beyond the plain stems:
+«без X» masks X, and «мигдалев-» joins the plant-milk exclusions.
 """
 
 import re

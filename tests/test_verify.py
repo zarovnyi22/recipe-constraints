@@ -110,7 +110,7 @@ def test_milk_in_a_milk_free_recipe_is_caught():
 
 
 def test_allergen_named_but_not_declared_is_found_by_the_dictionary(monkeypatch):
-    """Declared allergens missing in the data: the label-check dictionary still sees «молоко»."""
+    """Declared allergens missing in the data: the allergen dictionary still sees «молоко»."""
     spec = _spec(**TASK | {"cost_max": None})
     g = _grams(_solve(spec))
     powder = DATA.ingredients["skim_milk_powder"]
@@ -220,7 +220,7 @@ def test_claims_and_exclusions_are_evaluated_from_the_recipe():
 
 
 def test_dictionary_agrees_with_the_declared_allergens():
-    """What the label-check dictionary finds in a name is declared in the data; otherwise the
+    """What the allergen dictionary finds in a name is declared in the data; otherwise the
     solver (declared only) and verify (declared + dictionary) would disagree at run time."""
     from app.allergens import allergens_in_name
 

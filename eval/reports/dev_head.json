@@ -2,7 +2,7 @@
  "split": "dev",
  "date": "2026-10-02",
  "prompt_version": "p3",
- "data_version": "2a0190f7c83e",
+ "data_version": "4ae11e0037eb",
  "live": false,
  "after_fixes": false,
  "head": true,
@@ -515,8 +515,8 @@
      "еталон «звичайного»: Звичайний фруктовий йогурт 2,5 % (з цукром) — типові значення фруктових йогуртів 2–3 % жиру (асортимент UA-ритейлу, оцінка автора); звірено за порядком з USDA FDC (yogurt, fruit, lowfat)"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "2a0190f7c83e",
-    "duration_ms": 80,
+    "data_version": "4ae11e0037eb",
+    "duration_ms": 74,
     "error": null
    },
    "relax_check": [
@@ -965,8 +965,8 @@
      "еталон «звичайного»: Звичайний фруктовий йогурт 2,5 % (з цукром) — типові значення фруктових йогуртів 2–3 % жиру (асортимент UA-ритейлу, оцінка автора); звірено за порядком з USDA FDC (yogurt, fruit, lowfat)"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "2a0190f7c83e",
-    "duration_ms": 10,
+    "data_version": "4ae11e0037eb",
+    "duration_ms": 8,
     "error": null
    },
    "relax_check": []
@@ -1357,7 +1357,7 @@
      "«з горіхами»: частку не вказано — прийнято роль «nuts» не менше 10 % (max(5 %, мінімум ролі), не більше дозволеного шаблоном)"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "2a0190f7c83e",
+    "data_version": "4ae11e0037eb",
     "duration_ms": 1,
     "error": null
    },
@@ -1555,8 +1555,8 @@
      "«без доданого цукру»: якщо цукри природно присутні, на етикетці потрібен напис «містить природні цукри» (Наказ МОЗ № 1145)"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "2a0190f7c83e",
-    "duration_ms": 1,
+    "data_version": "4ae11e0037eb",
+    "duration_ms": 0,
     "error": null
    },
    "relax_check": []
@@ -1786,8 +1786,8 @@
      "еталон «звичайного»: Звичайний сік 100 % (яблучний/апельсиновий, відновлений, без цукру) — типові значення 100 % соку (USDA FDC: apple juice, orange juice, усереднено; асортимент UA-ритейлу, оцінка автора)"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "2a0190f7c83e",
-    "duration_ms": 4,
+    "data_version": "4ae11e0037eb",
+    "duration_ms": 3,
     "error": null
    },
    "relax_check": [
@@ -2170,7 +2170,7 @@
      "втрата вологи при випіканні 10 %: 1111,11 г рецептури дають 1000 г продукту"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "2a0190f7c83e",
+    "data_version": "4ae11e0037eb",
     "duration_ms": 2,
     "error": null
    },
@@ -2262,7 +2262,7 @@
     "explanation": null,
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "2a0190f7c83e",
+    "data_version": "4ae11e0037eb",
     "duration_ms": 0,
     "error": null
    },
@@ -2637,8 +2637,8 @@
     "explanation": null,
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "2a0190f7c83e",
-    "duration_ms": 9,
+    "data_version": "4ae11e0037eb",
+    "duration_ms": 5,
     "error": null
    },
    "relax_check": [
@@ -3014,7 +3014,7 @@
      "напій: пороги тверджень для рідин (на 100 мл) перераховано на 100 г за густиною шаблону 1,05 г/мл (поріг ÷ густина)"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "2a0190f7c83e",
+    "data_version": "4ae11e0037eb",
     "duration_ms": 2,
     "error": null
    },
@@ -3339,8 +3339,8 @@
      "у базі немає безлактозних молочних інгредієнтів, тому «без лактози» виконано через виключення всієї молочної сировини"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "2a0190f7c83e",
-    "duration_ms": 9,
+    "data_version": "4ae11e0037eb",
+    "duration_ms": 7,
     "error": null
    },
    "relax_check": []
@@ -3677,8 +3677,8 @@
     "explanation": null,
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "2a0190f7c83e",
-    "duration_ms": 9,
+    "data_version": "4ae11e0037eb",
+    "duration_ms": 8,
     "error": null
    },
    "relax_check": []
@@ -3770,7 +3770,7 @@
     "explanation": null,
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "2a0190f7c83e",
+    "data_version": "4ae11e0037eb",
     "duration_ms": 0,
     "error": null
    },
@@ -4170,7 +4170,7 @@
      "«якомога дешевше»: окремої межі немає, сервіс завжди шукає найдешевше"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "2a0190f7c83e",
+    "data_version": "4ae11e0037eb",
     "duration_ms": 7,
     "error": null
    },
@@ -4290,7 +4290,7 @@
     "explanation": null,
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "2a0190f7c83e",
+    "data_version": "4ae11e0037eb",
     "duration_ms": 3,
     "error": null
    },
@@ -4685,8 +4685,8 @@
     "explanation": null,
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "2a0190f7c83e",
-    "duration_ms": 40,
+    "data_version": "4ae11e0037eb",
+    "duration_ms": 37,
     "error": null
    },
    "relax_check": [
@@ -5104,8 +5104,8 @@
     "explanation": null,
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "2a0190f7c83e",
-    "duration_ms": 7,
+    "data_version": "4ae11e0037eb",
+    "duration_ms": 6,
     "error": null
    },
    "relax_check": [
@@ -5465,8 +5465,8 @@
     "explanation": null,
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "2a0190f7c83e",
-    "duration_ms": 9,
+    "data_version": "4ae11e0037eb",
+    "duration_ms": 8,
     "error": null
    },
    "relax_check": []

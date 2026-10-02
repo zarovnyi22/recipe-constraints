@@ -1,4 +1,4 @@
-"""RR1 (docs/reviews/RR1.md): each proven finding as a regression, through the whole path
+"""RR1 (docs/process/reviews/RR1.md): each proven finding as a regression, through the whole path
 (expand → solve → independent verify), without the database."""
 
 import pytest

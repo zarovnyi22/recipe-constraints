@@ -2,7 +2,7 @@
 
 Separate code from the solver: it never reads the linear rows, coefficients or the solver's own
 check. From the rounded grams and data/*.yaml it recomputes nutrients per 100 g, cost per kg,
-role shares, doses, sweetness, allergens (declared + may_contain + the label-check dictionary
+role shares, doses, sweetness, allergens (declared + may_contain + the allergen dictionary
 over the ingredient's names), and evaluates every requirement of the ConstraintSpec and every
 technology rule of the template. Only lookups are shared with expand (template by name,
 ingredient by name) and the legal thresholds (app.claims) — the arithmetic is written again here.

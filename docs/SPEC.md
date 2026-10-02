@@ -47,7 +47,7 @@
 ```yaml
 # кожен елемент має source_phrase (фраза запиту); нижче вона пропущена для стислості
 product: {template: yogurt_spoonable, flavor: strawberry}     # template з data/templates.yaml
-exclude_allergens: [{allergen: milk}]   # 14 категорій ЄС (ключі як у label-check)
+exclude_allergens: [{allergen: milk}]   # 14 категорій ЄС
 exclude_ingredients: [{ingredient: palm_oil}]   # id, аліас або група
 diet: [{diet: vegan}]              # vegan → виключити vegan: false (молочне, яйця, мед…);
                                    # vegetarian, gluten_free; інше → unsupported
@@ -79,7 +79,7 @@ unsupported: [{phrase: "щільної текстури", reason: "..."}]   # з
 - солодкість (цукровий еквівалент): Σ x_i·sweet_i ≥ s_min шаблону (щоб «без цукру» не дав
   несолодкий продукт), якщо шаблон має `sweetness_min`.
 **Твердження** (поріг на 100 г; тверде/рідке з шаблону):
-- абсолютні — як у label-check (`sugar_free` ≤ 0,5; `low_sugar` ≤ 5/2,5; `protein_source` ≥ 12 %
+- абсолютні (`sugar_free` ≤ 0,5; `low_sugar` ≤ 5/2,5; `protein_source` ≥ 12 %
   енергії; `protein_high` ≥ 20 %; `fat_low` ≤ 3/1,5; `fat_free` ≤ 0,5; `satfat_low`;
   `fibre_source`/`fibre_high` (на 100 г АБО на 100 ккал — два LP); `salt_low`; `salt_very_low`; `energy_low` ≤ 40/20;
   `no_added_sugar` — жодного інгредієнта з `added_sugar: true`);
@@ -113,8 +113,8 @@ unsupported: [{phrase: "щільної текстури", reason: "..."}]   # з
 ## §5. Незалежний перевіряльник (`verify.py`)
 
 Окремий код, **не** використовує матриці розв'язувача: з `recipe` і `data/` рахує
-нутрієнти на 100 г, ціну/кг, алергени (через словник алергенів label-check по назвах і полях
-`allergens`), твердження (логіка label-check над NutritionFacts), дози, ролі шаблону, суму = 1000 г.
+нутрієнти на 100 г, ціну/кг, алергени (через словник алергенів по назвах і полях
+`allergens`), твердження (пороги `app/claims.py` над нутрієнтами), дози, ролі шаблону, суму = 1000 г.
 Для кожної вимоги ConstraintSpec і кожного жорсткого обмеження — `check` з `requested`,
 `actual`, `pass`, `source_phrase`. Будь-який `pass: false` у рецептурі →
 `verification_failed` (500, запис у БД).

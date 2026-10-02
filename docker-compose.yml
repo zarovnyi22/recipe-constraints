@@ -8,7 +8,7 @@ services:
       POSTGRES_DB: recipe
     ports:
       # Host access for local tools only: not published on the LAN with the default password.
-      # 5434: 5432 is the pet project's database, 5433 is label-check's.
+      # 5434, not 5432: so that a local PostgreSQL on the default port does not clash.
       - "127.0.0.1:5434:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
