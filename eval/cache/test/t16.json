@@ -1,0 +1,16 @@
+{
+ "id": "t16",
+ "text_sha": "b4ddb468376b9bd38745650064e445df3b0624b760364e4ccc9b9e081600abee",
+ "prompt_sha": "ab4d91f24201fe68ef4bd358c0e4a40f74daf5da93971c9616582c5b5ba83451",
+ "prompt_version": "p2",
+ "model": "gemini:gemini-3.5-flash-lite",
+ "usage": {
+  "provider": "gemini",
+  "http_attempts": 1,
+  "input_tokens": 3699,
+  "output_tokens": 95,
+  "reasoning_tokens": 0,
+  "total_tokens": 3794
+ },
+ "raw_text": "{\n  \"product\": {\n    \"template\": \"Варена ковбаса докторська\",\n    \"flavor\": null,\n    \"source_phrase\": \"Варена ковбаса докторська\"\n  },\n  \"cost_max\": {\n    \"max_uah_per_kg\": 150,\n    \"source_phrase\": \"до 150 грн/кг\"\n  }\n}"
+}

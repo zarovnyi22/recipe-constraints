@@ -126,5 +126,5 @@ docs/ OVERVIEW, SPEC, NOTES, steps/, proof.md (генерується)
 | B3b | LLM-розбір тексту + POST /formulate | [x] |
 | B4a | набір запитів dev/test | [x] |
 | B4b | раннер, метрики, proof.md | [x] |
-| B5 | замір dev, одне покращення, фінальний test | [ ] |
+| B5 | замір dev, одне покращення, фінальний test | [x] |
 | B6 | README, звірка з кодом, чистий клон | [ ] |

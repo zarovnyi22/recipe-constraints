@@ -1,0 +1,16 @@
+{
+ "id": "t03",
+ "text_sha": "fd68d02f639d903ab4470c04210786be4d7b74d2f1e7710efc623df3bedd1638",
+ "prompt_sha": "ab4d91f24201fe68ef4bd358c0e4a40f74daf5da93971c9616582c5b5ba83451",
+ "prompt_version": "p2",
+ "model": "gemini:gemini-3.5-flash-lite",
+ "usage": {
+  "provider": "gemini",
+  "http_attempts": 1,
+  "input_tokens": 3713,
+  "output_tokens": 259,
+  "reasoning_tokens": 0,
+  "total_tokens": 3972
+ },
+ "raw_text": "{\n  \"product\": {\n    \"template\": \"cereal_bar\",\n    \"flavor\": null,\n    \"source_phrase\": \"Протеїновий батончик\"\n  },\n  \"claims\": [\n    {\n      \"claim\": \"protein_source\",\n      \"source_phrase\": \"джерело білка\"\n    }\n  ],\n  \"cost_max\": {\n    \"max_uah_per_kg\": 150,\n    \"source_phrase\": \"собівартість до 150 грн/кг\"\n  },\n  \"must_include\": [\n    {\n      \"ingredient_or_role\": \"peanuts_roasted\",\n      \"min_pct\": null,\n      \"source_phrase\": \"з арахісом\"\n    }\n  ],\n  \"unsupported\": [\n    {\n      \"phrase\": \"Протеїновий батончик\",\n      \"reason\": \"Вимога щодо протеїну покрита через твердження, але сама категорія батончика реалізується через базовий шаблон злакового батончика\"\n    }\n  ]\n}"
+}
