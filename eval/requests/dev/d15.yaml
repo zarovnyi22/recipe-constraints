@@ -1,0 +1,8 @@
+id: d15
+text: "йогурт собівартістю до 10 грн/кг"
+expected:
+  status: infeasible
+  product: "йогурт"
+  cost_max: 10
+  conflicts: [cost_max]
+  notes: "молоко само коштує дорожче"

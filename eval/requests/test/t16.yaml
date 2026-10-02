@@ -1,0 +1,6 @@
+id: t16
+text: "Варена ковбаса докторська, до 150 грн/кг"
+expected:
+  status: unsupported
+  product: "ковбаса"
+  cost_max: 150

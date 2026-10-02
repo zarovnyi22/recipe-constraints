@@ -1,0 +1,8 @@
+id: t07
+text: "Яблучний сік 100% за 3 грн/кг"
+expected:
+  status: infeasible
+  product: "сік"
+  cost_max: 3
+  conflicts: [cost_max]
+  notes: "такої ціни для 100% соку реально не досягти"

@@ -1,0 +1,7 @@
+id: d10
+text: "питний йогурт без лактози"
+expected:
+  status: feasible
+  product: "питний йогурт"
+  exclude_allergens: [milk]
+  notes: "«без лактози» трактуємо суворо: без молочної основи"

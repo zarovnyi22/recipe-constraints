@@ -1,0 +1,9 @@
+id: t01
+text: "Апельсиновий сік, 100% сік, без доданого цукру, до 60 грн/кг"
+expected:
+  status: feasible
+  product: "сік"
+  claims: [no_added_sugar]
+  cost_max: 60
+  must_include: ["апельсин"]
+  notes: "ціна може бути на межі, найімовірніше здійсненно"

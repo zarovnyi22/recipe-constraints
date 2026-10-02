@@ -1,0 +1,7 @@
+id: t05
+text: "веган смузі банан-полуниця"
+expected:
+  status: feasible
+  product: "смузі"
+  diet: [vegan]
+  must_include: ["банан", "полуниця"]

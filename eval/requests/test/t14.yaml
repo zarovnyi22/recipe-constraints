@@ -1,0 +1,9 @@
+id: t14
+text: "Йогурт полуничний як у дитинстві, зі зниженим вмістом цукру, яскраво-рожевого кольору"
+expected:
+  status: partial
+  product: "йогурт"
+  claims: [reduced_sugars]
+  must_include: ["полуниця"]
+  unparsed: ["як у дитинстві"]
+  unsupported: ["яскраво-рожевого кольору"]

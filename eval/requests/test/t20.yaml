@@ -1,0 +1,7 @@
+id: t20
+text: "Темний шоколад 70% веган без пальмової олії"
+expected:
+  status: unsupported
+  product: "шоколад"
+  diet: [vegan]
+  exclude_ingredients: ["пальмова олія"]

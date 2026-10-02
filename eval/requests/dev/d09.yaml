@@ -1,0 +1,9 @@
+id: d09
+text: "смузі з високим вмістом білка, собівартість до 30 грн/кг"
+expected:
+  status: infeasible
+  product: "смузі"
+  claims: [protein_high]
+  cost_max: 30
+  conflicts: [cost_max, "claim:protein_high"]
+  notes: "білкові добавки коштують сотні грн/кг; сумнів щодо межі 30"

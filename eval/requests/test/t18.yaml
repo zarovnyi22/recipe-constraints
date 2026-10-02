@@ -1,0 +1,6 @@
+id: t18
+text: "Морозиво пломбір зі зниженим вмістом жиру та цукру"
+expected:
+  status: unsupported
+  product: "морозиво"
+  claims: [reduced_fat, reduced_sugars]

@@ -1,0 +1,8 @@
+id: d03
+text: "веганський злаковий батончик з горіхами, білка не менше 10 г на 100 г"
+expected:
+  status: feasible
+  product: "батончик"
+  diet: [vegan]
+  nutrients: [{nutrient: protein, op: ">=", value: 10}]
+  must_include: ["горіхи"]

@@ -1,0 +1,9 @@
+id: t02
+text: "Йогурт питний з малиною, вегетаріанський, жирність низька, не дорожче 70 грн/кг"
+expected:
+  status: feasible
+  product: "йогурт"
+  diet: [vegetarian]
+  claims: [fat_low]
+  cost_max: 70
+  must_include: ["малина"]

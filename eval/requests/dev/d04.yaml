@@ -1,0 +1,8 @@
+id: d04
+text: "яблучний сік без доданого цукру"
+expected:
+  status: feasible
+  product: "сік"
+  claims: [no_added_sugar]
+  must_include: ["яблуко"]
+  notes: "100 % сік не містить доданого цукру"

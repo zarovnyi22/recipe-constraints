@@ -1,0 +1,6 @@
+id: t19
+text: "Твердий сир типу гауда без лактози, собівартість до 200 грн/кг"
+expected:
+  status: unsupported
+  product: "сир"
+  cost_max: 200

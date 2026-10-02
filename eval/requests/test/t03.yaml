@@ -1,0 +1,8 @@
+id: t03
+text: "Протеїновий батончик з арахісом, джерело білка, собівартість до 150 грн/кг"
+expected:
+  status: feasible
+  product: "батончик"
+  claims: [protein_source]
+  cost_max: 150
+  must_include: ["арахіс"]

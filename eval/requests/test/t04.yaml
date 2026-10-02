@@ -1,0 +1,9 @@
+id: t04
+text: "Вівсяне печиво без яєць і без молока, зі збільшеним вмістом клітковини, до 90 грн/кг."
+expected:
+  status: feasible
+  product: "печиво"
+  exclude_allergens: [eggs, milk]
+  claims: [fibre_source]
+  cost_max: 90
+  notes: "вівсяне печиво має містити глютен-злаки, тому не gluten_free; fibre_source як найближче до 'збільшеної клітковини'"

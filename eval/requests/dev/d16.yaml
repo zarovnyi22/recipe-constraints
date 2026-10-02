@@ -1,0 +1,8 @@
+id: d16
+text: "кетчуп без цукру, але солодкий і без підсолоджувачів"
+expected:
+  status: infeasible
+  product: "кетчуп"
+  claims: [sugar_free]
+  conflicts: ["claim:sugar_free"]
+  notes: "суперечлива вимога: солодкість без цукру й підсолоджувачів"

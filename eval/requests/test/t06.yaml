@@ -1,0 +1,11 @@
+id: t06
+text: "Йогурт натуральний без молока, а білка щоб було не менше, ніж у звичайному йогурті, і за 20 грн/кг"
+expected:
+  status: infeasible
+  product: "йогурт"
+  exclude_allergens: [milk]
+  cost_max: 20
+  nutrients:
+    - {nutrient: protein, op: ">=", relative: 1.0}
+  conflicts: [cost_max, "allergen:milk"]
+  notes: "йогурт без молока з білком як у молочному за 20 грн/кг малоймовірний"

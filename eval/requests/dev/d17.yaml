@@ -1,0 +1,7 @@
+id: d17
+text: "полуничний йогурт зі строком придатності 30 діб"
+expected:
+  status: partial
+  product: "йогурт"
+  must_include: ["полуниця"]
+  unsupported: ["зі строком придатності 30 діб"]

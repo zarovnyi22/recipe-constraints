@@ -1,0 +1,10 @@
+id: d02
+text: "полуничний йогурт, білка не менше, ніж у звичайного, собівартість до 45 грн/кг, зі зниженим вмістом цукру"
+expected:
+  status: feasible
+  product: "йогурт"
+  claims: [reduced_sugars]
+  cost_max: 45
+  nutrients: [{nutrient: protein, op: ">=", relative: 1.0}]
+  must_include: ["полуниця"]
+  notes: "той самий приклад без «без молока»"

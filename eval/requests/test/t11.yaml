@@ -1,0 +1,9 @@
+id: t11
+text: "Йогурт з високим вмістом білка, знежирений, без цукру, до 12 грн/кг"
+expected:
+  status: infeasible
+  product: "йогурт"
+  claims: [protein_high, fat_free, sugar_free]
+  cost_max: 12
+  conflicts: [cost_max]
+  notes: "найімовірніше ціна 12 грн/кг не досяжна"

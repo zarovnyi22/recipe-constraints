@@ -1,0 +1,8 @@
+id: d14
+text: "злаковий батончик без глютену"
+expected:
+  status: infeasible
+  product: "батончик"
+  diet: [gluten_free]
+  conflicts: ["diet:gluten_free"]
+  notes: "основа батончика — зернові пластівці; сумнів, чи є безглютенова основа"

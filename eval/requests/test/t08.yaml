@@ -1,0 +1,9 @@
+id: t08
+text: "Батончик без цукру з високим вмістом клітковини та високим вмістом білка, собівартість максимум 15 грн/кг"
+expected:
+  status: infeasible
+  product: "батончик"
+  claims: [sugar_free, fibre_high, protein_high]
+  cost_max: 15
+  conflicts: [cost_max]
+  notes: "три твердження за 15 грн/кг нереально"

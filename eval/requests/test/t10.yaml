@@ -1,0 +1,8 @@
+id: t10
+text: "Печиво з мигдалем і фундуком, без горіхів"
+expected:
+  status: infeasible
+  product: "печиво"
+  exclude_allergens: [nuts]
+  must_include: ["мигдаль", "фундук"]
+  conflicts: ["allergen:nuts", "must_include:мигдаль"]

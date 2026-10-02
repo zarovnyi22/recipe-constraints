@@ -1,0 +1,9 @@
+id: t09
+text: "Томатний соус, на упаковці написати 'без цукру', але з медом для солодкості"
+expected:
+  status: infeasible
+  product: "соус"
+  claims: [sugar_free]
+  must_include: ["мед"]
+  conflicts: ["claim:sugar_free", "must_include:мед"]
+  notes: "мед містить цукри, твердження без цукру неможливе"

@@ -1,0 +1,12 @@
+id: d01
+text: "полуничний йогурт без молока, білка не менше, ніж у звичайного, собівартість до 45 грн/кг, і щоб можна було написати \"зі зниженим вмістом цукру\""
+expected:
+  status: infeasible
+  product: "йогурт"
+  exclude_allergens: [milk]
+  claims: [reduced_sugars]
+  cost_max: 45
+  nutrients: [{nutrient: protein, op: ">=", relative: 1.0}]
+  must_include: ["полуниця"]
+  conflicts: [cost_max, "allergen:milk"]
+  notes: "приклад з умови; з молоком і з вищою ціною здійсненний"

@@ -124,7 +124,7 @@ docs/ OVERVIEW, SPEC, NOTES, steps/, proof.md (генерується)
 | B3a | незалежний перевіряльник + POST /formulate/structured + БД | [x] |
 | RR1 | глибоке рев'ю: зламати відповідність | [x] |
 | B3b | LLM-розбір тексту + POST /formulate | [x] |
-| B4a | набір запитів dev/test | [ ] |
+| B4a | набір запитів dev/test | [x] |
 | B4b | раннер, метрики, proof.md | [ ] |
 | B5 | замір dev, одне покращення, фінальний test | [ ] |
 | B6 | README, звірка з кодом, чистий клон | [ ] |

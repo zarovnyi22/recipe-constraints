@@ -1,0 +1,7 @@
+id: d12
+text: "морозиво без цукру"
+expected:
+  status: unsupported
+  product: "морозиво"
+  claims: [sugar_free]
+  unsupported: ["морозиво"]

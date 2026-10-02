@@ -1,0 +1,6 @@
+id: t17
+text: "Хліб житній без глютену"
+expected:
+  status: unsupported
+  product: "хліб"
+  diet: [gluten_free]

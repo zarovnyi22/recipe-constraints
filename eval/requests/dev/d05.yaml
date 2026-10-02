@@ -1,0 +1,8 @@
+id: d05
+text: "сік зі зниженим вмістом цукру"
+expected:
+  status: infeasible
+  product: "сік"
+  claims: [reduced_sugars]
+  conflicts: ["claim:reduced_sugars"]
+  notes: "100 % сік не може мати на 30 % менше цукрів, ніж звичайний сік, без води й підсолоджувачів"
