@@ -82,7 +82,7 @@ scripts/ask.sh --json "пиріг з нутелою"        # сира JSON-ві
 Конфлікт (ці вимоги разом неможливі):
   • собівартість не більше 45 грн/кг  («собівартість до 45 грн/кг»)
   • без алергену milk: виключено Молоко пастеризоване 2,5 %, … («без молока»)
-Що послабити разом (мінімально, перевірено повторним розв'язком):
+Щоб рецептура існувала, треба одночасно:
   • послабити: собівартість не більше 45 грн/кг → 52,9 грн/кг → рецептура 52.84 грн/кг
 Інший варіант (не автоматично):
   • відмовитись від вимоги: без алергену milk … → рецептура 36.03 грн/кг
@@ -115,7 +115,8 @@ scripts/ask.sh --json "пиріг з нутелою"        # сира JSON-ві
 - `recipe`, `totals` (`cost_uah_per_kg`, `per_100g`);
 - `checks[]` (`id`, `kind` hard/soft, `requested`, `actual`, `pass`, `source_phrase`);
 - `parsed` (spec, який зрозуміла модель), `unparsed`, `unsupported`;
-- `conflicts`, `relaxations`, `alternatives`, `other_options`, `relaxed_recipe`, `explanation`;
+- `conflicts`, `relaxations`, `alternatives`, `other_options`, `relaxed_recipe`, `other_recipe`
+  (рецептура найдешевшого «іншого варіанту» — алерген чи дієта знято, з попередженням), `explanation`;
 - `contradictions`, `assumptions`.
 
 Деталі — `docs/SPEC.md` §1.

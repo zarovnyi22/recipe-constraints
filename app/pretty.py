@@ -120,7 +120,7 @@ def render(out: dict) -> str:
             lines.append(f"  ℹ️  {out['explanation']}")
 
     if out.get("relaxations"):
-        lines += ["", "Що послабити разом (мінімально, перевірено повторним розв'язком):"]
+        lines += ["", "Щоб рецептура існувала, треба одночасно:"]
         lines += [_change(c) for c in out["relaxations"]]
     alternatives = [a for a in out.get("alternatives", []) if a not in out.get("relaxations", [])]
     if alternatives:
@@ -135,6 +135,13 @@ def render(out: dict) -> str:
         lines += ["", "Рецептура зі спільним послабленням (relaxed_recipe):"]
         lines += _recipe(relaxed["recipe"], relaxed["totals"])
         lines += ["  Перевірки:", *_checks(relaxed["checks"])]
+
+    other = out.get("other_recipe")
+    if other:
+        lines += ["", "Рецептура іншого варіанту (не автоматично):"]
+        lines += [f"  ⚠️  {c['warning']}" for c in other["changes"] if c.get("warning")][:1]
+        lines += _recipe(other["recipe"], other["totals"])
+        lines += ["  Перевірки:", *_checks(other["checks"])]
 
     if out.get("assumptions"):
         lines += ["", "Припущення:", *[f"  - {a}" for a in out["assumptions"]]]

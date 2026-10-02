@@ -917,7 +917,7 @@
 # енергія в межах Atwater/дод. XIV Рег. 1169/2011. Ціни — ОЦІНКИ (PRICES.md).
 - id: cocoa_powder
   name_uk: Какао-порошок (10–12 % жиру)
-  aliases: [какао, какао порошок]
+  aliases: [какао, какао порошок, cocoa, chocolate, шоколад, шоколадний, шоколадна, шоколадне]  # смак «шоколадний» = какао (шоколаду в базі немає)
   group: flavourings
   per_100g: {energy_kcal: 350, protein: 19.6, fat: 13.7, saturates: 8.1, carbs: 24.7, sugars: 1.8, fibre: 33.2, salt: 0.05, polyols: 0}
   nutrients_source: "USDA FDC (cocoa, dry powder, unsweetened); карбс = 57,9 − клітковина 33,2; енергія — типова для етикеток какао 10–12 % жиру (USDA 228 ккал рахує за специфічними коефіцієнтами, поза діапазоном Atwater цього набору)"

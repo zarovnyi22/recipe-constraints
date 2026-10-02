@@ -1,8 +1,8 @@
 {
  "split": "test",
  "date": "2026-10-02",
- "prompt_version": "p3",
- "data_version": "4ae11e0037eb",
+ "prompt_version": "p4",
+ "data_version": "7f347a97968d",
  "live": false,
  "after_fixes": false,
  "head": true,
@@ -204,6 +204,7 @@
     "alternatives": [],
     "other_options": [],
     "relaxed_recipe": null,
+    "other_recipe": null,
     "template_rules": [],
     "explanation": null,
     "assumptions": [
@@ -212,8 +213,8 @@
      "«без доданого цукру»: якщо цукри природно присутні, на етикетці потрібен напис «містить природні цукри» (Наказ МОЗ № 1145)"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "4ae11e0037eb",
-    "duration_ms": 9,
+    "data_version": "7f347a97968d",
+    "duration_ms": 4,
     "error": null
    },
    "relax_check": []
@@ -590,6 +591,7 @@
     "alternatives": [],
     "other_options": [],
     "relaxed_recipe": null,
+    "other_recipe": null,
     "template_rules": [],
     "explanation": null,
     "assumptions": [
@@ -597,7 +599,7 @@
      "«вегетаріанський»: шаблон «Йогурт питний» не містить таких інгредієнтів — виконано автоматично"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "4ae11e0037eb",
+    "data_version": "7f347a97968d",
     "duration_ms": 8,
     "error": null
    },
@@ -1000,13 +1002,14 @@
     "alternatives": [],
     "other_options": [],
     "relaxed_recipe": null,
+    "other_recipe": null,
     "template_rules": [],
     "explanation": null,
     "assumptions": [
      "«з арахісом»: частку не вказано — прийнято Арахіс смажений не менше 10 % (max(5 %, мінімум ролі), не більше дозволеного шаблоном)"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "4ae11e0037eb",
+    "data_version": "7f347a97968d",
     "duration_ms": 2,
     "error": null
    },
@@ -1437,6 +1440,7 @@
     "alternatives": [],
     "other_options": [],
     "relaxed_recipe": null,
+    "other_recipe": null,
     "template_rules": [],
     "explanation": null,
     "assumptions": [
@@ -1444,7 +1448,7 @@
      "втрата вологи при випіканні 10 %: 1111,11 г рецептури дають 1000 г продукту"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "4ae11e0037eb",
+    "data_version": "7f347a97968d",
     "duration_ms": 3,
     "error": null
    },
@@ -1824,6 +1828,7 @@
     "alternatives": [],
     "other_options": [],
     "relaxed_recipe": null,
+    "other_recipe": null,
     "template_rules": [],
     "explanation": null,
     "assumptions": [
@@ -1831,7 +1836,7 @@
      "«полуниця»: частку не вказано — прийнято Полуниця заморожена (IQF) без цукру не менше 35 % (max(5 %, мінімум ролі), не більше дозволеного шаблоном)"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "4ae11e0037eb",
+    "data_version": "7f347a97968d",
     "duration_ms": 3,
     "error": null
    },
@@ -2275,14 +2280,15 @@
       }
      ]
     },
+    "other_recipe": null,
     "template_rules": [],
     "explanation": null,
     "assumptions": [
      "еталон «звичайного»: Звичайний фруктовий йогурт 2,5 % (з цукром) — типові значення фруктових йогуртів 2–3 % жиру (асортимент UA-ритейлу, оцінка автора); звірено за порядком з USDA FDC (yogurt, fruit, lowfat)"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "4ae11e0037eb",
-    "duration_ms": 58,
+    "data_version": "7f347a97968d",
+    "duration_ms": 62,
     "error": null
    },
    "relax_check": [
@@ -2557,11 +2563,12 @@
       }
      ]
     },
+    "other_recipe": null,
     "template_rules": [],
     "explanation": null,
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "4ae11e0037eb",
+    "data_version": "7f347a97968d",
     "duration_ms": 4,
     "error": null
    },
@@ -3073,6 +3080,7 @@
       }
      ]
     },
+    "other_recipe": null,
     "template_rules": [
      "на результат також впливає технологічне правило шаблону: роль «binder» не менше 15 % (не послаблюється)",
      "на результат також впливає технологічне правило шаблону: роль «fat» не більше 10 % (не послаблюється)",
@@ -3081,8 +3089,8 @@
     "explanation": null,
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "4ae11e0037eb",
-    "duration_ms": 16,
+    "data_version": "7f347a97968d",
+    "duration_ms": 19,
     "error": null
    },
    "relax_check": [
@@ -3503,6 +3511,7 @@
       }
      ]
     },
+    "other_recipe": null,
     "template_rules": [
      "на результат також впливає технологічне правило шаблону: роль «tomato» не менше 15 % (не послаблюється)"
     ],
@@ -3511,7 +3520,7 @@
      "«з медом»: частку не вказано — прийнято Мед натуральний не менше 5 % (max(5 %, мінімум ролі), не більше дозволеного шаблоном)"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "4ae11e0037eb",
+    "data_version": "7f347a97968d",
     "duration_ms": 6,
     "error": null
    },
@@ -4005,6 +4014,320 @@
       }
      ]
     },
+    "other_recipe": {
+     "changes": [
+      {
+       "group": "allergen:0:nuts",
+       "action": "drop",
+       "label_uk": "відмовитись від вимоги: без алергену nuts: виключено Мигдаль смажений, Фундук смажений, Горіх грецький (ядро)",
+       "source_phrase": "без горіхів",
+       "rows": [],
+       "verified": true,
+       "cost_uah_per_kg": 78.83,
+       "warning": "вимогу щодо алергену/дієти не послаблюємо автоматично: рецептура міститиме виключене — лише як інший варіант, з відповідним маркуванням"
+      }
+     ],
+     "recipe": [
+      {
+       "ingredient": "wheat_flour",
+       "name": "Борошно пшеничне вищого ґатунку",
+       "role": "flour",
+       "grams": 652.6,
+       "cost_uah": 14.36
+      },
+      {
+       "ingredient": "palm_oil",
+       "name": "Олія пальмова рафінована",
+       "role": "fat",
+       "grams": 166.7,
+       "cost_uah": 13.0
+      },
+      {
+       "ingredient": "sugar",
+       "name": "Цукор білий (сахароза)",
+       "role": "sweetener",
+       "grams": 141.9,
+       "cost_uah": 3.41
+      },
+      {
+       "ingredient": "almonds_roasted",
+       "name": "Мигдаль смажений",
+       "role": "nuts",
+       "grams": 88.9,
+       "cost_uah": 48.01
+      },
+      {
+       "ingredient": "water",
+       "name": "Вода питна",
+       "role": "water",
+       "grams": 55.5,
+       "cost_uah": 0.01
+      },
+      {
+       "ingredient": "salt",
+       "name": "Сіль кухонна",
+       "role": "salt",
+       "grams": 5.5,
+       "cost_uah": 0.06
+      }
+     ],
+     "totals": {
+      "mass_g": 1111.1,
+      "cost_uah_per_kg": 78.83,
+      "per_100g": {
+       "energy_kcal": 480.74,
+       "protein": 8.41,
+       "fat": 21.76,
+       "saturates": 8.69,
+       "carbs": 58.72,
+       "sugars": 15.04,
+       "fibre": 3.72,
+       "salt": 0.56
+      }
+     },
+     "checks": [
+      {
+       "id": "template",
+       "kind": "hard",
+       "requested": "лише інгредієнти шаблону «Печиво пісочне»",
+       "actual": "усі з шаблону",
+       "pass": true,
+       "source_phrase": "Печиво",
+       "relaxed": null,
+       "enforced": true
+      },
+      {
+       "id": "mass",
+       "kind": "hard",
+       "requested": "Σ = 1111.1 г (1000 г продукту)",
+       "actual": "1111.1 г",
+       "pass": true,
+       "source_phrase": null,
+       "relaxed": null,
+       "enforced": true
+      },
+      {
+       "id": "grams",
+       "kind": "hard",
+       "requested": "грами > 0, крок не дрібніший за 0,01 г",
+       "actual": "так",
+       "pass": true,
+       "source_phrase": null,
+       "relaxed": null,
+       "enforced": true
+      },
+      {
+       "id": "role:flour",
+       "kind": "hard",
+       "requested": "роль «flour» 35–60 %",
+       "actual": "58.734 %",
+       "pass": true,
+       "source_phrase": null,
+       "relaxed": null,
+       "enforced": true
+      },
+      {
+       "id": "role:fat",
+       "kind": "hard",
+       "requested": "роль «fat» 15–32 %",
+       "actual": "15.003 %",
+       "pass": true,
+       "source_phrase": null,
+       "relaxed": null,
+       "enforced": true
+      },
+      {
+       "id": "role:sweetener",
+       "kind": "hard",
+       "requested": "роль «sweetener» 0–30 %",
+       "actual": "12.771 %",
+       "pass": true,
+       "source_phrase": null,
+       "relaxed": null,
+       "enforced": true
+      },
+      {
+       "id": "role:bulking",
+       "kind": "hard",
+       "requested": "роль «bulking» 0–20 %",
+       "actual": "0 %",
+       "pass": true,
+       "source_phrase": null,
+       "relaxed": null,
+       "enforced": true
+      },
+      {
+       "id": "role:egg",
+       "kind": "hard",
+       "requested": "роль «egg» 0–15 %",
+       "actual": "0 %",
+       "pass": true,
+       "source_phrase": null,
+       "relaxed": null,
+       "enforced": true
+      },
+      {
+       "id": "role:cereal",
+       "kind": "hard",
+       "requested": "роль «cereal» 0–25 %",
+       "actual": "0 %",
+       "pass": true,
+       "source_phrase": null,
+       "relaxed": null,
+       "enforced": true
+      },
+      {
+       "id": "role:nuts",
+       "kind": "hard",
+       "requested": "роль «nuts» 0–15 %",
+       "actual": "8.001 %",
+       "pass": true,
+       "source_phrase": null,
+       "relaxed": null,
+       "enforced": true
+      },
+      {
+       "id": "role:leavening",
+       "kind": "hard",
+       "requested": "роль «leavening» 0–1 %",
+       "actual": "0 %",
+       "pass": true,
+       "source_phrase": null,
+       "relaxed": null,
+       "enforced": true
+      },
+      {
+       "id": "role:salt",
+       "kind": "hard",
+       "requested": "роль «salt» 0–1 %",
+       "actual": "0.495 %",
+       "pass": true,
+       "source_phrase": null,
+       "relaxed": null,
+       "enforced": true
+      },
+      {
+       "id": "role:water",
+       "kind": "hard",
+       "requested": "роль «water» 0–5 %",
+       "actual": "4.995 %",
+       "pass": true,
+       "source_phrase": null,
+       "relaxed": null,
+       "enforced": true
+      },
+      {
+       "id": "role:seeds",
+       "kind": "hard",
+       "requested": "роль «seeds» 0–8 %",
+       "actual": "0 %",
+       "pass": true,
+       "source_phrase": null,
+       "relaxed": null,
+       "enforced": true
+      },
+      {
+       "id": "role:flavour",
+       "kind": "hard",
+       "requested": "роль «flavour» 0–12 %",
+       "actual": "0 %",
+       "pass": true,
+       "source_phrase": null,
+       "relaxed": null,
+       "enforced": true
+      },
+      {
+       "id": "dose:almonds_roasted",
+       "kind": "hard",
+       "requested": "Мигдаль смажений: 0–30 %",
+       "actual": "8.001 %",
+       "pass": true,
+       "source_phrase": null,
+       "relaxed": null,
+       "enforced": true
+      },
+      {
+       "id": "dose:salt",
+       "kind": "hard",
+       "requested": "Сіль кухонна: 0–0.5 %",
+       "actual": "0.495 %",
+       "pass": true,
+       "source_phrase": null,
+       "relaxed": null,
+       "enforced": true
+      },
+      {
+       "id": "water_balance",
+       "kind": "hard",
+       "requested": "вода в тісті ≥ 111.111 г втрати, вологість продукту ≤ 10 %",
+       "actual": "вода 146.828 г, вологість 3.572 %",
+       "pass": true,
+       "source_phrase": null,
+       "relaxed": null,
+       "enforced": true
+      },
+      {
+       "id": "sweetness_min",
+       "kind": "hard",
+       "requested": "солодкість ≥ 15 г сахарозного екв./100 г",
+       "actual": "15.002",
+       "pass": true,
+       "source_phrase": null,
+       "relaxed": null,
+       "enforced": true
+      },
+      {
+       "id": "tech_nutrient:fat",
+       "kind": "hard",
+       "requested": "технологія «Печиво пісочне»: fat ≥ 15 г/100 г",
+       "actual": "21.759 г/100 г",
+       "pass": true,
+       "source_phrase": null,
+       "relaxed": null,
+       "enforced": true
+      },
+      {
+       "id": "cost_reported",
+       "kind": "hard",
+       "requested": "заявлена собівартість 78.83 грн/кг = перерахованій",
+       "actual": "78.832 грн/кг",
+       "pass": true,
+       "source_phrase": null,
+       "relaxed": null,
+       "enforced": true
+      },
+      {
+       "id": "allergen:0:nuts",
+       "kind": "soft",
+       "requested": "без алергену nuts (і «може містити»)",
+       "actual": "знайдено: Мигдаль смажений",
+       "pass": false,
+       "source_phrase": "без горіхів",
+       "relaxed": "drop",
+       "enforced": false
+      },
+      {
+       "id": "must_include:0:almonds_roasted",
+       "kind": "soft",
+       "requested": "Мигдаль смажений ≥ 8 %",
+       "actual": "8.001 %",
+       "pass": true,
+       "source_phrase": "з мигдалем",
+       "relaxed": null,
+       "enforced": true
+      },
+      {
+       "id": "coverage",
+       "kind": "hard",
+       "requested": "кожна вимога запиту — перевірка або unsupported",
+       "actual": "усі враховано",
+       "pass": true,
+       "source_phrase": null,
+       "relaxed": null,
+       "enforced": true
+      }
+     ]
+    },
     "template_rules": [],
     "explanation": null,
     "assumptions": [
@@ -4012,7 +4335,7 @@
      "втрата вологи при випіканні 10 %: 1111,11 г рецептури дають 1000 г продукту"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "4ae11e0037eb",
+    "data_version": "7f347a97968d",
     "duration_ms": 10,
     "error": null
    },
@@ -4529,6 +4852,7 @@
       }
      ]
     },
+    "other_recipe": null,
     "template_rules": [
      "на результат також впливає технологічне правило шаблону: роль «base» не менше 55 % (не послаблюється)",
      "на результат також впливає технологічне правило шаблону: роль «fruit» не більше 25 % (не послаблюється)"
@@ -4536,8 +4860,8 @@
     "explanation": null,
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "4ae11e0037eb",
-    "duration_ms": 79,
+    "data_version": "7f347a97968d",
+    "duration_ms": 76,
     "error": null
    },
    "relax_check": [
@@ -4939,6 +5263,7 @@
     "alternatives": [],
     "other_options": [],
     "relaxed_recipe": null,
+    "other_recipe": null,
     "template_rules": [],
     "explanation": null,
     "assumptions": [
@@ -4946,7 +5271,7 @@
      "«яблука»: частку не вказано — прийнято Яблучний сік (відновлений із концентрату) не менше 10 % (max(5 %, мінімум ролі), не більше дозволеного шаблоном)"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "4ae11e0037eb",
+    "data_version": "7f347a97968d",
     "duration_ms": 2,
     "error": null
    },
@@ -5313,13 +5638,14 @@
     "alternatives": [],
     "other_options": [],
     "relaxed_recipe": null,
+    "other_recipe": null,
     "template_rules": [],
     "explanation": null,
     "assumptions": [
      "втрата вологи при випіканні 10 %: 1111,11 г рецептури дають 1000 г продукту"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "4ae11e0037eb",
+    "data_version": "7f347a97968d",
     "duration_ms": 2,
     "error": null
    },
@@ -5703,13 +6029,14 @@
     "alternatives": [],
     "other_options": [],
     "relaxed_recipe": null,
+    "other_recipe": null,
     "template_rules": [],
     "explanation": null,
     "assumptions": [
      "еталон «звичайного»: Звичайний фруктовий йогурт 2,5 % (з цукром) — типові значення фруктових йогуртів 2–3 % жиру (асортимент UA-ритейлу, оцінка автора); звірено за порядком з USDA FDC (yogurt, fruit, lowfat)"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "4ae11e0037eb",
+    "data_version": "7f347a97968d",
     "duration_ms": 10,
     "error": null
    },
@@ -6030,6 +6357,7 @@
     "alternatives": [],
     "other_options": [],
     "relaxed_recipe": null,
+    "other_recipe": null,
     "template_rules": [],
     "explanation": null,
     "assumptions": [
@@ -6038,7 +6366,7 @@
      "«без пальмової олії»: шаблон «Соковмісний напій» не містить таких інгредієнтів — виконано автоматично"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "4ae11e0037eb",
+    "data_version": "7f347a97968d",
     "duration_ms": 3,
     "error": null
    },
@@ -6121,11 +6449,12 @@
     "alternatives": [],
     "other_options": [],
     "relaxed_recipe": null,
+    "other_recipe": null,
     "template_rules": [],
     "explanation": null,
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "4ae11e0037eb",
+    "data_version": "7f347a97968d",
     "duration_ms": 0,
     "error": null
    },
@@ -6212,11 +6541,12 @@
     "alternatives": [],
     "other_options": [],
     "relaxed_recipe": null,
+    "other_recipe": null,
     "template_rules": [],
     "explanation": null,
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "4ae11e0037eb",
+    "data_version": "7f347a97968d",
     "duration_ms": 0,
     "error": null
    },
@@ -6313,11 +6643,12 @@
     "alternatives": [],
     "other_options": [],
     "relaxed_recipe": null,
+    "other_recipe": null,
     "template_rules": [],
     "explanation": null,
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "4ae11e0037eb",
+    "data_version": "7f347a97968d",
     "duration_ms": 0,
     "error": null
    },
@@ -6410,11 +6741,12 @@
     "alternatives": [],
     "other_options": [],
     "relaxed_recipe": null,
+    "other_recipe": null,
     "template_rules": [],
     "explanation": null,
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "4ae11e0037eb",
+    "data_version": "7f347a97968d",
     "duration_ms": 0,
     "error": null
    },
@@ -6524,11 +6856,12 @@
     "alternatives": [],
     "other_options": [],
     "relaxed_recipe": null,
+    "other_recipe": null,
     "template_rules": [],
     "explanation": null,
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "4ae11e0037eb",
+    "data_version": "7f347a97968d",
     "duration_ms": 0,
     "error": null
    },

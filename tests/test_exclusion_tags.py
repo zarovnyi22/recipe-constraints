@@ -99,7 +99,7 @@ def test_the_word_juice_means_100_percent_juice_and_nectar_its_own_template():
     assert "juice_100" in prompt and "нектар" in prompt and "preservative" in prompt
     assert "нектар" in DATA.templates["nectar"].aliases
     assert "нектар" not in DATA.templates["juice_drink"].aliases
-    assert PROMPT_VERSION == "p3"
+    assert PROMPT_VERSION == "p4"
 
 
 # --- the data rules --------------------------------------------------------------------------

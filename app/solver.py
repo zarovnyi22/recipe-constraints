@@ -583,6 +583,7 @@ def explain(exp: Expansion, data: DataBundle) -> Infeasible:
             break
 
     alternatives, other = [], []
+    other_recipe: tuple[Recipe, list[Change]] | None = None
     for g, rows in groups.items():
         single = _single(exp, data, g, rows)
         if single is None:
@@ -595,7 +596,10 @@ def explain(exp: Expansion, data: DataBundle) -> Infeasible:
                 "вимогу щодо алергену/дієти не послаблюємо автоматично: рецептура міститиме "
                 "виключене — лише як інший варіант, з відповідним маркуванням"
             )
-            other += _changes(exp, drops, rhs, recipe, warning)
+            changes = _changes(exp, drops, rhs, recipe, warning)
+            other += changes
+            if other_recipe is None or recipe.cost_uah_per_kg < other_recipe[0].cost_uah_per_kg:
+                other_recipe = (recipe, changes)
     alternatives.sort(key=lambda c: (c.action != "relax", c.cost_uah_per_kg))
     return Infeasible(
         conflict=[
@@ -609,6 +613,8 @@ def explain(exp: Expansion, data: DataBundle) -> Infeasible:
         other_options=other,
         relaxed_recipe=relaxed_recipe,
         template_rules=template_rules,
+        other_recipe=other_recipe[0] if other_recipe else None,
+        other_recipe_changes=other_recipe[1] if other_recipe else [],
     )
 
 

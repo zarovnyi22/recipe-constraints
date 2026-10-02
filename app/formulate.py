@@ -145,6 +145,16 @@ async def _solve_and_verify(out, spec, data, exp, solve_fn: SolveFn) -> None:
         )
         if failed(checks):
             out.error = _failure(checks, "рецептура з послабленням")
+    if result.other_recipe is not None:
+        changes = result.other_recipe_changes
+        checks, totals, lines = await asyncio.to_thread(
+            _verified, result.other_recipe, spec, data, exp, changes
+        )
+        out.other_recipe = RelaxedRecipe(
+            changes=changes, recipe=lines, totals=totals, checks=checks
+        )
+        if failed(checks):
+            out.error = _failure(checks, "рецептура іншого варіанту")
 
 
 async def _finish(out: FormulateOut, pool, request_text: str | None, started: float) -> None:
@@ -198,5 +208,5 @@ async def load_run(pool: asyncpg.Pool, run_id: int) -> FormulateOut | None:
         return None
     out = FormulateOut.model_validate(json.loads(response) | {"run_id": run_id})
     if out.status == "error":  # kept for the audit, never given out as an answer
-        out.recipe = out.relaxed_recipe = None
+        out.recipe = out.relaxed_recipe = out.other_recipe = None
     return out

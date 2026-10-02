@@ -248,6 +248,9 @@ class Infeasible(BaseModel):
     template_rules: list[str] = []
     # why, in words, when the reason is not a conflict of requirements (the rounding window)
     explanation: str | None = None
+    # the cheapest "another option" (allergen / diet lifted) and the change it was solved with
+    other_recipe: Recipe | None = None
+    other_recipe_changes: list[Change] = []
 
 
 # --- response (docs/SPEC.md §1, §5) -------------------------------------------------------------
@@ -319,6 +322,8 @@ class FormulateOut(BaseModel):
     alternatives: list[Change] = []  # "it is enough to change one of…" (each verified)
     other_options: list[Change] = []  # allergen/diet: only with a warning
     relaxed_recipe: RelaxedRecipe | None = None
+    # the recipe of the cheapest "another option" (allergen / diet lifted, with a warning)
+    other_recipe: RelaxedRecipe | None = None
     template_rules: list[str] = []  # the template's rules in the conflict (not relaxed)
     explanation: str | None = None  # infeasible for a reason other than a conflict (rounding)
     assumptions: list[str] = []

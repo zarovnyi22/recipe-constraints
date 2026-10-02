@@ -10,8 +10,9 @@ down:    ## stop the stack (data in the pgdata volume is kept)
 logs:    ## follow the api JSON logs
 	docker compose logs -f api
 
-health:  ## check that the api and the database answer
-	curl -s localhost:8020/health
+health:  ## check that the api and the database answer (waits up to 30 s: api starts after db)
+	@for i in $$(seq 1 30); do curl -sf localhost:8020/health && echo && exit 0; sleep 1; done; \
+	echo "api did not answer in 30 s: make logs" >&2; curl -s localhost:8020/health; exit 1
 
 ask:     ## request in words -> readable answer: make ask Q="полуничний йогурт без молока, до 45 грн/кг"
 	@scripts/ask.sh "$(Q)"

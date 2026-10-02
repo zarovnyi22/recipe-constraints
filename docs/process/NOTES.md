@@ -311,3 +311,15 @@
   повний розв'язок з округленням; `explanation` (нове поле Infeasible/FormulateOut, друкує pretty) пояснює
   «досяжна лише в неокругленому розв'язку». Нічого не перевірилось → вихідний 500 (справжній баг).
   Тест: полуничне смузі + білок 6 % + low_sugar, ліміти 61,64 і 61,65 → infeasible, до ≤ +0,05.
+
+## Живий прогін (коміт «fix(live): health wait, chocolate, diet alternatives, wording»)
+- `make health` чекає до 30 с (`curl -sf` з повторами): api стартує після db, «make up && make health» падав з
+  curl Error 52.
+- «Шоколадний» = какао: аліаси cocoa_powder (chocolate, шоколад-), промпт p4. Какао вже було в ролі flavour
+  печива й батончика; шоколадне печиво → какао ≥ 3 % тіста (flavor_min ролі) і ≥ 50 % ролі.
+- «Інший варіант» (алерген/дієта, `auto_relax: false`) тепер з рецептурою: `Infeasible.other_recipe` (найдешевша
+  з other_options) → `FormulateOut.other_recipe` (RelaxedRecipe, verify з relaxed=[drop] → вимога `enforced:
+  false`). Раніше без спільного послаблення (батончик без глютену: пластівці — злаки, роль cereal ≥ 25 %)
+  відповідь мала лише ціну варіанту. Метрики eval не змінились (test t10, dev d01, d14 мають other_recipe,
+  усі перевірки pass).
+- pretty: «Щоб рецептура існувала, треба одночасно:»; рядок правила шаблону без дубля префікса.
