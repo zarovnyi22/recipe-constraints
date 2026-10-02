@@ -91,6 +91,7 @@ async def run_formulate(
         parsed=spec,
         unparsed=spec.unparsed,
         unsupported=[*spec.unsupported, *exp.unsupported],
+        contradictions=exp.contradictions,
         assumptions=exp.assumptions
         + (
             [f"«{spec.optimize_phrase}»: окремої межі немає, сервіс завжди шукає найдешевше"]
@@ -122,7 +123,9 @@ async def _solve_and_verify(out, spec, data, exp, solve_fn: SolveFn) -> None:
     if isinstance(result, Recipe):
         checks, totals, lines = await asyncio.to_thread(_verified, result, spec, data, exp)
         out.checks, out.totals, out.recipe = checks, totals, lines
-        out.status = "partial" if out.unsupported or spec.unparsed else "feasible"
+        # a contradictory request is never plainly feasible (its X is unsupported anyway)
+        gaps = out.unsupported or spec.unparsed or out.contradictions
+        out.status = "partial" if gaps else "feasible"
         if failed(checks):
             out.error = _failure(checks, "рецептура")
         return

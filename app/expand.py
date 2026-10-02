@@ -10,10 +10,11 @@ technologist's requirements are soft. Every requirement becomes rows, a note in 
 import re
 
 from app import claims as C
-from app.allergens import allergens_in_name
+from app.allergens import CATEGORY_NAMES_UK, allergens_in_name
 from app.data import TAGS, AllergenCategory, DataBundle, Ingredient, RefNutrients, Role, Template
 from app.schemas import (
     ConstraintSpec,
+    Contradiction,
     Expansion,
     LinearConstraint,
     Unsupported,
@@ -37,6 +38,7 @@ EQ_TOLERANCE = 0.02  # "==" on a nutrient is a ±2 % band
 # bulking agent, not a sweetener.
 SWEETENER_MIN_SWEETNESS = 0.1
 DIET_ANIMAL = {"fish", "crustaceans", "molluscs"}
+VEGAN_EXCLUDED = {"milk", "eggs"} | DIET_ANIMAL  # allergen categories a vegan product cannot have
 # "must include X" without a share: at least this % (or the role's minimum, if larger)
 MUST_INCLUDE_DEFAULT_PCT = 5.0
 
@@ -754,6 +756,90 @@ class _Builder:
         )
 
 
+def _exclusions(spec: ConstraintSpec, everything: list[Ingredient]):
+    """(requirement id, phrase, what it excludes in words, test on an Ingredient, test on the
+    allergen categories of a name that is not in the data) for every exclusion of the spec."""
+    for k, a in enumerate(spec.exclude_allergens):
+        if a.allergen in ALLERGENS:
+            what = f"{CATEGORY_NAMES_UK[a.allergen]} ({a.allergen})"
+            yield (
+                f"allergen:{k}:{a.allergen}",
+                a.source_phrase,
+                what,
+                lambda i, y=a.allergen: y in i.allergens + i.may_contain,
+                lambda cats, y=a.allergen: y in cats,
+            )
+    for k, d in enumerate(spec.diet):
+        tests = {
+            "vegan": (
+                lambda i: not i.vegan,
+                lambda cats: bool(VEGAN_EXCLUDED & cats),
+                "тваринну сировину",
+            ),
+            "vegetarian": (
+                lambda i: bool(DIET_ANIMAL & set(i.allergens)),
+                lambda cats: bool(DIET_ANIMAL & cats),
+                "рибу або морепродукти",
+            ),
+            "gluten_free": (
+                lambda i: "cereals" in i.allergens + i.may_contain,
+                lambda cats: "cereals" in cats,
+                "злаки з глютеном",
+            ),
+        }
+        if d.diet in tests:
+            on_ing, on_cats, what = tests[d.diet]
+            yield f"diet:{k}:{d.diet}", d.source_phrase, what, on_ing, on_cats
+    for k, e in enumerate(spec.exclude_ingredients):
+        ids = excluded_ids(e.ingredient, everything)
+        cats = allergens_in_name(e.ingredient)
+        yield (
+            f"exclude:{k}:{e.ingredient}",
+            e.source_phrase,
+            f"«{e.ingredient}»",
+            lambda i, ids=ids, cats=cats: i.id in ids or bool(cats & set(i.allergens)),
+            lambda c, cats=cats: bool(cats & c),
+        )
+    sw = spec.sweeteners
+    if sw is not None and not sw.allowed:
+        yield "no_sweeteners", sw.source_phrase, "підсолоджувачі", is_sweetener, lambda c: False
+
+
+def find_contradictions(
+    spec: ConstraintSpec, data: DataBundle, tpl: Template
+) -> list[Contradiction]:
+    """Something the request asks to include (must_include, flavor) that one of its own exclusions
+    rules out — from the data (all matching ingredients excluded), or, for a name not in the data,
+    from the allergen dictionary («фундук» → nuts). Independent of the template: a contradiction
+    is named even when the ingredient is unsupported anyway."""
+    everything = list(data.ingredients.values())
+    wants = [
+        (f"must_include:{k}:{m.ingredient_or_role}", m.source_phrase, m.ingredient_or_role)
+        for k, m in enumerate(spec.must_include)
+    ]
+    if spec.product.flavor:
+        wants.append(("flavor", spec.product.source_phrase, spec.product.flavor))
+    out = []
+    for wid, wphrase, name in wants:
+        if name in tpl.roles:
+            found = [data.ingredients[i] for i in tpl.roles[name].ingredients]
+        else:
+            found = match_ingredients(name, everything)
+        for xid, xphrase, what, on_ing, on_cats in _exclusions(spec, everything):
+            hit = all(on_ing(i) for i in found) if found else on_cats(allergens_in_name(name))
+            if not hit:
+                continue
+            names = f" ({', '.join(i.name_uk for i in found)})" if found else ""
+            out.append(
+                Contradiction(
+                    message=f"запит суперечливий: «{wphrase}»{names} містить {what}, "
+                    f"а «{xphrase}» це виключає",
+                    requirements=[wid, xid],
+                )
+            )
+    return out
+
+
 def expand(spec: ConstraintSpec, data: DataBundle) -> Expansion:
     tpl = find_template(spec.product.template, data)
     if tpl is None:
@@ -780,4 +866,6 @@ def expand(spec: ConstraintSpec, data: DataBundle) -> Expansion:
                 *rest,
             ],
         )
-    return _Builder(spec, data, tpl).build()
+    exp = _Builder(spec, data, tpl).build()
+    exp.contradictions = find_contradictions(spec, data, tpl)
+    return exp

@@ -61,12 +61,15 @@ def cache_path(split: str, request_id: str, cache_root: Path = CACHE) -> Path:
     return cache_root / split / f"{request_id}.json"
 
 
-def read_cache(path: Path, text: str, prompt_sha: str, model: str | None) -> dict | None:
-    """The cached raw answer, or None if absent or made for another text / prompt / model."""
+def read_cache(path: Path, text: str, prompt_sha: str | None, model: str | None) -> dict | None:
+    """The cached raw answer, or None if absent or made for another text / prompt / model.
+    prompt_sha None: any prompt (--after-fixes: the answer the model gave at the measurement)."""
     if not path.exists():
         return None
     data = json.loads(path.read_text(encoding="utf-8"))
-    if data["text_sha"] != _sha(text) or data["prompt_sha"] != prompt_sha:
+    if data["text_sha"] != _sha(text):
+        return None
+    if prompt_sha is not None and data["prompt_sha"] != prompt_sha:
         return None
     if model is not None and data["model"] != model:
         return None
@@ -105,11 +108,15 @@ async def run_requests(
     solve_fn: SolveFn | None = None,
     sleep: Callable[[float], Awaitable[None]] = asyncio.sleep,
     log: Callable[[str], None] = print,
+    any_prompt: bool = False,
 ) -> list[dict]:
     """A row per request: expected, actual status, the whole answer (or the error). Raises
-    NotCachedError before running anything when a request cannot be answered."""
+    NotCachedError before running anything when a request cannot be answered. any_prompt: the
+    cached answer is used even if the system prompt has changed since (cache only)."""
+    if any_prompt and live:
+        raise ValueError("any_prompt is cache-only: it cannot be combined with --live")
     data = data or get_data()
-    prompt_sha = _sha(build_system_prompt(data))
+    prompt_sha = None if any_prompt else _sha(build_system_prompt(data))
     model = f"{llm.provider}:{llm.model}" if live and llm is not None else None
     cached = {
         r.id: read_cache(cache_path(split, r.id, cache_root), r.text, prompt_sha, model)
@@ -164,17 +171,19 @@ async def run_requests(
     return rows
 
 
-def write_report(split: str, rows: list[dict], live: bool) -> Path:
+def write_report(split: str, rows: list[dict], live: bool, after_fixes: bool = False) -> Path:
     from eval.metrics import write_markdown
 
     REPORTS.mkdir(exist_ok=True)
-    path = REPORTS / f"{split}_{date.today().isoformat()}.json"
+    suffix = "_after_fixes" if after_fixes else ""
+    path = REPORTS / f"{split}_{date.today().isoformat()}{suffix}.json"
     report = {
         "split": split,
         "date": date.today().isoformat(),
         "prompt_version": PROMPT_VERSION,
         "data_version": get_data().data_version,
         "live": live,
+        "after_fixes": after_fixes,
         "units": rows,
         "errors": sum(r["status"] == "error" for r in rows),
     }
@@ -188,7 +197,15 @@ async def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--split", choices=("dev", "test"), required=True)
     parser.add_argument("--live", action="store_true", help="call the model for missing requests")
     parser.add_argument("--limit", type=int, help="only the first N requests")
+    parser.add_argument(
+        "--after-fixes",
+        action="store_true",
+        help="cache only, even if the prompt changed since; report <split>_<date>_after_fixes "
+        "(for information: the honest number is the original report)",
+    )
     args = parser.parse_args(argv)
+    if args.after_fixes and args.live:
+        parser.error("--after-fixes is cache-only")
 
     requests = load_dir(REQUESTS / args.split)[: args.limit]
     llm = pool = None
@@ -203,7 +220,13 @@ async def main(argv: list[str] | None = None) -> int:
     pause = float(os.environ.get("EVAL_PAUSE_SECONDS", DEFAULT_PAUSE_SECONDS))
     try:
         rows = await run_requests(
-            args.split, requests, llm=llm, pool=pool, live=args.live, pause_seconds=pause
+            args.split,
+            requests,
+            llm=llm,
+            pool=pool,
+            live=args.live,
+            pause_seconds=pause,
+            any_prompt=args.after_fixes,
         )
     except NotCachedError as exc:
         print(exc, file=sys.stderr)
@@ -213,7 +236,7 @@ async def main(argv: list[str] | None = None) -> int:
             await llm.aclose()
         if pool is not None:
             await pool.close()
-    path = write_report(args.split, rows, args.live)
+    path = write_report(args.split, rows, args.live, args.after_fixes)
     errors = sum(r["status"] == "error" for r in rows)
     print(f"{len(rows)} requests, {errors} errors -> {_rel(path)}, {_rel(path.with_suffix('.md'))}")
     return 0

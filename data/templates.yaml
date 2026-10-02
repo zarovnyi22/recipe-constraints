@@ -317,6 +317,21 @@
       min_pct: 0
       max_pct: 15
       ingredients: [whole_egg, aquafaba]
+    # B5b: вівсяне печиво і печиво з горіхами. Межі — припущення за типовими рецептурами:
+    # вівсяне — пластівці ~20–30 % тіста поряд з борошном (тут борошно ≥ 35 %), «вівсяне» ≥ 15 %;
+    # горіхове — 8–15 % тіста.
+    cereal:
+      mode: blend
+      min_pct: 0
+      max_pct: 25
+      flavor_min_pct: 15
+      ingredients: [oat_flakes]
+    nuts:
+      mode: blend
+      min_pct: 0
+      max_pct: 15
+      flavor_min_pct: 8
+      ingredients: [almonds_roasted, peanuts_roasted]
     leavening:
       mode: blend
       min_pct: 0

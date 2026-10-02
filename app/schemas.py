@@ -155,6 +155,14 @@ class LinearConstraint(BaseModel):
     relax: Literal["value", "drop"] = "value"
 
 
+class Contradiction(BaseModel):
+    """The request contradicts itself: something it asks to include is something it excludes
+    (almonds + «без горіхів»). Found from the data, before the solver."""
+
+    message: str  # «запит суперечливий: X містить Y»
+    requirements: list[str]  # the two requirement ids (= check / conflict groups)
+
+
 class Expansion(BaseModel):
     """The linear model of one request. `template_id` None = the category is unsupported."""
 
@@ -172,6 +180,7 @@ class Expansion(BaseModel):
     reference_id: str | None = None
     unsupported: list[Unsupported] = []
     assumptions: list[str] = []
+    contradictions: list[Contradiction] = []
 
 
 # --- solver results (docs/SPEC.md §4) ---------------------------------------------------------
@@ -301,6 +310,9 @@ class FormulateOut(BaseModel):
     unparsed: list[Phrase] = []
     unsupported: list[Unsupported] = []
     conflicts: list[ConflictItem] = []
+    # the request contradicts itself (include X + exclude what X contains): always named, whether
+    # the solver then reports the conflict (X in the template) or X is unsupported anyway
+    contradictions: list[Contradiction] = []
     relaxations: list[Change] = []  # the recommended joint relaxation (verified)
     alternatives: list[Change] = []  # "it is enough to change one of…" (each verified)
     other_options: list[Change] = []  # allergen/diet: only with a warning

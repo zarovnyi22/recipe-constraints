@@ -3,7 +3,8 @@
     python -m eval.proof --split test|dev      (make proof SPLIT=test)
 
 Renders the newest eval/reports/<split>_*.json (make eval first). The test split goes to
-docs/proof.md, dev to docs/proof_dev.md.
+docs/proof.md, dev to docs/proof_dev.md. --after-fixes renders the newest
+<split>_<date>_after_fixes.json to docs/proof_after_fixes.md (for information only).
 """
 
 import argparse
@@ -18,8 +19,8 @@ ROOT = Path(__file__).resolve().parent
 DOCS = ROOT.parent / "docs"
 
 
-def latest_report(split: str, reports: Path = ROOT / "reports") -> Path:
-    found = sorted(reports.glob(f"{split}_????-??-??.json"))
+def latest_report(split: str, reports: Path = ROOT / "reports", suffix: str = "") -> Path:
+    found = sorted(reports.glob(f"{split}_????-??-??{suffix}.json"))
     if not found:
         raise FileNotFoundError(f"no eval/reports/{split}_<date>.json: run make eval SPLIT={split}")
     return found[-1]
@@ -87,6 +88,7 @@ def _row(row: dict) -> list[str]:
         ("Не зрозуміло (unparsed)", out.unparsed),
         ("Зрозуміло, але не підтримується", [f"{u.phrase} — {u.reason}" for u in out.unsupported]),
         ("Припущення", out.assumptions),
+        ("**Запит суперечливий**", [c.message for c in out.contradictions]),
     ):
         if items:
             lines += ["", f"{title}:", ""] + [f"- {i}" for i in items]
@@ -121,7 +123,10 @@ def _row(row: dict) -> list[str]:
 
 def render(report: dict) -> str:
     m = compute(report)
-    lines = [f"# Доказ відповідності рецептур запиту — {report['split']}, {report['date']}", ""]
+    title = f"# Доказ відповідності рецептур запиту — {report['split']}, {report['date']}"
+    if report.get("after_fixes"):
+        title += " (після фіксів B5b, для інформації)"
+    lines = [title, ""]
     lines += [
         "Кожна рецептура нижче пройшла незалежну перевірку (`app/verify.py`: рахує з грамів і "
         "YAML, не з матриць розв'язувача). Таблиця «Перевірка» — її результат; ціни — оцінки.",
@@ -137,10 +142,14 @@ def render(report: dict) -> str:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--split", choices=("dev", "test"), default="test")
+    parser.add_argument("--after-fixes", action="store_true")
     args = parser.parse_args(argv)
-    path = latest_report(args.split)
+    path = latest_report(args.split, suffix="_after_fixes" if args.after_fixes else "")
     report = json.loads(path.read_text(encoding="utf-8"))
-    target = DOCS / ("proof.md" if args.split == "test" else f"proof_{args.split}.md")
+    if args.after_fixes:
+        target = DOCS / f"proof_after_fixes{'' if args.split == 'test' else '_' + args.split}.md"
+    else:
+        target = DOCS / ("proof.md" if args.split == "test" else f"proof_{args.split}.md")
     target.write_text(render(report), encoding="utf-8")
     print(f"{path.name} -> {target.relative_to(ROOT.parent)}")
     return 0

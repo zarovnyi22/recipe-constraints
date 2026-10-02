@@ -226,6 +226,46 @@ async def test_runner_live_then_cache_without_a_model(tmp_path):
     assert "a2" not in str(exc.value)
 
 
+async def test_after_fixes_reuses_the_answer_of_another_prompt_but_not_another_text(tmp_path):
+    reqs = [_request("a1")]
+    await run_requests(
+        "dev",
+        reqs,
+        llm=FakeLLM([_answer(**_TASK)]),
+        live=True,
+        cache_root=tmp_path,
+        log=lambda s: None,
+    )
+    entry = cache_path("dev", "a1", tmp_path)
+    stale = json.loads(entry.read_text()) | {"prompt_sha": "prompt-before-the-fixes"}
+    entry.write_text(json.dumps(stale, ensure_ascii=False))
+    with pytest.raises(NotCachedError):
+        await run_requests("dev", reqs, llm=None, cache_root=tmp_path)
+    rows = await run_requests(
+        "dev", reqs, llm=None, cache_root=tmp_path, any_prompt=True, log=lambda s: None
+    )
+    assert [r["status"] for r in rows] == ["infeasible"]
+    with pytest.raises(NotCachedError):
+        await run_requests(
+            "dev",
+            [_request("a1", text=TEXT + " і все")],
+            llm=None,
+            cache_root=tmp_path,
+            any_prompt=True,
+        )
+    with pytest.raises(ValueError, match="cache-only"):
+        await run_requests("dev", reqs, llm=FakeLLM([]), live=True, any_prompt=True)
+
+
+def test_proof_never_takes_the_after_fixes_report_for_the_honest_one(tmp_path):
+    from eval.proof import latest_report
+
+    for name in ("test_2026-10-02.json", "test_2026-10-03_after_fixes.json"):
+        (tmp_path / name).write_text("{}")
+    assert latest_report("test", tmp_path).name == "test_2026-10-02.json"
+    assert latest_report("test", tmp_path, "_after_fixes").name.endswith("_after_fixes.json")
+
+
 async def test_parse_error_is_a_row_not_a_crash(tmp_path):
     llm = FakeLLM(
         ["не json", "ще не json", _answer(**{k: v for k, v in WITH_MILK.items() if k != "product"})]

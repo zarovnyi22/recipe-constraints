@@ -448,7 +448,18 @@ def summary(report: dict, m: dict) -> list[str]:
         ),
     ]
     confusion = ", ".join(f"{k}: {v}" for k, v in sorted(st["confusion"].items()))
+    banner = (
+        [
+            "> **Після фіксів (B5b), для інформації; чесне число — у `docs/proof.md`.** Розбір — "
+            "ті самі відповіді моделі, що й на фінальному замірі (кеш; системний промпт з тих "
+            "пір змінився, модель його не бачила), код і дані — поточні.",
+            "",
+        ]
+        if report.get("after_fixes")
+        else []
+    )
     return [
+        *banner,
         f"Запитів: {m['units']}; помилок: {len(m['errors'])}. PROMPT_VERSION "
         f"`{report['prompt_version']}`, дані `{report['data_version']}`, {mode}.",
         "",
