@@ -334,3 +334,22 @@
 - «Злаковий батончик без глютену» → feasible (рисові пластівці 49,5 %, 54,15 грн/кг). Dev d14 чекав infeasible
   («сумнів, чи є безглютенова основа») — за рішенням людини очікування змінено на feasible; статус dev 15/17 як
   був, test без змін. Тест «інший варіант дієти з рецептурою» переведено на веганське печиво на маслі.
+
+## C1: не більше 6 інгредієнтів (коміт «feat(c1): max 6 ingredients»)
+- `data.MAX_INGREDIENTS = 6`; `Ingredient.supplier` (false лише у води: з водопідготовки). Валідація: базові
+  рецептури ≤ 6 (батончик був 8 — прибрано родзинки й олію, пластівці 387 → 527).
+- `expand(spec, data, max_ingredients=6)` → `Expansion.max_ingredients`, `uncounted`. Розв'язувач: у `_lp`, якщо
+  відкритих (не закритих варіантом one_of) лічених змінних більше за ліміт, — `scipy.optimize.milp`: x ≤ M·y,
+  M = маса партії, Σy ≤ ліміт (і для elastic/feasibility/repair — та сама модель, тож послаблення й
+  relaxed_recipe теж ≤ 6). Інакше — linprog, як було. `MILP_SECONDS = 20` — перевищення = solver_error.
+- explain: шаблон без м'яких вимог нездійсненний лише через ліміт → conflict []. `limit_hit` — ядро конфлікту
+  здійсненне без ліміту → ConflictItem `max_ingredients` («правило: не більше 6 інгредієнтів …»), `explanation`,
+  `_more_ingredients`: найменше k > 6, з яким повний spec має рецептуру → Change `max_ingredients` (relax, rows
+  6 → k, warning) першим в other_options і `other_recipe` (пріоритет над алергенами).
+- verify: `max_ingredients` (hard), свій підрахунок (`supplier`), ліміт = параметр або `to_rhs` зміни
+  `max_ingredients` з relaxed; `Totals.ingredients`, `Totals.water`. pretty: «N інгредієнтів + вода».
+- eval relax_check: зміна `max_ingredients` не в spec — повтор run_formulate з `max_ingredients=k`.
+- Eval (--head): метрики test і dev без змін; t03 7 → 6 інгредієнтів (+0,25 грн/кг), t08 relaxed 8 → 6
+  (+2,89 грн/кг); ліміт не в конфлікті в жодному запиті. Час прогону не змінився помітно (~4 с на test).
+- Тест «потрібно 7»: густий йогурт з полуницею + WPC80, кокосові вершки, какао (+ основа, закваска,
+  підсолоджувач для sweetness_min) = 7. Перша спроба з пектином вимагала 8 — розв'язувач правильно дав 8.

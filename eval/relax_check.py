@@ -7,7 +7,7 @@ again: run_formulate → expand → solver → independent verify. The proposal 
 gives a recipe with every enforced check passed. No LLM: the spec is the one already parsed.
 """
 
-from app.data import DataBundle
+from app.data import MAX_INGREDIENTS, DataBundle
 from app.errors import AppError
 from app.expand import EQ_TOLERANCE
 from app.formulate import SolveFn, run_formulate
@@ -123,9 +123,17 @@ async def recheck(
     rows = []
     for label, changes in proposals(out):
         row = {"proposal": label, "groups": [c.group for c in changes], "ok": False}
+        # the ingredient limit is not in the spec: «another option» re-runs with its number
+        limit = next(
+            (int(r.to_rhs) for c in changes if c.group == "max_ingredients" for r in c.rows),
+            MAX_INGREDIENTS,
+        )
+        changes = [c for c in changes if c.group != "max_ingredients"]
         try:
             spec = apply_changes(out.parsed, changes)
-            new = await run_formulate(spec, pool=None, data=data, solve_fn=solve_fn)
+            new = await run_formulate(
+                spec, pool=None, data=data, solve_fn=solve_fn, max_ingredients=limit
+            )
         except CannotApply as exc:
             row["problem"] = f"не вдалося застосувати: {exc}"
         except AppError as exc:  # verification_failed, rounding_failed, …

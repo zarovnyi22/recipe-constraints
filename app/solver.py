@@ -21,7 +21,8 @@ import math
 from dataclasses import dataclass
 
 import numpy as np
-from scipy.optimize import linprog
+from scipy.optimize import Bounds, linprog, milp
+from scipy.optimize import LinearConstraint as Rows
 
 from app.data import DataBundle
 from app.errors import AppError
@@ -53,6 +54,7 @@ WINDOW_COST_STEP = 0.01
 # UAH per gram of distance from the base recipe (1e-4 UAH/g = 0.1 UAH/kg price difference): the
 # penalty is at most 2·LAMBDA·batch mass ≈ 0.2 UAH/kg, below any price difference that matters
 LAMBDA = 1e-4
+MILP_SECONDS = 20.0  # per MILP (the ingredient limit); hitting it is a solver_error, not a guess
 
 
 @dataclass(frozen=True)
@@ -141,8 +143,22 @@ def _lp(
     col = {rid: n + k for k, rid in enumerate(slack_ids)}
     dev = n + len(slack_ids)  # first d_i column (|x_i − anchor_i|), if anchored
     anchored = anchor is not None and not elastic and cost is not None
-    width = dev + (n if anchored else 0)
+    switch = dev + (n if anchored else 0)  # first y_i column (ingredient used), if limited
+    counted = _counted(exp, v)
+    limited = exp.max_ingredients is not None and len(counted) > exp.max_ingredients
+    width = switch + (len(counted) if limited else 0)
     a_ub, b_ub, a_eq, b_eq = [], [], [], []
+    if limited:
+        # x_k ≤ M·y_k (M = the batch mass: no ingredient weighs more), Σ y ≤ max_ingredients
+        for j, k in enumerate(counted):
+            a = np.zeros(width)
+            a[k], a[switch + j] = 1.0, -exp.batch_mass_g
+            a_ub.append(a)
+            b_ub.append(0.0)
+        a = np.zeros(width)
+        a[switch:] = 1.0
+        a_ub.append(a)
+        b_ub.append(float(exp.max_ingredients))
     if anchored:
         for k in range(n):  # x_k − d_k ≤ b_k and −x_k − d_k ≤ −b_k
             for sign in (1.0, -1.0):
@@ -171,20 +187,58 @@ def _lp(
     elif cost is not None:
         c[:n] = cost
         if anchored:
-            c[dev:] = LAMBDA
+            c[dev:switch] = LAMBDA
+    bounds = v.bounds + [(0.0, None)] * (switch - n) + [(0.0, 1.0)] * (width - switch)
+    if limited:
+        return _milp(c, a_ub, b_ub, a_eq, b_eq, bounds, switch, n, col, slack_ids)
     res = linprog(
         c,
         A_ub=np.array(a_ub) if a_ub else None,
         b_ub=np.array(b_ub) if b_ub else None,
         A_eq=np.array(a_eq) if a_eq else None,
         b_eq=np.array(b_eq) if b_eq else None,
-        bounds=v.bounds + [(0.0, None)] * (width - n),
+        bounds=bounds,
         method="highs",
     )
     if res.status == 2:
         return None
     if res.status != 0:
         raise AppError(500, "solver_error", f"linprog: {res.message}")
+    return res.x[:n], {rid: float(res.x[col[rid]]) for rid in slack_ids}
+
+
+def _counted(exp: Expansion, v: _Variant) -> list[int]:
+    """Columns that count towards the ingredient limit: not water, not closed by the variant."""
+    skip = set(exp.uncounted)
+    return [
+        k
+        for k, (name, b) in enumerate(zip(exp.variables, v.bounds, strict=True))
+        if name not in skip and b != (0.0, 0.0)
+    ]
+
+
+def _milp(c, a_ub, b_ub, a_eq, b_eq, bounds, switch, n, col, slack_ids):
+    """The same model with binary switches y (columns from `switch`): scipy milp (HiGHS)."""
+    rows = []
+    if a_ub:
+        rows.append(Rows(np.array(a_ub), -np.inf, np.array(b_ub)))
+    if a_eq:
+        rows.append(Rows(np.array(a_eq), np.array(b_eq), np.array(b_eq)))
+    lo = np.array([b[0] for b in bounds], dtype=float)
+    hi = np.array([np.inf if b[1] is None else b[1] for b in bounds], dtype=float)
+    integrality = np.zeros(len(c))
+    integrality[switch:] = 1
+    res = milp(
+        c,
+        integrality=integrality,
+        bounds=Bounds(lo, hi),
+        constraints=rows,
+        options={"time_limit": MILP_SECONDS},
+    )
+    if res.status == 2:
+        return None
+    if res.status != 0 or res.x is None:
+        raise AppError(500, "solver_error", f"milp: {res.message}")
     return res.x[:n], {rid: float(res.x[col[rid]]) for rid in slack_ids}
 
 
@@ -560,15 +614,63 @@ def _template_rules(exp: Expansion, others: set[str]) -> list[str]:
     ]
 
 
+def _limit(exp: Expansion, k: int | None) -> Expansion:
+    return exp.model_copy(update={"max_ingredients": k})
+
+
+def _more_ingredients(exp: Expansion, data: DataBundle) -> tuple[Change, Recipe] | None:
+    """«Another option» when the ingredient limit is in the conflict: every requirement kept,
+    the fewest ingredients above the limit that give a verified recipe (7 for a limit of 6)."""
+    top = exp.max_ingredients
+    for k in range(top + 1, len(exp.variables) + 1):
+        recipe = _try_solve(_limit(exp, k), data)
+        if recipe is None:
+            continue
+        label = f"не більше {top} інгредієнтів"
+        return (
+            Change(
+                group="max_ingredients",
+                action="relax",
+                label_uk=f"послабити правило: {label} → {k}",
+                source_phrase=None,
+                rows=[
+                    RowChange(
+                        id="max_ingredients",
+                        label_uk=label,
+                        unit="інгредієнтів",
+                        op="<=",
+                        from_rhs=top,
+                        to_rhs=k,
+                    )
+                ],
+                verified=True,
+                cost_uah_per_kg=recipe.cost_uah_per_kg,
+                warning=(
+                    f"правило технологів «≤ {top} інгредієнтів» (кожен — окремий постачальник і "
+                    "аудит) не послаблюємо автоматично: лише як інший варіант"
+                ),
+            ),
+            recipe,
+        )
+    return None
+
+
 def explain(exp: Expansion, data: DataBundle) -> Infeasible:
     groups = _soft_groups(exp)
-    if not _feasible(_without(exp, set(groups))):
+    bare = _without(exp, set(groups))
+    if _feasible(bare):
+        conflict = _conflict(exp, groups)
+    elif exp.max_ingredients is not None and _feasible(_limit(bare, None)):
+        conflict = []  # the template alone needs more ingredients than the limit
+    else:
         raise AppError(
             500,
             "template_infeasible",
             f"template {exp.template_id}: its own hard constraints have no solution",
         )
-    conflict = _conflict(exp, groups)
+    # the limit is in the conflict if the conflicting requirements hold without it
+    core = _without(exp, set(groups) - set(conflict))
+    limit_hit = exp.max_ingredients is not None and _feasible(_limit(core, None))
     template_rules = _template_rules(exp, set(groups) - set(conflict))
     relaxations: list[Change] = []
     relaxed_recipe = None
@@ -601,13 +703,39 @@ def explain(exp: Expansion, data: DataBundle) -> Infeasible:
             if other_recipe is None or recipe.cost_uah_per_kg < other_recipe[0].cost_uah_per_kg:
                 other_recipe = (recipe, changes)
     alternatives.sort(key=lambda c: (c.action != "relax", c.cost_uah_per_kg))
-    return Infeasible(
-        conflict=[
+    conflict_items = [
+        ConflictItem(
+            group=g, label_uk=_group_label(groups[g]), source_phrase=groups[g][0].source_phrase
+        )
+        for g in conflict
+    ]
+    explanation = None
+    if limit_hit:
+        top = exp.max_ingredients
+        conflict_items.append(
             ConflictItem(
-                group=g, label_uk=_group_label(groups[g]), source_phrase=groups[g][0].source_phrase
+                group="max_ingredients",
+                label_uk=f"правило: не більше {top} інгредієнтів (кожен — окремий постачальник і "
+                "аудит; вода з водопідготовки не рахується)",
+                source_phrase=None,
             )
-            for g in conflict
-        ],
+        )
+        more = _more_ingredients(exp, data)
+        if more is not None:
+            change, recipe = more
+            other.insert(0, change)
+            other_recipe = (recipe, [change])  # the option the conflict is about goes first
+            explanation = (
+                f"рецептура існує лише з {change.rows[0].to_rhs:g} інгредієнтами "
+                f"({recipe.cost_uah_per_kg:.2f} грн/кг) — див. «Інший варіант»"
+            )
+        else:
+            explanation = (
+                f"вимоги разом нездійсненні і в межах {top} інгредієнтів, і з більшою їх кількістю"
+            )
+    return Infeasible(
+        conflict=conflict_items,
+        explanation=explanation,
         relaxations=relaxations,
         alternatives=alternatives,
         other_options=other,

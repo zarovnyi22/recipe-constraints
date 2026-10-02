@@ -13,7 +13,7 @@ from collections.abc import Callable
 
 import asyncpg
 
-from app.data import DataBundle, get_data
+from app.data import MAX_INGREDIENTS, DataBundle, get_data
 from app.errors import AppError
 from app.expand import expand
 from app.schemas import (
@@ -59,7 +59,12 @@ def _verified(
 ):
     grams = {i.ingredient: i.grams for i in recipe.items}
     checks, totals, lines = verify(
-        grams, spec, data, reported_cost=recipe.cost_uah_per_kg, relaxed=relaxed
+        grams,
+        spec,
+        data,
+        reported_cost=recipe.cost_uah_per_kg,
+        relaxed=relaxed,
+        max_ingredients=exp.max_ingredients,
     )
     checks.append(_coverage(spec, checks, exp.unsupported))
     return checks, totals, lines
@@ -80,10 +85,11 @@ async def run_formulate(
     model: str | None = None,
     data: DataBundle | None = None,
     solve_fn: SolveFn | None = None,
+    max_ingredients: int | None = MAX_INGREDIENTS,
 ) -> FormulateOut:
     started = time.monotonic()
     data = data or get_data()
-    exp = expand(spec, data)
+    exp = expand(spec, data, max_ingredients)
     out = FormulateOut(
         run_id=None,
         status="unsupported",

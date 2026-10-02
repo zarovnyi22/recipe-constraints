@@ -54,6 +54,10 @@ def _recipe(recipe: list[dict], totals: dict) -> list[str]:
     out = _table(rows, ["інгредієнт", "роль", "г", "грн"], right=(2, 3))
     if abs(totals["mass_g"] - 1000) > 0.05:  # cookie: raw mass before baking
         out.append(f"  Маса сирої рецептури {_num(totals['mass_g'])} г дає 1000 г після випікання")
+    if totals.get("ingredients"):
+        water = " + вода" if totals.get("water") else ""
+        count = f"{totals['ingredients']} інгредієнтів{water}"
+        out.append(f"  {count} (вода з водопідготовки не рахується)")
     out.append(f"  Собівартість: {_num(totals['cost_uah_per_kg'])} грн/кг готового (ціни — оцінки)")
     per = totals["per_100g"]
     shown = (f"{label} {_num(per[k])} {unit}" for k, label, unit in NUTRIENTS if k in per)

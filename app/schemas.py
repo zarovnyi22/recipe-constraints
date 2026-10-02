@@ -181,6 +181,10 @@ class Expansion(BaseModel):
     unsupported: list[Unsupported] = []
     assumptions: list[str] = []
     contradictions: list[Contradiction] = []
+    # at most this many used variables outside `uncounted` (None: no limit); hard, never relaxed
+    # automatically — «another option» only
+    max_ingredients: int | None = None
+    uncounted: list[str] = []  # water from water treatment
 
 
 # --- solver results (docs/SPEC.md §4) ---------------------------------------------------------
@@ -285,6 +289,8 @@ class Totals(BaseModel):
     mass_g: float
     cost_uah_per_kg: float
     per_100g: dict[str, float]  # of finished product
+    ingredients: int = 0  # bought ingredients (count towards the limit): «N інгредієнтів + вода»
+    water: bool = False  # water from water treatment is used (not counted)
 
 
 class RelaxedRecipe(BaseModel):

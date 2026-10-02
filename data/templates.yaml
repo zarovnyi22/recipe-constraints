@@ -385,7 +385,7 @@
       max_pct: 10
       flavor_min_pct: 2
       ingredients: [cocoa_powder, vanillin, cinnamon]
-  base_recipe: {oat_flakes: 387, almonds_roasted: 100, glucose_syrup: 220, raisins: 100, sunflower_oil: 40, pea_protein_crisps: 130, sugar: 20, salt: 3}
+  base_recipe: {oat_flakes: 527, almonds_roasted: 100, glucose_syrup: 220, pea_protein_crisps: 130, sugar: 20, salt: 3}  # ≤ 6 інгредієнтів
 
 - id: cookie
   name_uk: Печиво пісочне

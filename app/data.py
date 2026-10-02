@@ -27,6 +27,11 @@ ROLE_WORDS: dict[str, list[str]] = {
     "dried_fruit": ["dried fruit", "сухофрукти", "сухофруктів", "сухофруктами"],
 }
 
+# At most this many ingredients in a recipe: each one is a separate supplier and audit (the
+# technologists' rule). Ingredients with `supplier: false` (water from water treatment) do not
+# count.
+MAX_INGREDIENTS = 6
+
 # Marker tags: a property of the ingredient, not a class «без …» excludes (not in the prompt).
 # gluten_free_certified: oats grown and processed apart from wheat, ≤ 20 mg/kg gluten (Reg. (EU)
 # 828/2014: may be sold as «без глютену»); the data does not declare them as allergen «cereals».
@@ -131,6 +136,8 @@ class Ingredient(BaseModel):
     may_contain: list[AllergenCategory]
     vegan: bool
     added_sugar: bool
+    # bought from a supplier (counts towards MAX_INGREDIENTS); false: water from water treatment
+    supplier: bool = True
     sweetness: float = Field(ge=0)
     min_dose_pct: float | None = Field(default=None, gt=0, le=100)
     max_dose_pct: float | None = Field(default=None, gt=0, le=100)
@@ -392,6 +399,10 @@ class DataBundle(BaseModel):
             )
             if have < low - 1e-9:
                 p.append(f"{t}: {n} {have:.2f} g/100 g < technology minimum {low}")
+        known = [self.ingredients[i] for i in tpl.base_recipe if i in self.ingredients]
+        bought = [i for i in known if i.supplier]
+        if len(bought) > MAX_INGREDIENTS:
+            p.append(f"{t}: {len(bought)} ingredients > MAX_INGREDIENTS {MAX_INGREDIENTS}")
         sweet_per_100g = sweet / 10  # g sucrose-eq per 1000 g finished product → per 100 g
         if sweet_per_100g < tpl.sweetness_min - 1e-9:
             p.append(f"{t}: sweetness {sweet_per_100g:.2f} < sweetness_min {tpl.sweetness_min}")

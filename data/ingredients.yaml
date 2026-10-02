@@ -890,6 +890,7 @@
   vegan: true
   added_sugar: false
   sweetness: 0
+  supplier: false  # з водопідготовки, не окремий постачальник: не рахується в ліміт інгредієнтів
   roles: [water]
   price_uah_per_kg: 0.1
   price_source: "оцінка: тариф на питну воду (порядок 0,03–0,1 грн/кг з підготовкою), група filler (PRICES.md)"

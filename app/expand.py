@@ -11,7 +11,16 @@ import re
 
 from app import claims as C
 from app.allergens import CATEGORY_NAMES_UK, allergens_in_name, named_nuts
-from app.data import TAGS, AllergenCategory, DataBundle, Ingredient, RefNutrients, Role, Template
+from app.data import (
+    MAX_INGREDIENTS,
+    TAGS,
+    AllergenCategory,
+    DataBundle,
+    Ingredient,
+    RefNutrients,
+    Role,
+    Template,
+)
 from app.schemas import (
     ConstraintSpec,
     Contradiction,
@@ -927,7 +936,11 @@ def find_contradictions(
     return out
 
 
-def expand(spec: ConstraintSpec, data: DataBundle) -> Expansion:
+def expand(
+    spec: ConstraintSpec, data: DataBundle, max_ingredients: int | None = MAX_INGREDIENTS
+) -> Expansion:
+    """`max_ingredients`: the technologists' limit (None: none — the eval re-checks «another
+    option» with the number it proposes)."""
     tpl = find_template(spec.product.template, data)
     if tpl is None:
         supported = "; ".join(f"{t.name_uk} ({t.id})" for t in data.templates.values())
@@ -954,5 +967,7 @@ def expand(spec: ConstraintSpec, data: DataBundle) -> Expansion:
             ],
         )
     exp = _Builder(spec, data, tpl).build()
+    exp.max_ingredients = max_ingredients
+    exp.uncounted = [i for i in exp.variables if not data.ingredients[i].supplier]
     exp.contradictions = find_contradictions(spec, data, tpl)
     return exp

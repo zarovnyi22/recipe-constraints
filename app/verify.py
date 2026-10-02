@@ -17,7 +17,7 @@ from collections.abc import Iterable
 
 from app import claims as C
 from app.allergens import allergens_in_name, named_nuts
-from app.data import AllergenCategory, DataBundle, Ingredient, Role, Template
+from app.data import MAX_INGREDIENTS, AllergenCategory, DataBundle, Ingredient, Role, Template
 from app.expand import excluded_ids, find_template, match_ingredients
 from app.schemas import Change, Check, ConstraintSpec, RecipeLine, Totals
 
@@ -57,6 +57,7 @@ class _Verifier:
         data: DataBundle,
         tpl: Template,
         relaxed: Iterable[Change],
+        max_ingredients: int | None = MAX_INGREDIENTS,
     ) -> None:
         self.grams = {i: g for i, g in grams.items() if g != 0}
         self.spec, self.data, self.tpl = spec, data, tpl
@@ -74,6 +75,8 @@ class _Verifier:
         relaxed = list(relaxed)
         self.new_rhs = {r.id: r.to_rhs for c in relaxed if c.action == "relax" for r in c.rows}
         self.changes = {c.group: c for c in relaxed}
+        # «another option» with more ingredients: checked against the number it proposes
+        self.max_ingredients = self.new_rhs.get("max_ingredients", max_ingredients)
         self.checks: list[Check] = []
 
     def _known(self) -> list[tuple[str, float]]:
@@ -175,11 +178,33 @@ class _Verifier:
                 _n(sweet),
                 _holds(sweet, ">=", tpl.sweetness_min),
             )
+        self.ingredient_count()
         for pair in tpl.pairings:
             self.pairing(pair.role, pair.then, pair.by_group)
         self.tech_nutrients()
         if self.spec.product.flavor:
             self.flavor(self.spec.product.flavor)
+
+    def bought(self) -> list[str]:
+        """Ingredients from a supplier: every used one except water from water treatment."""
+        return [i for i in self.grams if i not in self.known or self.known[i].supplier]
+
+    def ingredient_count(self) -> None:
+        """≤ N ingredients, each a separate supplier and audit; water does not count."""
+        if self.max_ingredients is None:
+            return
+        bought = self.bought()
+        water = len(self.grams) - len(bought)
+        limit = int(round(self.max_ingredients))
+        relaxed = self.max_ingredients != MAX_INGREDIENTS
+        self.add(
+            "max_ingredients",
+            "hard",
+            f"не більше {limit} інгредієнтів (вода з водопідготовки не рахується)"
+            + (f"; інший варіант — правило {MAX_INGREDIENTS} послаблено" if relaxed else ""),
+            f"{len(bought)} інгредієнтів" + (" + вода" if water else ""),
+            len(bought) <= limit,
+        )
 
     def water_balance(self) -> None:
         """Water in the dough (moisture = 100 − macronutrients, g/100 g) vs the baking loss."""
@@ -571,18 +596,21 @@ def verify(
     *,
     reported_cost: float | None = None,
     relaxed: Iterable[Change] = (),
+    max_ingredients: int | None = MAX_INGREDIENTS,
 ) -> tuple[list[Check], Totals, list[RecipeLine]]:
     """Checks for every requirement and technology rule; totals and lines recomputed here.
     `relaxed`: the changes the recipe was solved with — their checks use the new numbers."""
     tpl = find_template(spec.product.template, data)
     if tpl is None:
         raise ValueError("verify() needs a supported template")
-    v = _Verifier(grams, spec, data, tpl, relaxed)
+    v = _Verifier(grams, spec, data, tpl, relaxed, max_ingredients)
     checks = v.run(reported_cost)
     totals = Totals(
         mass_g=round(sum(v.grams.values()), 2),
         cost_uah_per_kg=round(v.cost, 2),
         per_100g={n: round(x, 2) for n, x in v.per100.items()},
+        ingredients=len(v.bought()),
+        water=len(v.bought()) < len(v.grams),
     )
     lines = [
         RecipeLine(
