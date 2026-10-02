@@ -1,11 +1,14 @@
 """Linear model → the cheapest recipe, or why there is none and what to relax (docs/SPEC.md §4).
 
-x_i — grams of ingredient i per batch. `one_of` roles and `either_or` requirements are
-enumerated: each combination ("variant") is a plain LP (scipy linprog, HiGHS); the cheapest
-feasible variant wins. The recipe is rounded to 0.1 g (0.01 g below 1 g), the remainder goes to
-the largest base
-ingredient, and every row is checked again on the rounded grams; if rounding broke a tight row,
-the LP is re-solved with the rows tightened by ε.
+x_i — grams of ingredient i per batch. The objective is cost + λ·Σ|x_i − b_i| (b = the template's
+base_recipe; |·| through auxiliary d_i ≥ ±(x_i − b_i)): among recipes of (almost) the same cost the
+one closest to the working recipe wins, not an arbitrary vertex of the LP. λ = LAMBDA is small
+enough that cost stays first: Σ|x − b| ≤ 2·batch mass, so the chosen recipe costs at most
+2·LAMBDA·mass ≈ 0.2 UAH/kg more than the cheapest one (docs/NOTES.md). `one_of` roles and
+`either_or` requirements are enumerated: each combination ("variant") is a plain LP (scipy
+linprog, HiGHS); the best feasible variant wins. The recipe is rounded to 0.1 g (0.01 g below
+1 g), the remainder goes to the largest base ingredient, and every row is checked again on the
+rounded grams; if rounding broke a tight row, the LP is re-solved with the rows tightened by ε.
 
 No recipe: a minimal conflicting set of requirements (deletion filter), the smallest joint
 relaxation (elastic LP) and "it is enough to change one of…". A change is offered only after a
@@ -43,6 +46,9 @@ MASS_TOL_G = 0.05  # the batch mass is rounded to 0.1 g (1111.1 g for a 10 % moi
 DROP_WEIGHT = 10.0  # the elastic LP prefers moving a number to dropping a requirement
 REPAIRS = 4  # rounds of "tighten the rows rounding broke" per margin (a row broken again: ×2)
 NUDGES = 3  # outward steps tried when a proposed number fails the re-solve after rounding
+# UAH per gram of distance from the base recipe (1e-4 UAH/g = 0.1 UAH/kg price difference): the
+# penalty is at most 2·LAMBDA·batch mass ≈ 0.2 UAH/kg, below any price difference that matters
+LAMBDA = 1e-4
 
 
 @dataclass(frozen=True)
@@ -120,15 +126,26 @@ def _lp(
     elastic: dict[str, float] | None = None,
     margin: float = 0.0,
     only: dict[str, float] | None = None,
+    anchor: np.ndarray | None = None,
 ) -> tuple[np.ndarray, dict[str, float]] | None:
-    """Minimise cost (None: any feasible point) or, with `elastic` {row id: objective weight},
-    the weighted slacks of those rows. Returns (x, slack by row id) or None if infeasible."""
+    """Minimise cost (None: any feasible point), plus LAMBDA·Σ|x − anchor| if an anchor (base
+    recipe) is given, or, with `elastic` {row id: objective weight}, the weighted slacks of those
+    rows. Returns (x, slack by row id) or None if infeasible."""
     index = {name: k for k, name in enumerate(exp.variables)}
     n = len(exp.variables)
     slack_ids = [r.id for r in v.rows if elastic and r.id in elastic]
     col = {rid: n + k for k, rid in enumerate(slack_ids)}
-    width = n + len(slack_ids)
+    dev = n + len(slack_ids)  # first d_i column (|x_i − anchor_i|), if anchored
+    anchored = anchor is not None and not elastic and cost is not None
+    width = dev + (n if anchored else 0)
     a_ub, b_ub, a_eq, b_eq = [], [], [], []
+    if anchored:
+        for k in range(n):  # x_k − d_k ≤ b_k and −x_k − d_k ≤ −b_k
+            for sign in (1.0, -1.0):
+                a = np.zeros(width)
+                a[k], a[dev + k] = sign, -1.0
+                a_ub.append(a)
+                b_ub.append(sign * float(anchor[k]))
     for r in v.rows:
         a = np.zeros(width)
         for name, c in r.coeffs.items():
@@ -149,13 +166,15 @@ def _lp(
             c[col[rid]] = elastic[rid]
     elif cost is not None:
         c[:n] = cost
+        if anchored:
+            c[dev:] = LAMBDA
     res = linprog(
         c,
         A_ub=np.array(a_ub) if a_ub else None,
         b_ub=np.array(b_ub) if b_ub else None,
         A_eq=np.array(a_eq) if a_eq else None,
         b_eq=np.array(b_eq) if b_eq else None,
-        bounds=v.bounds + [(0.0, None)] * len(slack_ids),
+        bounds=v.bounds + [(0.0, None)] * (width - n),
         method="highs",
     )
     if res.status == 2:
@@ -243,17 +262,26 @@ def _prices(exp: Expansion, data: DataBundle) -> np.ndarray:
     return np.array([data.ingredients[i].price_uah_per_kg / 1000 for i in exp.variables])
 
 
+def _anchor(exp: Expansion, data: DataBundle) -> np.ndarray:
+    """The template's base recipe in grams per batch (0 for what it does not use)."""
+    base = data.templates[exp.template_id].base_recipe
+    return np.array([base.get(i, 0.0) for i in exp.variables])
+
+
 def best_recipe(exp: Expansion, data: DataBundle) -> Recipe | None:
-    """The cheapest rounded recipe over all variants, or None if no variant is feasible."""
-    cost = _prices(exp, data)
+    """The best rounded recipe over all variants (cost + LAMBDA·distance from the base recipe),
+    or None if no variant is feasible."""
+    cost, anchor = _prices(exp, data), _anchor(exp, data)
     solved = []
     for v in _variants(exp):
-        found = _lp(exp, v, cost)
+        found = _lp(exp, v, cost, anchor=anchor)
         if found is not None:
-            solved.append((float(cost @ found[0]), len(solved), v, found[0]))
+            x = found[0]
+            score = float(cost @ x) + LAMBDA * float(np.abs(x - anchor).sum())
+            solved.append((score, len(solved), v, x))
     solved.sort(key=lambda s: s[:2])
     for _, _, v, x in solved:
-        if recipe := _repair(exp, data, v, x, cost):
+        if recipe := _repair(exp, data, v, x, cost, anchor):
             return recipe
     if solved:
         raise AppError(500, "rounding_failed", "rounding to 0.1 g breaks the constraints")
@@ -261,7 +289,12 @@ def best_recipe(exp: Expansion, data: DataBundle) -> Recipe | None:
 
 
 def _repair(
-    exp: Expansion, data: DataBundle, v: _Variant, x: np.ndarray, cost: np.ndarray
+    exp: Expansion,
+    data: DataBundle,
+    v: _Variant,
+    x: np.ndarray,
+    cost: np.ndarray,
+    anchor: np.ndarray | None = None,
 ) -> Recipe | None:
     """Round; if that breaks rows, re-solve with a margin on THOSE rows only (a margin on every
     row, cost included, made tight but feasible requests infeasible — RR1 #4), adding rows as
@@ -286,7 +319,7 @@ def _repair(
         for _ in range(REPAIRS):
             if not tighten:
                 break
-            found = _lp(exp, v, cost, only=tighten)
+            found = _lp(exp, v, cost, only=tighten, anchor=anchor)
             if found is None:
                 break
             now: set[str] = set()
@@ -299,7 +332,7 @@ def _repair(
                 tighten[rid] = 2 * tighten[rid] if rid in tighten else first(rid, margin)
         if margin is None:
             continue
-        found = _lp(exp, v, cost, margin=margin)
+        found = _lp(exp, v, cost, margin=margin, anchor=anchor)
         if found is not None and (recipe := _round(exp, data, v, found[0], margin)):
             return recipe
     return None

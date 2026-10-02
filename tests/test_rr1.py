@@ -94,12 +94,13 @@ def test_dough_must_have_the_water_it_loses():
 # #4 — rounding must not turn a feasible request into rounding_failed -----------------------
 
 
-# LP optimum 94.90 UAH/kg (low_sugar per 100 ml, RR1 #10); rounded 95.32 — 95.4 is within 0.1 %
-@pytest.mark.parametrize("cost", [95.4, 96])
+# LP optimum 61.64 UAH/kg (low_sugar per 100 ml, RR1 #10); rounded 61.65 — 61.66 is within 0.05 %.
+# (Was blueberry: since «named fruit ≥ 20 %» blueberry + low_sugar is honestly infeasible.)
+@pytest.mark.parametrize("cost", [61.66, 62])
 async def test_tight_smoothie_is_found(cost):
     spec = _spec(
         "smoothie",
-        "blueberry",
+        "strawberry",
         must_include=[_ph(ingredient_or_role="protein", min_pct=6)],
         cost_max=_ph(max_uah_per_kg=cost),
         claims=[_ph(claim="low_sugar")],
@@ -152,8 +153,10 @@ async def test_peanut_bar_has_peanuts():
     assert out.status == "feasible", out.unsupported
     grams = {line.ingredient: line.grams for line in out.recipe}
     peanut = next(i for i in grams if i.startswith("peanut"))
-    assert grams[peanut] >= 50 - 1e-6  # 5 % of 1000 g
-    assert any("мінімум характерного" in a for a in out.assumptions)
+    assert grams[peanut] >= 100 - 1e-6  # the nuts role's flavor_min_pct: 10 % of 1000 g
+    role = DATA.templates["cereal_bar"].roles["nuts"].ingredients
+    nuts = sum(g for i, g in grams.items() if i in role)
+    assert grams[peanut] >= nuts / 2  # and at least half of the nuts
 
 
 # #8 — salt is not a filler -----------------------------------------------------------------

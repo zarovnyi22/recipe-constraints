@@ -5,7 +5,8 @@
 Renders the newest eval/reports/<split>_*.json (make eval first). The test split goes to
 docs/proof.md, dev to docs/proof_dev.md. --after-fixes renders the newest
 <split>_<date>_after_fixes.json to docs/proof_after_fixes.md (for information only).
---head renders <split>_<date>_head.json to docs/proof_head.md (current code, stored model answers).
+--head renders <split>_head.json (no date: overwritten by every make eval) to docs/proof_head.md
+(current code, stored model answers).
 """
 
 import argparse
@@ -21,6 +22,11 @@ DOCS = ROOT.parent / "docs"
 
 
 def latest_report(split: str, reports: Path = ROOT / "reports", suffix: str = "") -> Path:
+    if suffix == "_head":
+        found = sorted(reports.glob(f"{split}_head.json"))
+        if not found:
+            raise FileNotFoundError(f"no eval/reports/{split}_head.json: make eval SPLIT={split}")
+        return found[0]
     found = sorted(reports.glob(f"{split}_????-??-??{suffix}.json"))
     if not found:
         raise FileNotFoundError(f"no eval/reports/{split}_<date>.json: run make eval SPLIT={split}")

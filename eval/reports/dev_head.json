@@ -1,8 +1,8 @@
 {
  "split": "dev",
  "date": "2026-10-02",
- "prompt_version": "p2",
- "data_version": "76a39d678eae",
+ "prompt_version": "p3",
+ "data_version": "2a0190f7c83e",
  "live": false,
  "after_fixes": false,
  "head": true,
@@ -328,7 +328,7 @@
       {
        "id": "role:sweetener",
        "kind": "hard",
-       "requested": "роль «sweetener» 0–15 %",
+       "requested": "роль «sweetener» 0–10 %",
        "actual": "8.58 %",
        "pass": true,
        "source_phrase": null,
@@ -438,8 +438,8 @@
       {
        "id": "flavor",
        "kind": "hard",
-       "requested": "характерний інгредієнт (Полуниця заморожена (IQF) без цукру) ≥ 10 % і найбільший у ролі",
-       "actual": "10 %, інші в ролі до 0 %",
+       "requested": "назва відповідає складу (кожен названий смак — не менше мінімуму шаблону для своєї ролі (кілька смаків в одній ролі: кожен ≥ половини рівної частки, разом ≥ мінімуму); названі разом ≥ 50 % своєї ролі): Полуниця заморожена (IQF) без цукру ≥ 10 % і ≥ 50 % ролі «fruit»",
+       "actual": "10 %, 100 % ролі «fruit»",
        "pass": true,
        "source_phrase": "полуничний йогурт",
        "relaxed": null,
@@ -514,8 +514,8 @@
      "еталон «звичайного»: Звичайний фруктовий йогурт 2,5 % (з цукром) — типові значення фруктових йогуртів 2–3 % жиру (асортимент UA-ритейлу, оцінка автора); звірено за порядком з USDA FDC (yogurt, fruit, lowfat)"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "76a39d678eae",
-    "duration_ms": 68,
+    "data_version": "2a0190f7c83e",
+    "duration_ms": 74,
     "error": null
    },
    "relax_check": [
@@ -734,7 +734,7 @@
      {
       "id": "role:sweetener",
       "kind": "hard",
-      "requested": "роль «sweetener» 0–15 %",
+      "requested": "роль «sweetener» 0–10 %",
       "actual": "5.044 %",
       "pass": true,
       "source_phrase": null,
@@ -854,8 +854,8 @@
      {
       "id": "flavor",
       "kind": "hard",
-      "requested": "характерний інгредієнт (Полуниця заморожена (IQF) без цукру) ≥ 10 % і найбільший у ролі",
-      "actual": "10 %, інші в ролі до 0 %",
+      "requested": "назва відповідає складу (кожен названий смак — не менше мінімуму шаблону для своєї ролі (кілька смаків в одній ролі: кожен ≥ половини рівної частки, разом ≥ мінімуму); названі разом ≥ 50 % своєї ролі): Полуниця заморожена (IQF) без цукру ≥ 10 % і ≥ 50 % ролі «fruit»",
+      "actual": "10 %, 100 % ролі «fruit»",
       "pass": true,
       "source_phrase": "полуничний йогурт",
       "relaxed": null,
@@ -963,8 +963,8 @@
      "еталон «звичайного»: Звичайний фруктовий йогурт 2,5 % (з цукром) — типові значення фруктових йогуртів 2–3 % жиру (асортимент UA-ритейлу, оцінка автора); звірено за порядком з USDA FDC (yogurt, fruit, lowfat)"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "76a39d678eae",
-    "duration_ms": 7,
+    "data_version": "2a0190f7c83e",
+    "duration_ms": 8,
     "error": null
    },
    "relax_check": []
@@ -1025,8 +1025,15 @@
       "ingredient": "glucose_syrup",
       "name": "Глюкозний сироп DE 40",
       "role": "binder",
-      "grams": 210.8,
-      "cost_uah": 11.59
+      "grams": 226.4,
+      "cost_uah": 12.45
+     },
+     {
+      "ingredient": "peanuts_roasted",
+      "name": "Арахіс смажений",
+      "role": "nuts",
+      "grams": 100.0,
+      "cost_uah": 13.0
      },
      {
       "ingredient": "sugar",
@@ -1039,15 +1046,8 @@
       "ingredient": "flax_seeds",
       "name": "Насіння льону",
       "role": "seeds",
-      "grams": 84.2,
-      "cost_uah": 5.89
-     },
-     {
-      "ingredient": "peanuts_roasted",
-      "name": "Арахіс смажений",
-      "role": "nuts",
-      "grams": 50.0,
-      "cost_uah": 6.5
+      "grams": 18.6,
+      "cost_uah": 1.3
      },
      {
       "ingredient": "salt",
@@ -1059,16 +1059,16 @@
     ],
     "totals": {
      "mass_g": 1000.0,
-     "cost_uah_per_kg": 45.69,
+     "cost_uah_per_kg": 48.45,
      "per_100g": {
-      "energy_kcal": 390.12,
+      "energy_kcal": 389.33,
       "protein": 10.0,
-      "fat": 9.63,
-      "saturates": 1.27,
-      "carbs": 59.28,
-      "sugars": 19.32,
-      "fibre": 8.3,
-      "salt": 0.52
+      "fat": 9.36,
+      "saturates": 1.37,
+      "carbs": 61.02,
+      "sugars": 20.04,
+      "fibre": 6.96,
+      "salt": 0.51
      }
     },
     "checks": [
@@ -1116,7 +1116,7 @@
       "id": "role:binder",
       "kind": "hard",
       "requested": "роль «binder» 15–40 %",
-      "actual": "21.08 %",
+      "actual": "22.64 %",
       "pass": true,
       "source_phrase": null,
       "relaxed": null,
@@ -1126,7 +1126,7 @@
       "id": "role:nuts",
       "kind": "hard",
       "requested": "роль «nuts» 0–25 %",
-      "actual": "5 %",
+      "actual": "10 %",
       "pass": true,
       "source_phrase": null,
       "relaxed": null,
@@ -1196,7 +1196,7 @@
       "id": "role:seeds",
       "kind": "hard",
       "requested": "роль «seeds» 0–15 %",
-      "actual": "8.42 %",
+      "actual": "1.86 %",
       "pass": true,
       "source_phrase": null,
       "relaxed": null,
@@ -1213,20 +1213,20 @@
       "enforced": true
      },
      {
-      "id": "dose:flax_seeds",
+      "id": "dose:peanuts_roasted",
       "kind": "hard",
-      "requested": "Насіння льону: 0–10 %",
-      "actual": "8.42 %",
+      "requested": "Арахіс смажений: 0–30 %",
+      "actual": "10 %",
       "pass": true,
       "source_phrase": null,
       "relaxed": null,
       "enforced": true
      },
      {
-      "id": "dose:peanuts_roasted",
+      "id": "dose:flax_seeds",
       "kind": "hard",
-      "requested": "Арахіс смажений: 0–30 %",
-      "actual": "5 %",
+      "requested": "Насіння льону: 0–10 %",
+      "actual": "1.86 %",
       "pass": true,
       "source_phrase": null,
       "relaxed": null,
@@ -1246,7 +1246,7 @@
       "id": "sweetness_min",
       "kind": "hard",
       "requested": "солодкість ≥ 12 г сахарозного екв./100 г",
-      "actual": "19.308",
+      "actual": "20.034",
       "pass": true,
       "source_phrase": null,
       "relaxed": null,
@@ -1255,8 +1255,8 @@
      {
       "id": "cost_reported",
       "kind": "hard",
-      "requested": "заявлена собівартість 45.69 грн/кг = перерахованій",
-      "actual": "45.688 грн/кг",
+      "requested": "заявлена собівартість 48.45 грн/кг = перерахованій",
+      "actual": "48.454 грн/кг",
       "pass": true,
       "source_phrase": null,
       "relaxed": null,
@@ -1266,7 +1266,7 @@
       "id": "nutrient:0:protein",
       "kind": "soft",
       "requested": "protein >= 10 г/100 г",
-      "actual": "10.001 г/100 г",
+      "actual": "10 г/100 г",
       "pass": true,
       "source_phrase": "білка не менше 10 г на 100 г",
       "relaxed": null,
@@ -1285,8 +1285,8 @@
      {
       "id": "must_include:0:nuts",
       "kind": "soft",
-      "requested": "Мигдаль смажений, Арахіс смажений, Фундук смажений, Горіх грецький (ядро) ≥ 5 %",
-      "actual": "5 %",
+      "requested": "Мигдаль смажений, Арахіс смажений, Фундук смажений, Горіх грецький (ядро) ≥ 10 %",
+      "actual": "10 %",
       "pass": true,
       "source_phrase": "з горіхами",
       "relaxed": null,
@@ -1351,10 +1351,10 @@
     "relaxed_recipe": null,
     "template_rules": [],
     "assumptions": [
-     "«з горіхами»: частку не вказано — прийнято роль «nuts» не менше 5 % (max(5 %, мінімум ролі), не більше дозволеного шаблоном)"
+     "«з горіхами»: частку не вказано — прийнято роль «nuts» не менше 10 % (max(5 %, мінімум ролі), не більше дозволеного шаблоном)"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "76a39d678eae",
+    "data_version": "2a0190f7c83e",
     "duration_ms": 1,
     "error": null
    },
@@ -1474,8 +1474,8 @@
      {
       "id": "flavor",
       "kind": "hard",
-      "requested": "характерний інгредієнт (Яблучний сік (відновлений із концентрату), Яблучне пюре без цукру) ≥ 5 % і найбільший у ролі",
-      "actual": "100 %, інші в ролі до 0 %",
+      "requested": "назва відповідає складу (кожен названий смак — не менше мінімуму шаблону для своєї ролі (кілька смаків в одній ролі: кожен ≥ половини рівної частки, разом ≥ мінімуму); названі разом ≥ 50 % своєї ролі): Яблучний сік (відновлений із концентрату), Яблучне пюре без цукру ≥ 100 % і ≥ 50 % ролі «juice»",
+      "actual": "100 %, 100 % ролі «juice»",
       "pass": true,
       "source_phrase": "яблучний сік",
       "relaxed": null,
@@ -1546,14 +1546,13 @@
     "relaxed_recipe": null,
     "template_rules": [],
     "assumptions": [
-     "«яблучний сік»: мінімум характерного інгредієнта шаблоном не задано — прийнято не менше 5 %",
      "напій: пороги тверджень для рідин (на 100 мл) перераховано на 100 г за густиною шаблону 1,045 г/мл (поріг ÷ густина)",
      "«без доданого цукру»: шаблон «Сік 100 % (відновлений)» не містить таких інгредієнтів — виконано автоматично",
      "«без доданого цукру»: якщо цукри природно присутні, на етикетці потрібен напис «містить природні цукри» (Наказ МОЗ № 1145)"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "76a39d678eae",
-    "duration_ms": 1,
+    "data_version": "2a0190f7c83e",
+    "duration_ms": 0,
     "error": null
    },
    "relax_check": []
@@ -1782,8 +1781,8 @@
      "еталон «звичайного»: Звичайний сік 100 % (яблучний/апельсиновий, відновлений, без цукру) — типові значення 100 % соку (USDA FDC: apple juice, orange juice, усереднено; асортимент UA-ритейлу, оцінка автора)"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "76a39d678eae",
-    "duration_ms": 3,
+    "data_version": "2a0190f7c83e",
+    "duration_ms": 4,
     "error": null
    },
    "relax_check": [
@@ -1847,15 +1846,15 @@
       "ingredient": "wheat_flour",
       "name": "Борошно пшеничне вищого ґатунку",
       "role": "flour",
-      "grams": 453.5,
-      "cost_uah": 9.98
+      "grams": 666.6,
+      "cost_uah": 14.67
      },
      {
       "ingredient": "sugar",
       "name": "Цукор білий (сахароза)",
       "role": "sweetener",
-      "grams": 333.3,
-      "cost_uah": 8.0
+      "grams": 216.8,
+      "cost_uah": 5.2
      },
      {
       "ingredient": "sunflower_oil",
@@ -1868,8 +1867,8 @@
       "ingredient": "water",
       "name": "Вода питна",
       "role": "water",
-      "grams": 152.1,
-      "cost_uah": 0.02
+      "grams": 55.5,
+      "cost_uah": 0.01
      },
      {
       "ingredient": "salt",
@@ -1881,16 +1880,16 @@
     ],
     "totals": {
      "mass_g": 1111.1,
-     "cost_uah_per_kg": 32.22,
+     "cost_uah_per_kg": 34.1,
      "per_100g": {
-      "energy_kcal": 439.81,
-      "protein": 4.54,
-      "fat": 17.12,
-      "saturates": 1.92,
-      "carbs": 63.71,
-      "sugars": 33.65,
-      "fibre": 1.81,
-      "salt": 0.55
+      "energy_kcal": 466.73,
+      "protein": 6.67,
+      "fat": 17.34,
+      "saturates": 1.97,
+      "carbs": 66.34,
+      "sugars": 22.15,
+      "fibre": 2.67,
+      "salt": 0.56
      }
     },
     "checks": [
@@ -1928,7 +1927,7 @@
       "id": "role:flour",
       "kind": "hard",
       "requested": "роль «flour» 35–60 %",
-      "actual": "40.815 %",
+      "actual": "59.994 %",
       "pass": true,
       "source_phrase": null,
       "relaxed": null,
@@ -1948,7 +1947,7 @@
       "id": "role:sweetener",
       "kind": "hard",
       "requested": "роль «sweetener» 0–30 %",
-      "actual": "29.997 %",
+      "actual": "19.512 %",
       "pass": true,
       "source_phrase": null,
       "relaxed": null,
@@ -2017,8 +2016,8 @@
      {
       "id": "role:water",
       "kind": "hard",
-      "requested": "роль «water» 0–15 %",
-      "actual": "13.689 %",
+      "requested": "роль «water» 0–5 %",
+      "actual": "4.995 %",
       "pass": true,
       "source_phrase": null,
       "relaxed": null,
@@ -2058,7 +2057,7 @@
       "id": "water_balance",
       "kind": "hard",
       "requested": "вода в тісті ≥ 111.111 г втрати, вологість продукту ≤ 10 %",
-      "actual": "вода 211.055 г, вологість 9.994 %",
+      "actual": "вода 142.158 г, вологість 3.105 %",
       "pass": true,
       "source_phrase": null,
       "relaxed": null,
@@ -2068,7 +2067,17 @@
       "id": "sweetness_min",
       "kind": "hard",
       "requested": "солодкість ≥ 15 г сахарозного екв./100 г",
-      "actual": "33.647",
+      "actual": "22.147",
+      "pass": true,
+      "source_phrase": null,
+      "relaxed": null,
+      "enforced": true
+     },
+     {
+      "id": "tech_nutrient:fat",
+      "kind": "hard",
+      "requested": "технологія «Печиво пісочне»: fat ≥ 15 г/100 г",
+      "actual": "17.337 г/100 г",
       "pass": true,
       "source_phrase": null,
       "relaxed": null,
@@ -2077,8 +2086,8 @@
      {
       "id": "cost_reported",
       "kind": "hard",
-      "requested": "заявлена собівартість 32.22 грн/кг = перерахованій",
-      "actual": "32.216 грн/кг",
+      "requested": "заявлена собівартість 34.1 грн/кг = перерахованій",
+      "actual": "34.098 грн/кг",
       "pass": true,
       "source_phrase": null,
       "relaxed": null,
@@ -2088,7 +2097,7 @@
       "id": "cost_max",
       "kind": "soft",
       "requested": "собівартість ≤ 50 грн/кг",
-      "actual": "32.216 грн/кг",
+      "actual": "34.098 грн/кг",
       "pass": true,
       "source_phrase": "собівартість до 50 грн/кг",
       "relaxed": null,
@@ -2155,7 +2164,7 @@
      "втрата вологи при випіканні 10 %: 1111,11 г рецептури дають 1000 г продукту"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "76a39d678eae",
+    "data_version": "2a0190f7c83e",
     "duration_ms": 2,
     "error": null
    },
@@ -2229,7 +2238,7 @@
      {
       "id": "template",
       "phrase": "пиріг",
-      "reason": "категорія «пиріг» не підтримується; підтримуємо: Йогурт густий (ложковий) (yogurt_spoonable); Йогурт питний (drinking_yogurt); Соковмісний напій (juice_drink); Сік 100 % (відновлений) (juice_100); Смузі (smoothie); Батончик злаковий (cereal_bar); Печиво пісочне (cookie); Кетчуп (ketchup_sauce)"
+      "reason": "категорія «пиріг» не підтримується; підтримуємо: Йогурт густий (ложковий) (yogurt_spoonable); Йогурт питний (drinking_yogurt); Соковмісний напій (juice_drink); Нектар (nectar); Сік 100 % (відновлений) (juice_100); Смузі (smoothie); Батончик злаковий (cereal_bar); Печиво пісочне (cookie); Кетчуп (ketchup_sauce)"
      },
      {
       "id": "must_include:0:нутелою",
@@ -2246,7 +2255,7 @@
     "template_rules": [],
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "76a39d678eae",
+    "data_version": "2a0190f7c83e",
     "duration_ms": 0,
     "error": null
    },
@@ -2620,7 +2629,7 @@
     ],
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "76a39d678eae",
+    "data_version": "2a0190f7c83e",
     "duration_ms": 5,
     "error": null
    },
@@ -2996,7 +3005,7 @@
      "напій: пороги тверджень для рідин (на 100 мл) перераховано на 100 г за густиною шаблону 1,05 г/мл (поріг ÷ густина)"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "76a39d678eae",
+    "data_version": "2a0190f7c83e",
     "duration_ms": 2,
     "error": null
    },
@@ -3042,8 +3051,8 @@
       "ingredient": "oat_drink",
       "name": "Вівсяний напій",
       "role": "base",
-      "grams": 729.9,
-      "cost_uah": 29.2
+      "grams": 749.9,
+      "cost_uah": 30.0
      },
      {
       "ingredient": "apple_puree",
@@ -3056,8 +3065,8 @@
       "ingredient": "sugar",
       "name": "Цукор білий (сахароза)",
       "role": "sweetener",
-      "grams": 120.0,
-      "cost_uah": 2.88
+      "grams": 100.0,
+      "cost_uah": 2.4
      },
      {
       "ingredient": "dvs_culture_plant",
@@ -3069,15 +3078,15 @@
     ],
     "totals": {
      "mass_g": 1000.0,
-     "cost_uah_per_kg": 38.68,
+     "cost_uah_per_kg": 39.0,
      "per_100g": {
-      "energy_kcal": 88.81,
-      "protein": 0.78,
-      "fat": 1.12,
+      "energy_kcal": 81.73,
+      "protein": 0.8,
+      "fat": 1.15,
       "saturates": 0.15,
-      "carbs": 18.37,
-      "sugars": 16.36,
-      "fibre": 0.82,
+      "carbs": 16.5,
+      "sugars": 14.44,
+      "fibre": 0.84,
       "salt": 0.07
      }
     },
@@ -3116,7 +3125,7 @@
       "id": "role:base",
       "kind": "hard",
       "requested": "роль «base» 70–95 %",
-      "actual": "72.99 %",
+      "actual": "74.99 %",
       "pass": true,
       "source_phrase": null,
       "relaxed": null,
@@ -3165,8 +3174,8 @@
      {
       "id": "role:sweetener",
       "kind": "hard",
-      "requested": "роль «sweetener» 0–12 %",
-      "actual": "12 %",
+      "requested": "роль «sweetener» 0–10 %",
+      "actual": "10 %",
       "pass": true,
       "source_phrase": null,
       "relaxed": null,
@@ -3236,7 +3245,7 @@
       "id": "sweetness_min",
       "kind": "hard",
       "requested": "солодкість ≥ 6 г сахарозного екв./100 г",
-      "actual": "14.668",
+      "actual": "12.7",
       "pass": true,
       "source_phrase": null,
       "relaxed": null,
@@ -3255,8 +3264,8 @@
      {
       "id": "cost_reported",
       "kind": "hard",
-      "requested": "заявлена собівартість 38.68 грн/кг = перерахованій",
-      "actual": "38.676 грн/кг",
+      "requested": "заявлена собівартість 39 грн/кг = перерахованій",
+      "actual": "38.996 грн/кг",
       "pass": true,
       "source_phrase": null,
       "relaxed": null,
@@ -3320,8 +3329,8 @@
      "у базі немає безлактозних молочних інгредієнтів, тому «без лактози» виконано через виключення всієї молочної сировини"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "76a39d678eae",
-    "duration_ms": 6,
+    "data_version": "2a0190f7c83e",
+    "duration_ms": 7,
     "error": null
    },
    "relax_check": []
@@ -3370,15 +3379,8 @@
       "ingredient": "milk_2_5",
       "name": "Молоко пастеризоване 2,5 %",
       "role": "base",
-      "grams": 740.0,
-      "cost_uah": 18.5
-     },
-     {
-      "ingredient": "sugar",
-      "name": "Цукор білий (сахароза)",
-      "role": "sweetener",
-      "grams": 150.0,
-      "cost_uah": 3.6
+      "grams": 790.0,
+      "cost_uah": 19.75
      },
      {
       "ingredient": "strawberry_frozen",
@@ -3386,6 +3388,13 @@
       "role": "fruit",
       "grams": 100.0,
       "cost_uah": 11.0
+     },
+     {
+      "ingredient": "sugar",
+      "name": "Цукор білий (сахароза)",
+      "role": "sweetener",
+      "grams": 100.0,
+      "cost_uah": 2.4
      },
      {
       "ingredient": "bulk_starter_milk",
@@ -3397,16 +3406,16 @@
     ],
     "totals": {
      "mass_g": 1000.0,
-     "cost_uah_per_kg": 33.45,
+     "cost_uah_per_kg": 33.5,
      "per_100g": {
-      "energy_kcal": 103.27,
-      "protein": 2.22,
-      "fat": 1.89,
-      "saturates": 1.2,
-      "carbs": 19.22,
-      "sugars": 18.97,
+      "energy_kcal": 85.92,
+      "protein": 2.36,
+      "fat": 2.01,
+      "saturates": 1.28,
+      "carbs": 14.45,
+      "sugars": 14.21,
       "fibre": 0.21,
-      "salt": 0.08
+      "salt": 0.09
      }
     },
     "checks": [
@@ -3444,7 +3453,7 @@
       "id": "role:base",
       "kind": "hard",
       "requested": "роль «base» 55–90 %",
-      "actual": "74 %",
+      "actual": "79 %",
       "pass": true,
       "source_phrase": null,
       "relaxed": null,
@@ -3493,8 +3502,8 @@
      {
       "id": "role:sweetener",
       "kind": "hard",
-      "requested": "роль «sweetener» 0–15 %",
-      "actual": "15 %",
+      "requested": "роль «sweetener» 0–10 %",
+      "actual": "10 %",
       "pass": true,
       "source_phrase": null,
       "relaxed": null,
@@ -3574,7 +3583,7 @@
       "id": "sweetness_min",
       "kind": "hard",
       "requested": "солодкість ≥ 7 г сахарозного екв./100 г",
-      "actual": "16.011",
+      "actual": "11.049",
       "pass": true,
       "source_phrase": null,
       "relaxed": null,
@@ -3593,8 +3602,8 @@
      {
       "id": "flavor",
       "kind": "hard",
-      "requested": "характерний інгредієнт (Полуниця заморожена (IQF) без цукру) ≥ 10 % і найбільший у ролі",
-      "actual": "10 %, інші в ролі до 0 %",
+      "requested": "назва відповідає складу (кожен названий смак — не менше мінімуму шаблону для своєї ролі (кілька смаків в одній ролі: кожен ≥ половини рівної частки, разом ≥ мінімуму); названі разом ≥ 50 % своєї ролі): Полуниця заморожена (IQF) без цукру ≥ 10 % і ≥ 50 % ролі «fruit»",
+      "actual": "10 %, 100 % ролі «fruit»",
       "pass": true,
       "source_phrase": "полуничний йогурт",
       "relaxed": null,
@@ -3603,8 +3612,8 @@
      {
       "id": "cost_reported",
       "kind": "hard",
-      "requested": "заявлена собівартість 33.45 грн/кг = перерахованій",
-      "actual": "33.45 грн/кг",
+      "requested": "заявлена собівартість 33.5 грн/кг = перерахованій",
+      "actual": "33.5 грн/кг",
       "pass": true,
       "source_phrase": null,
       "relaxed": null,
@@ -3657,8 +3666,8 @@
     "template_rules": [],
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "76a39d678eae",
-    "duration_ms": 7,
+    "data_version": "2a0190f7c83e",
+    "duration_ms": 8,
     "error": null
    },
    "relax_check": []
@@ -3732,7 +3741,7 @@
      {
       "id": "template",
       "phrase": "морозиво",
-      "reason": "категорія «морозиво» не підтримується; підтримуємо: Йогурт густий (ложковий) (yogurt_spoonable); Йогурт питний (drinking_yogurt); Соковмісний напій (juice_drink); Сік 100 % (відновлений) (juice_100); Смузі (smoothie); Батончик злаковий (cereal_bar); Печиво пісочне (cookie); Кетчуп (ketchup_sauce)"
+      "reason": "категорія «морозиво» не підтримується; підтримуємо: Йогурт густий (ложковий) (yogurt_spoonable); Йогурт питний (drinking_yogurt); Соковмісний напій (juice_drink); Нектар (nectar); Сік 100 % (відновлений) (juice_100); Смузі (smoothie); Батончик злаковий (cereal_bar); Печиво пісочне (cookie); Кетчуп (ketchup_sauce)"
      },
      {
       "id": "claim:sugar_free",
@@ -3749,7 +3758,7 @@
     "template_rules": [],
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "76a39d678eae",
+    "data_version": "2a0190f7c83e",
     "duration_ms": 0,
     "error": null
    },
@@ -3785,281 +3794,14 @@
     "reasoning_tokens": 0,
     "total_tokens": 3794
    },
-   "status": "feasible",
+   "status": "infeasible",
    "out": {
     "run_id": null,
-    "status": "feasible",
+    "status": "infeasible",
     "template": "cookie",
-    "recipe": [
-     {
-      "ingredient": "wheat_flour",
-      "name": "Борошно пшеничне вищого ґатунку",
-      "role": "flour",
-      "grams": 480.5,
-      "cost_uah": 10.57
-     },
-     {
-      "ingredient": "sugar",
-      "name": "Цукор білий (сахароза)",
-      "role": "sweetener",
-      "grams": 333.3,
-      "cost_uah": 8.0
-     },
-     {
-      "ingredient": "water",
-      "name": "Вода питна",
-      "role": "water",
-      "grams": 125.0,
-      "cost_uah": 0.01
-     },
-     {
-      "ingredient": "plant_margarine",
-      "name": "Маргарин рослинний 80 % (кондитерський)",
-      "role": "fat",
-      "grams": 123.5,
-      "cost_uah": 14.2
-     },
-     {
-      "ingredient": "palm_oil",
-      "name": "Олія пальмова рафінована",
-      "role": "fat",
-      "grams": 43.3,
-      "cost_uah": 3.38
-     },
-     {
-      "ingredient": "salt",
-      "name": "Сіль кухонна",
-      "role": "salt",
-      "grams": 5.5,
-      "cost_uah": 0.06
-     }
-    ],
-    "totals": {
-     "mass_g": 1111.1,
-     "cost_uah_per_kg": 36.22,
-     "per_100g": {
-      "energy_kcal": 426.54,
-      "protein": 4.83,
-      "fat": 14.69,
-      "saturates": 6.18,
-      "carbs": 65.59,
-      "sugars": 33.7,
-      "fibre": 1.92,
-      "salt": 0.58
-     }
-    },
-    "checks": [
-     {
-      "id": "template",
-      "kind": "hard",
-      "requested": "лише інгредієнти шаблону «Печиво пісочне»",
-      "actual": "усі з шаблону",
-      "pass": true,
-      "source_phrase": "печиво",
-      "relaxed": null,
-      "enforced": true
-     },
-     {
-      "id": "mass",
-      "kind": "hard",
-      "requested": "Σ = 1111.1 г (1000 г продукту)",
-      "actual": "1111.1 г",
-      "pass": true,
-      "source_phrase": null,
-      "relaxed": null,
-      "enforced": true
-     },
-     {
-      "id": "grams",
-      "kind": "hard",
-      "requested": "грами > 0, крок не дрібніший за 0,01 г",
-      "actual": "так",
-      "pass": true,
-      "source_phrase": null,
-      "relaxed": null,
-      "enforced": true
-     },
-     {
-      "id": "role:flour",
-      "kind": "hard",
-      "requested": "роль «flour» 35–60 %",
-      "actual": "43.245 %",
-      "pass": true,
-      "source_phrase": null,
-      "relaxed": null,
-      "enforced": true
-     },
-     {
-      "id": "role:fat",
-      "kind": "hard",
-      "requested": "роль «fat» 15–32 %",
-      "actual": "15.012 %",
-      "pass": true,
-      "source_phrase": null,
-      "relaxed": null,
-      "enforced": true
-     },
-     {
-      "id": "role:sweetener",
-      "kind": "hard",
-      "requested": "роль «sweetener» 0–30 %",
-      "actual": "29.997 %",
-      "pass": true,
-      "source_phrase": null,
-      "relaxed": null,
-      "enforced": true
-     },
-     {
-      "id": "role:bulking",
-      "kind": "hard",
-      "requested": "роль «bulking» 0–20 %",
-      "actual": "0 %",
-      "pass": true,
-      "source_phrase": null,
-      "relaxed": null,
-      "enforced": true
-     },
-     {
-      "id": "role:egg",
-      "kind": "hard",
-      "requested": "роль «egg» 0–15 %",
-      "actual": "0 %",
-      "pass": true,
-      "source_phrase": null,
-      "relaxed": null,
-      "enforced": true
-     },
-     {
-      "id": "role:cereal",
-      "kind": "hard",
-      "requested": "роль «cereal» 0–25 %",
-      "actual": "0 %",
-      "pass": true,
-      "source_phrase": null,
-      "relaxed": null,
-      "enforced": true
-     },
-     {
-      "id": "role:nuts",
-      "kind": "hard",
-      "requested": "роль «nuts» 0–15 %",
-      "actual": "0 %",
-      "pass": true,
-      "source_phrase": null,
-      "relaxed": null,
-      "enforced": true
-     },
-     {
-      "id": "role:leavening",
-      "kind": "hard",
-      "requested": "роль «leavening» 0–1 %",
-      "actual": "0 %",
-      "pass": true,
-      "source_phrase": null,
-      "relaxed": null,
-      "enforced": true
-     },
-     {
-      "id": "role:salt",
-      "kind": "hard",
-      "requested": "роль «salt» 0–1 %",
-      "actual": "0.495 %",
-      "pass": true,
-      "source_phrase": null,
-      "relaxed": null,
-      "enforced": true
-     },
-     {
-      "id": "role:water",
-      "kind": "hard",
-      "requested": "роль «water» 0–15 %",
-      "actual": "11.25 %",
-      "pass": true,
-      "source_phrase": null,
-      "relaxed": null,
-      "enforced": true
-     },
-     {
-      "id": "role:seeds",
-      "kind": "hard",
-      "requested": "роль «seeds» 0–8 %",
-      "actual": "0 %",
-      "pass": true,
-      "source_phrase": null,
-      "relaxed": null,
-      "enforced": true
-     },
-     {
-      "id": "role:flavour",
-      "kind": "hard",
-      "requested": "роль «flavour» 0–12 %",
-      "actual": "0 %",
-      "pass": true,
-      "source_phrase": null,
-      "relaxed": null,
-      "enforced": true
-     },
-     {
-      "id": "dose:salt",
-      "kind": "hard",
-      "requested": "Сіль кухонна: 0–0.5 %",
-      "actual": "0.495 %",
-      "pass": true,
-      "source_phrase": null,
-      "relaxed": null,
-      "enforced": true
-     },
-     {
-      "id": "water_balance",
-      "kind": "hard",
-      "requested": "вода в тісті ≥ 111.111 г втрати, вологість продукту ≤ 10 %",
-      "actual": "вода 211.053 г, вологість 9.994 %",
-      "pass": true,
-      "source_phrase": null,
-      "relaxed": null,
-      "enforced": true
-     },
-     {
-      "id": "sweetness_min",
-      "kind": "hard",
-      "requested": "солодкість ≥ 15 г сахарозного екв./100 г",
-      "actual": "33.673",
-      "pass": true,
-      "source_phrase": null,
-      "relaxed": null,
-      "enforced": true
-     },
-     {
-      "id": "cost_reported",
-      "kind": "hard",
-      "requested": "заявлена собівартість 36.22 грн/кг = перерахованій",
-      "actual": "36.218 грн/кг",
-      "pass": true,
-      "source_phrase": null,
-      "relaxed": null,
-      "enforced": true
-     },
-     {
-      "id": "claim:reduced_fat",
-      "kind": "soft",
-      "requested": "«зі зниженим вмістом жиру»: fat <= 14.7 (0.7 × еталон 21)",
-      "actual": "fat 14.691",
-      "pass": true,
-      "source_phrase": "зниженим вмістом жиру",
-      "relaxed": null,
-      "enforced": true
-     },
-     {
-      "id": "coverage",
-      "kind": "hard",
-      "requested": "кожна вимога запиту — перевірка або unsupported",
-      "actual": "усі враховано",
-      "pass": true,
-      "source_phrase": null,
-      "relaxed": null,
-      "enforced": true
-     }
-    ],
+    "recipe": null,
+    "totals": null,
+    "checks": [],
     "parsed": {
      "product": {
       "source_phrase": "печиво",
@@ -4086,24 +3828,359 @@
     },
     "unparsed": [],
     "unsupported": [],
-    "conflicts": [],
+    "conflicts": [
+     {
+      "group": "claim:reduced_fat",
+      "label_uk": "«зі зниженим вмістом жиру»: жири ≤ 14,7 г/100 г (0,7 × еталон 21)",
+      "source_phrase": "зниженим вмістом жиру"
+     }
+    ],
     "contradictions": [],
-    "relaxations": [],
-    "alternatives": [],
+    "relaxations": [
+     {
+      "group": "claim:reduced_fat",
+      "action": "drop",
+      "label_uk": "відмовитись від вимоги: «зі зниженим вмістом жиру»: жири ≤ 14,7 г/100 г (0,7 × еталон 21)",
+      "source_phrase": "зниженим вмістом жиру",
+      "rows": [],
+      "verified": true,
+      "cost_uah_per_kg": 32.93,
+      "warning": null
+     }
+    ],
+    "alternatives": [
+     {
+      "group": "claim:reduced_fat",
+      "action": "drop",
+      "label_uk": "відмовитись від вимоги: «зі зниженим вмістом жиру»: жири ≤ 14,7 г/100 г (0,7 × еталон 21)",
+      "source_phrase": "зниженим вмістом жиру",
+      "rows": [],
+      "verified": true,
+      "cost_uah_per_kg": 32.93,
+      "warning": null
+     }
+    ],
     "other_options": [],
-    "relaxed_recipe": null,
-    "template_rules": [],
+    "relaxed_recipe": {
+     "changes": [
+      {
+       "group": "claim:reduced_fat",
+       "action": "drop",
+       "label_uk": "відмовитись від вимоги: «зі зниженим вмістом жиру»: жири ≤ 14,7 г/100 г (0,7 × еталон 21)",
+       "source_phrase": "зниженим вмістом жиру",
+       "rows": [],
+       "verified": true,
+       "cost_uah_per_kg": 32.93,
+       "warning": null
+      }
+     ],
+     "recipe": [
+      {
+       "ingredient": "wheat_flour",
+       "name": "Борошно пшеничне вищого ґатунку",
+       "role": "flour",
+       "grams": 666.6,
+       "cost_uah": 14.67
+      },
+      {
+       "ingredient": "sugar",
+       "name": "Цукор білий (сахароза)",
+       "role": "sweetener",
+       "grams": 216.8,
+       "cost_uah": 5.2
+      },
+      {
+       "ingredient": "palm_oil",
+       "name": "Олія пальмова рафінована",
+       "role": "fat",
+       "grams": 166.7,
+       "cost_uah": 13.0
+      },
+      {
+       "ingredient": "water",
+       "name": "Вода питна",
+       "role": "water",
+       "grams": 55.5,
+       "cost_uah": 0.01
+      },
+      {
+       "ingredient": "salt",
+       "name": "Сіль кухонна",
+       "role": "salt",
+       "grams": 5.5,
+       "cost_uah": 0.06
+      }
+     ],
+     "totals": {
+      "mass_g": 1111.1,
+      "cost_uah_per_kg": 32.93,
+      "per_100g": {
+       "energy_kcal": 464.06,
+       "protein": 6.67,
+       "fat": 17.34,
+       "saturates": 8.35,
+       "carbs": 66.34,
+       "sugars": 22.15,
+       "fibre": 2.67,
+       "salt": 0.56
+      }
+     },
+     "checks": [
+      {
+       "id": "template",
+       "kind": "hard",
+       "requested": "лише інгредієнти шаблону «Печиво пісочне»",
+       "actual": "усі з шаблону",
+       "pass": true,
+       "source_phrase": "печиво",
+       "relaxed": null,
+       "enforced": true
+      },
+      {
+       "id": "mass",
+       "kind": "hard",
+       "requested": "Σ = 1111.1 г (1000 г продукту)",
+       "actual": "1111.1 г",
+       "pass": true,
+       "source_phrase": null,
+       "relaxed": null,
+       "enforced": true
+      },
+      {
+       "id": "grams",
+       "kind": "hard",
+       "requested": "грами > 0, крок не дрібніший за 0,01 г",
+       "actual": "так",
+       "pass": true,
+       "source_phrase": null,
+       "relaxed": null,
+       "enforced": true
+      },
+      {
+       "id": "role:flour",
+       "kind": "hard",
+       "requested": "роль «flour» 35–60 %",
+       "actual": "59.994 %",
+       "pass": true,
+       "source_phrase": null,
+       "relaxed": null,
+       "enforced": true
+      },
+      {
+       "id": "role:fat",
+       "kind": "hard",
+       "requested": "роль «fat» 15–32 %",
+       "actual": "15.003 %",
+       "pass": true,
+       "source_phrase": null,
+       "relaxed": null,
+       "enforced": true
+      },
+      {
+       "id": "role:sweetener",
+       "kind": "hard",
+       "requested": "роль «sweetener» 0–30 %",
+       "actual": "19.512 %",
+       "pass": true,
+       "source_phrase": null,
+       "relaxed": null,
+       "enforced": true
+      },
+      {
+       "id": "role:bulking",
+       "kind": "hard",
+       "requested": "роль «bulking» 0–20 %",
+       "actual": "0 %",
+       "pass": true,
+       "source_phrase": null,
+       "relaxed": null,
+       "enforced": true
+      },
+      {
+       "id": "role:egg",
+       "kind": "hard",
+       "requested": "роль «egg» 0–15 %",
+       "actual": "0 %",
+       "pass": true,
+       "source_phrase": null,
+       "relaxed": null,
+       "enforced": true
+      },
+      {
+       "id": "role:cereal",
+       "kind": "hard",
+       "requested": "роль «cereal» 0–25 %",
+       "actual": "0 %",
+       "pass": true,
+       "source_phrase": null,
+       "relaxed": null,
+       "enforced": true
+      },
+      {
+       "id": "role:nuts",
+       "kind": "hard",
+       "requested": "роль «nuts» 0–15 %",
+       "actual": "0 %",
+       "pass": true,
+       "source_phrase": null,
+       "relaxed": null,
+       "enforced": true
+      },
+      {
+       "id": "role:leavening",
+       "kind": "hard",
+       "requested": "роль «leavening» 0–1 %",
+       "actual": "0 %",
+       "pass": true,
+       "source_phrase": null,
+       "relaxed": null,
+       "enforced": true
+      },
+      {
+       "id": "role:salt",
+       "kind": "hard",
+       "requested": "роль «salt» 0–1 %",
+       "actual": "0.495 %",
+       "pass": true,
+       "source_phrase": null,
+       "relaxed": null,
+       "enforced": true
+      },
+      {
+       "id": "role:water",
+       "kind": "hard",
+       "requested": "роль «water» 0–5 %",
+       "actual": "4.995 %",
+       "pass": true,
+       "source_phrase": null,
+       "relaxed": null,
+       "enforced": true
+      },
+      {
+       "id": "role:seeds",
+       "kind": "hard",
+       "requested": "роль «seeds» 0–8 %",
+       "actual": "0 %",
+       "pass": true,
+       "source_phrase": null,
+       "relaxed": null,
+       "enforced": true
+      },
+      {
+       "id": "role:flavour",
+       "kind": "hard",
+       "requested": "роль «flavour» 0–12 %",
+       "actual": "0 %",
+       "pass": true,
+       "source_phrase": null,
+       "relaxed": null,
+       "enforced": true
+      },
+      {
+       "id": "dose:salt",
+       "kind": "hard",
+       "requested": "Сіль кухонна: 0–0.5 %",
+       "actual": "0.495 %",
+       "pass": true,
+       "source_phrase": null,
+       "relaxed": null,
+       "enforced": true
+      },
+      {
+       "id": "water_balance",
+       "kind": "hard",
+       "requested": "вода в тісті ≥ 111.111 г втрати, вологість продукту ≤ 10 %",
+       "actual": "вода 142.158 г, вологість 3.105 %",
+       "pass": true,
+       "source_phrase": null,
+       "relaxed": null,
+       "enforced": true
+      },
+      {
+       "id": "sweetness_min",
+       "kind": "hard",
+       "requested": "солодкість ≥ 15 г сахарозного екв./100 г",
+       "actual": "22.147",
+       "pass": true,
+       "source_phrase": null,
+       "relaxed": null,
+       "enforced": true
+      },
+      {
+       "id": "tech_nutrient:fat",
+       "kind": "hard",
+       "requested": "технологія «Печиво пісочне»: fat ≥ 15 г/100 г",
+       "actual": "17.337 г/100 г",
+       "pass": true,
+       "source_phrase": null,
+       "relaxed": null,
+       "enforced": true
+      },
+      {
+       "id": "cost_reported",
+       "kind": "hard",
+       "requested": "заявлена собівартість 32.93 грн/кг = перерахованій",
+       "actual": "32.932 грн/кг",
+       "pass": true,
+       "source_phrase": null,
+       "relaxed": null,
+       "enforced": true
+      },
+      {
+       "id": "claim:reduced_fat",
+       "kind": "soft",
+       "requested": "«зі зниженим вмістом жиру»: fat <= 14.7 (0.7 × еталон 21)",
+       "actual": "fat 17.337",
+       "pass": false,
+       "source_phrase": "зниженим вмістом жиру",
+       "relaxed": "drop",
+       "enforced": false
+      },
+      {
+       "id": "coverage",
+       "kind": "hard",
+       "requested": "кожна вимога запиту — перевірка або unsupported",
+       "actual": "усі враховано",
+       "pass": true,
+       "source_phrase": null,
+       "relaxed": null,
+       "enforced": true
+      }
+     ]
+    },
+    "template_rules": [
+     "на результат також впливає технологічне правило шаблону: технологія «Печиво пісочне»: жири ≥ 15 г/100 г (не послаблюється)"
+    ],
     "assumptions": [
      "еталон «звичайного»: Звичайне пісочне печиво з вершковим маслом — типові значення пісочного печива (UA-ритейл, оцінка автора); USDA FDC (cookies, butter)",
      "втрата вологи при випіканні 10 %: 1111,11 г рецептури дають 1000 г продукту",
      "«якомога дешевше»: окремої межі немає, сервіс завжди шукає найдешевше"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "76a39d678eae",
-    "duration_ms": 2,
+    "data_version": "2a0190f7c83e",
+    "duration_ms": 7,
     "error": null
    },
-   "relax_check": []
+   "relax_check": [
+    {
+     "proposal": "relaxations",
+     "groups": [
+      "claim:reduced_fat"
+     ],
+     "ok": true,
+     "status": "feasible",
+     "cost_uah_per_kg": 32.93
+    },
+    {
+     "proposal": "alternative claim:reduced_fat",
+     "groups": [
+      "claim:reduced_fat"
+     ],
+     "ok": true,
+     "status": "feasible",
+     "cost_uah_per_kg": 32.93
+    }
+   ]
   },
   {
    "id": "d14",
@@ -4199,8 +4276,8 @@
     ],
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "76a39d678eae",
-    "duration_ms": 4,
+    "data_version": "2a0190f7c83e",
+    "duration_ms": 3,
     "error": null
    },
    "relax_check": [
@@ -4302,7 +4379,7 @@
        }
       ],
       "verified": true,
-      "cost_uah_per_kg": 24.95,
+      "cost_uah_per_kg": 25.0,
       "warning": null
      }
     ],
@@ -4323,7 +4400,7 @@
        }
       ],
       "verified": true,
-      "cost_uah_per_kg": 24.95,
+      "cost_uah_per_kg": 25.0,
       "warning": null
      }
     ],
@@ -4346,7 +4423,7 @@
         }
        ],
        "verified": true,
-       "cost_uah_per_kg": 24.95,
+       "cost_uah_per_kg": 25.0,
        "warning": null
       }
      ],
@@ -4355,15 +4432,15 @@
        "ingredient": "milk_2_5",
        "name": "Молоко пастеризоване 2,5 %",
        "role": "base",
-       "grams": 840.0,
-       "cost_uah": 21.0
+       "grams": 890.0,
+       "cost_uah": 22.25
       },
       {
        "ingredient": "sugar",
        "name": "Цукор білий (сахароза)",
        "role": "sweetener",
-       "grams": 150.0,
-       "cost_uah": 3.6
+       "grams": 100.0,
+       "cost_uah": 2.4
       },
       {
        "ingredient": "bulk_starter_milk",
@@ -4375,16 +4452,16 @@
      ],
      "totals": {
       "mass_g": 1000.0,
-      "cost_uah_per_kg": 24.95,
+      "cost_uah_per_kg": 25.0,
       "per_100g": {
-       "energy_kcal": 105.07,
-       "protein": 2.47,
-       "fat": 2.12,
-       "saturates": 1.36,
-       "carbs": 18.99,
-       "sugars": 18.98,
+       "energy_kcal": 87.72,
+       "protein": 2.61,
+       "fat": 2.25,
+       "saturates": 1.44,
+       "carbs": 14.22,
+       "sugars": 14.22,
        "fibre": 0.0,
-       "salt": 0.09
+       "salt": 0.1
       }
      },
      "checks": [
@@ -4422,7 +4499,7 @@
        "id": "role:base",
        "kind": "hard",
        "requested": "роль «base» 55–90 %",
-       "actual": "84 %",
+       "actual": "89 %",
        "pass": true,
        "source_phrase": null,
        "relaxed": null,
@@ -4471,8 +4548,8 @@
       {
        "id": "role:sweetener",
        "kind": "hard",
-       "requested": "роль «sweetener» 0–15 %",
-       "actual": "15 %",
+       "requested": "роль «sweetener» 0–10 %",
+       "actual": "10 %",
        "pass": true,
        "source_phrase": null,
        "relaxed": null,
@@ -4542,7 +4619,7 @@
        "id": "sweetness_min",
        "kind": "hard",
        "requested": "солодкість ≥ 7 г сахарозного екв./100 г",
-       "actual": "15.636",
+       "actual": "10.674",
        "pass": true,
        "source_phrase": null,
        "relaxed": null,
@@ -4561,8 +4638,8 @@
       {
        "id": "cost_reported",
        "kind": "hard",
-       "requested": "заявлена собівартість 24.95 грн/кг = перерахованій",
-       "actual": "24.95 грн/кг",
+       "requested": "заявлена собівартість 25 грн/кг = перерахованій",
+       "actual": "25 грн/кг",
        "pass": true,
        "source_phrase": null,
        "relaxed": null,
@@ -4572,7 +4649,7 @@
        "id": "cost_max",
        "kind": "soft",
        "requested": "собівартість ≤ 25 грн/кг",
-       "actual": "24.95 грн/кг",
+       "actual": "25 грн/кг",
        "pass": true,
        "source_phrase": "собівартістю до 10 грн/кг",
        "relaxed": "послабити: собівартість не більше 10 грн/кг → 25 грн/кг",
@@ -4593,8 +4670,8 @@
     "template_rules": [],
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "76a39d678eae",
-    "duration_ms": 35,
+    "data_version": "2a0190f7c83e",
+    "duration_ms": 37,
     "error": null
    },
    "relax_check": [
@@ -4605,7 +4682,7 @@
      ],
      "ok": true,
      "status": "feasible",
-     "cost_uah_per_kg": 24.95
+     "cost_uah_per_kg": 25.0
     },
     {
      "proposal": "alternative cost_max",
@@ -4614,7 +4691,7 @@
      ],
      "ok": true,
      "status": "feasible",
-     "cost_uah_per_kg": 24.95
+     "cost_uah_per_kg": 25.0
     }
    ]
   },
@@ -5011,7 +5088,7 @@
     ],
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "76a39d678eae",
+    "data_version": "2a0190f7c83e",
     "duration_ms": 6,
     "error": null
    },
@@ -5078,15 +5155,8 @@
       "ingredient": "milk_2_5",
       "name": "Молоко пастеризоване 2,5 %",
       "role": "base",
-      "grams": 740.0,
-      "cost_uah": 18.5
-     },
-     {
-      "ingredient": "sugar",
-      "name": "Цукор білий (сахароза)",
-      "role": "sweetener",
-      "grams": 150.0,
-      "cost_uah": 3.6
+      "grams": 790.0,
+      "cost_uah": 19.75
      },
      {
       "ingredient": "strawberry_frozen",
@@ -5094,6 +5164,13 @@
       "role": "fruit",
       "grams": 100.0,
       "cost_uah": 11.0
+     },
+     {
+      "ingredient": "sugar",
+      "name": "Цукор білий (сахароза)",
+      "role": "sweetener",
+      "grams": 100.0,
+      "cost_uah": 2.4
      },
      {
       "ingredient": "bulk_starter_milk",
@@ -5105,16 +5182,16 @@
     ],
     "totals": {
      "mass_g": 1000.0,
-     "cost_uah_per_kg": 33.45,
+     "cost_uah_per_kg": 33.5,
      "per_100g": {
-      "energy_kcal": 103.27,
-      "protein": 2.22,
-      "fat": 1.89,
-      "saturates": 1.2,
-      "carbs": 19.22,
-      "sugars": 18.97,
+      "energy_kcal": 85.92,
+      "protein": 2.36,
+      "fat": 2.01,
+      "saturates": 1.28,
+      "carbs": 14.45,
+      "sugars": 14.21,
       "fibre": 0.21,
-      "salt": 0.08
+      "salt": 0.09
      }
     },
     "checks": [
@@ -5152,7 +5229,7 @@
       "id": "role:base",
       "kind": "hard",
       "requested": "роль «base» 55–90 %",
-      "actual": "74 %",
+      "actual": "79 %",
       "pass": true,
       "source_phrase": null,
       "relaxed": null,
@@ -5201,8 +5278,8 @@
      {
       "id": "role:sweetener",
       "kind": "hard",
-      "requested": "роль «sweetener» 0–15 %",
-      "actual": "15 %",
+      "requested": "роль «sweetener» 0–10 %",
+      "actual": "10 %",
       "pass": true,
       "source_phrase": null,
       "relaxed": null,
@@ -5282,7 +5359,7 @@
       "id": "sweetness_min",
       "kind": "hard",
       "requested": "солодкість ≥ 7 г сахарозного екв./100 г",
-      "actual": "16.011",
+      "actual": "11.049",
       "pass": true,
       "source_phrase": null,
       "relaxed": null,
@@ -5301,8 +5378,8 @@
      {
       "id": "flavor",
       "kind": "hard",
-      "requested": "характерний інгредієнт (Полуниця заморожена (IQF) без цукру) ≥ 10 % і найбільший у ролі",
-      "actual": "10 %, інші в ролі до 0 %",
+      "requested": "назва відповідає складу (кожен названий смак — не менше мінімуму шаблону для своєї ролі (кілька смаків в одній ролі: кожен ≥ половини рівної частки, разом ≥ мінімуму); названі разом ≥ 50 % своєї ролі): Полуниця заморожена (IQF) без цукру ≥ 10 % і ≥ 50 % ролі «fruit»",
+      "actual": "10 %, 100 % ролі «fruit»",
       "pass": true,
       "source_phrase": "полуничний йогурт",
       "relaxed": null,
@@ -5311,8 +5388,8 @@
      {
       "id": "cost_reported",
       "kind": "hard",
-      "requested": "заявлена собівартість 33.45 грн/кг = перерахованій",
-      "actual": "33.45 грн/кг",
+      "requested": "заявлена собівартість 33.5 грн/кг = перерахованій",
+      "actual": "33.5 грн/кг",
       "pass": true,
       "source_phrase": null,
       "relaxed": null,
@@ -5371,8 +5448,8 @@
     "template_rules": [],
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
-    "data_version": "76a39d678eae",
-    "duration_ms": 7,
+    "data_version": "2a0190f7c83e",
+    "duration_ms": 9,
     "error": null
    },
    "relax_check": []

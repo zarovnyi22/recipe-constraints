@@ -303,9 +303,9 @@ def test_head_report_has_its_own_name_banner_and_proof_target(tmp_path):
     from eval.proof import latest_report, render
 
     (tmp_path / "test_2026-10-02.json").write_text("{}")
-    (tmp_path / "test_2026-10-03_head.json").write_text("{}")
+    (tmp_path / "test_head.json").write_text("{}")  # no date: overwritten by every make eval
     assert latest_report("test", tmp_path).name == "test_2026-10-02.json"
-    assert latest_report("test", tmp_path, "_head").name == "test_2026-10-03_head.json"
+    assert latest_report("test", tmp_path, "_head").name == "test_head.json"
     report = {
         "split": "test", "date": "2026-10-03", "prompt_version": "p2", "data_version": "x",
         "live": False, "after_fixes": False, "head": True, "units": [],

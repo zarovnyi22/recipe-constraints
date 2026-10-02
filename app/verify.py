@@ -12,12 +12,13 @@ Soft check ids are the requirement's group id (`cost_max`, `nutrient:0:protein`,
 relaxation is checked against the RELAXED requirement and marked as such.
 """
 
+import re
 from collections.abc import Iterable
 
 from app import claims as C
-from app.allergens import allergens_in_name
+from app.allergens import allergens_in_name, named_nuts
 from app.data import AllergenCategory, DataBundle, Ingredient, Role, Template
-from app.expand import excluded_ids, find_template, match_ingredients, resolve_flavor
+from app.expand import excluded_ids, find_template, match_ingredients
 from app.schemas import Change, Check, ConstraintSpec, RecipeLine, Totals
 
 NUTRIENTS = ("energy_kcal", "protein", "fat", "saturates", "carbs", "sugars", "fibre", "salt")
@@ -31,6 +32,12 @@ SWEETENER_MIN_SWEETNESS = 0.1
 VEGAN_ANIMAL = {"milk", "eggs", "fish", "crustaceans", "molluscs"}
 VEGETARIAN_ANIMAL = {"fish", "crustaceans", "molluscs"}
 ALLERGENS = set(AllergenCategory.__args__)
+# The name of the product matches its composition (the rule, written out for the check):
+NAME_RULE = (
+    "кожен названий смак — не менше мінімуму шаблону для своєї ролі (кілька смаків в одній ролі: "
+    "кожен ≥ половини рівної частки, разом ≥ мінімуму); названі разом ≥ 50 % своєї ролі"
+)
+NAME_ROLE_SHARE = 0.5
 
 
 def _n(v: float) -> str:
@@ -170,6 +177,7 @@ class _Verifier:
             )
         for pair in tpl.pairings:
             self.pairing(pair.role, pair.then, pair.by_group)
+        self.tech_nutrients()
         if self.spec.product.flavor:
             self.flavor(self.spec.product.flavor)
 
@@ -220,28 +228,86 @@ class _Verifier:
             not wrong,
         )
 
+    # --- the product's name vs its composition (own lookup: no code shared with expand) ------
+
+    def flavor_names(self, text: str) -> list[str]:
+        return [w for w in re.split(r"\s*(?:[,;/+]|-|\s(?:and|і|й|та)\s)\s*", text.strip()) if w]
+
+    def flavor_ids(self, name: str) -> tuple[str, list[str]] | None:
+        """(role, ids) a flavour name stands for in this template: a role word → the whole role;
+        else ingredients by id / Ukrainian name / alias, then by id prefix, then by group. Found
+        in several roles: the roles with a flavour minimum, then fruit; still several → None."""
+        tpl, key = self.tpl, name.strip().casefold()
+        role = tpl.role_named(key)
+        if role is not None:
+            return role, list(tpl.roles[role].ingredients)
+        ings = [self.data.ingredients[i] for r in tpl.roles.values() for i in r.ingredients]
+        tests = (
+            lambda i: key in {i.id, i.name_uk.casefold(), *(a.casefold() for a in i.aliases)},
+            lambda i: i.id.startswith(key + "_"),
+            lambda i: i.group == key,
+        )
+        found = next((f for t in tests if (f := [i for i in ings if t(i)])), [])
+        roles = {tpl.role_of(i.id) for i in found}
+        if len(roles) > 1:
+            with_min = [i for i in found if tpl.roles[tpl.role_of(i.id)].flavor_min_pct]
+            found = with_min or found
+            roles = {tpl.role_of(i.id) for i in found}
+        if len(roles) > 1:
+            found = [i for i in found if i.group == "fruit"] or found
+            roles = {tpl.role_of(i.id) for i in found}
+        if len(roles) != 1:
+            return None
+        return roles.pop(), [i.id for i in found]
+
     def flavor(self, flavor: str) -> None:
-        ings = [self.data.ingredients[i] for r in self.tpl.roles.values() for i in r.ingredients]
-        found = resolve_flavor(flavor, self.tpl, ings)
-        if not found:
-            return  # unsupported in expand: the phrase is reported there
-        role = self.tpl.roles[self.tpl.role_of(found[0].id)]
-        ids = [i.id for i in found]
-        share = self.pct(ids)
-        others = {o: self.grams.get(o, 0.0) for o in role.ingredients if o not in ids}
-        top_other = max(others.values(), default=0.0)
-        mine = sum(self.grams.get(i, 0.0) for i in ids)
-        minimum = role.flavor_min_pct
-        if minimum is None:  # no minimum in the template: 5 %, or what the template allows
-            minimum = min(MUST_INCLUDE_DEFAULT_PCT, self.cap(role, ids))
+        by_role: dict[str, list[tuple[str, list[str]]]] = {}
+        for name in self.flavor_names(flavor):
+            hit = self.flavor_ids(name)
+            if hit is None:
+                return  # unsupported in expand: the phrase is reported there
+            by_role.setdefault(hit[0], []).append((name, hit[1]))
+        wants, facts, ok = [], [], True
+        for role_name, named in by_role.items():
+            role = self.tpl.roles[role_name]
+            ids = sorted({i for _, x in named for i in x})
+            minimum = role.flavor_min_pct
+            if minimum is None:  # no minimum in the template: 5 %, or what the template allows
+                minimum = min(MUST_INCLUDE_DEFAULT_PCT, self.cap(role, ids))
+            together = self.pct(ids)
+            role_g = sum(self.grams.get(i, 0.0) for i in role.ingredients)
+            mine_g = sum(self.grams.get(i, 0.0) for i in ids)
+            want = min(minimum, self.cap(role, ids))
+            ok &= _holds(together, ">=", want)
+            ok &= mine_g >= NAME_ROLE_SHARE * role_g - 1e-6
+            role_pct = _n(100 * NAME_ROLE_SHARE)
+            wants.append(f"{self.names(ids)} ≥ {_n(want)} % і ≥ {role_pct} % ролі «{role_name}»")
+            share_of_role = 100 * mine_g / role_g if role_g else 100.0
+            facts.append(f"{_n(together)} %, {_n(share_of_role)} % ролі «{role_name}»")
+            if len(named) > 1:
+                for name, x in named:
+                    each = min(minimum / (2 * len(named)), self.cap(role, x))
+                    ok &= _holds(self.pct(x), ">=", each)
+                    wants.append(f"«{name}» ≥ {_n(each)} %")
+                    facts.append(f"«{name}» {_n(self.pct(x))} %")
         self.add(
             "flavor",
             "hard",
-            f"характерний інгредієнт ({self.names(ids)}) ≥ {_n(minimum)} % і найбільший у ролі",
-            f"{_n(share)} %, інші в ролі до {_n(100 * top_other / self.mass)} %",
-            _holds(share, ">=", minimum) and mine >= top_other - 1e-9,
+            f"назва відповідає складу ({NAME_RULE}): " + "; ".join(wants),
+            "; ".join(facts),
+            ok,
             self.spec.product.source_phrase,
         )
+
+    def tech_nutrients(self) -> None:
+        for n, low in self.tpl.nutrient_min_per_100g.items():
+            self.add(
+                f"tech_nutrient:{n}",
+                "hard",
+                f"технологія «{self.tpl.name_uk}»: {n} ≥ {_n(low)} {UNIT[n]}",
+                f"{_n(self.per100[n])} {UNIT[n]}",
+                _holds(self.per100[n], ">=", low),
+            )
 
     def cap(self, role: Role, ids: list[str]) -> float:
         """The most of `ids` the template allows: the role's max, or the sum of their doses."""
@@ -406,14 +472,18 @@ class _Verifier:
         self.add(gid, "soft", label, f"знайдено: {self.names(offenders)}", not offenders, phrase)
 
     def exclusions(self) -> None:
+        everything = list(self.data.ingredients.values())
         for k, req in enumerate(self.spec.exclude_allergens):
             a = req.allergen
             if a not in ALLERGENS:
                 continue
             bad = [i for i, ing in self.known.items() if a in self.allergens(ing)]
-            self.excluded(
-                f"allergen:{k}:{a}", f"без алергену {a} (і «може містити»)", bad, req.source_phrase
-            )
+            nuts = named_nuts(req.source_phrase, everything) if a == "nuts" else set()
+            label = f"без алергену {a} (і «може містити»)"
+            if nuts:  # «без мигдалю»: that nut (and what is made of it), not every tree nut
+                bad = [i for i, ing in self.known.items() if i in nuts or nuts & set(ing.contains)]
+                label = f"без {self.names(sorted(nuts))}"
+            self.excluded(f"allergen:{k}:{a}", label, bad, req.source_phrase)
         for k, req in enumerate(self.spec.diet):
             if req.diet == "vegan":
                 bad = [
@@ -432,10 +502,11 @@ class _Verifier:
             else:
                 continue
             self.excluded(f"diet:{k}:{req.diet}", f"дієта {req.diet}", bad, req.source_phrase)
-        everything = list(self.data.ingredients.values())
         for k, req in enumerate(self.spec.exclude_ingredients):
             ids = excluded_ids(req.ingredient, everything)
             cats = allergens_in_name(req.ingredient)  # «молоко», «лактоза», «глютен»
+            if "nuts" in cats and named_nuts(req.ingredient, everything):
+                cats = cats - {"nuts"}  # «мигдаль»: the nut itself (in ids), not every nut
             bad = [i for i, ing in self.known.items() if i in ids or cats & self.allergens(ing)]
             self.excluded(
                 f"exclude:{k}:{req.ingredient}", f"без «{req.ingredient}»", bad, req.source_phrase
@@ -456,8 +527,9 @@ class _Verifier:
         ings = [self.data.ingredients[i] for r in tpl.roles.values() for i in r.ingredients]
         for k, req in enumerate(self.spec.must_include):
             name = req.ingredient_or_role
-            if name in tpl.roles:
-                role, ids = tpl.roles[name], list(tpl.roles[name].ingredients)
+            role_name = tpl.role_named(name)
+            if role_name is not None:
+                role, ids = tpl.roles[role_name], list(tpl.roles[role_name].ingredients)
             else:
                 found = match_ingredients(name, ings)
                 if not found:

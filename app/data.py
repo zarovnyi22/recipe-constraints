@@ -19,6 +19,14 @@ AllergenCategory = Literal[
     "celery", "mustard", "sesame", "sulphites", "lupin", "molluscs",
 ]  # fmt: skip
 
+# Generic words for a template role («з горіхами» = the nuts role, not one nut): role -> words
+# (exact word, casefolded, no stemming). Used by must_include and the flavour of every template.
+ROLE_WORDS: dict[str, list[str]] = {
+    "nuts": ["nuts", "nut", "горіхи", "горіх", "горіхів", "горіхами", "горіхові", "горіховий"],
+    "seeds": ["seeds", "насіння", "насінням"],
+    "dried_fruit": ["dried fruit", "сухофрукти", "сухофруктів", "сухофруктами"],
+}
+
 # Classes an ingredient can belong to (Ingredient.tags) -> the words a technologist uses for the
 # class, in the forms that occur in «без …» (matching is by exact word, no stemming).
 TAGS: dict[str, list[str]] = {
@@ -162,8 +170,9 @@ class Role(BaseModel):
         if self.min_pct > self.max_pct:
             raise ValueError("role min_pct > max_pct")
         flavor = self.flavor_min_pct
-        if flavor is not None and not self.min_pct <= flavor <= self.max_pct:
-            raise ValueError("flavor_min_pct outside the role's [min_pct, max_pct]")
+        # the minimum of the NAMED ingredient(s), not of the role: may be below the role's min
+        if flavor is not None and flavor > self.max_pct:
+            raise ValueError("flavor_min_pct above the role's max_pct")
         return self
 
 
@@ -193,6 +202,8 @@ class Template(BaseModel):
     max_moisture_pct: float | None = Field(default=None, gt=0, lt=100)
     # liquids only: claim limits are per 100 ml, the recipe is per 100 g (RR1 #10)
     density_g_per_ml: float | None = Field(default=None, ge=0.9, le=1.5)
+    # technology minimums of the finished product, g per 100 g (shortbread: fat ≥ 15)
+    nutrient_min_per_100g: dict[str, float] = {}
     dose_limits_pct: dict[str, float] = {}
     pairings: list[Pairing] = []
     roles: dict[str, Role] = Field(min_length=1)
@@ -204,6 +215,11 @@ class Template(BaseModel):
             raise ValueError(f"{self.id}: moisture_loss_pct needs max_moisture_pct")
         if (self.form == "drinkable") != (self.density_g_per_ml is not None):
             raise ValueError(f"{self.id}: density_g_per_ml is set for drinkable templates only")
+        if not any(r.flavor_min_pct is not None for r in self.roles.values()):
+            raise ValueError(f"{self.id}: no role has flavor_min_pct (the named flavour's minimum)")
+        stray = set(self.nutrient_min_per_100g) - set(RefNutrients.model_fields)
+        if stray:
+            raise ValueError(f"{self.id}: nutrient_min_per_100g of unknown nutrients {stray}")
         return self
 
     @property
@@ -219,6 +235,14 @@ class Template(BaseModel):
                 allowed = pair.by_group.get(ingredients[a].group, [])
                 out += [(a, b) for b in self.roles[pair.then].ingredients if b not in allowed]
         return out
+
+    def role_named(self, name: str) -> str | None:
+        """The role a word names: its id («nuts») or a generic word for it («горіхи»)."""
+        key = name.strip().casefold()
+        if key in self.roles:
+            return key
+        found = [r for r, words in ROLE_WORDS.items() if r in self.roles and key in words]
+        return found[0] if found else None
 
     def role_of(self, ingredient_id: str) -> str | None:
         for name, role in self.roles.items():
@@ -354,6 +378,14 @@ class DataBundle(BaseModel):
                 p.append(f"{t}: {water:.1f} g of water cannot lose {loss:.1f} g")
             elif left > tpl.max_moisture_pct + 1e-9:
                 p.append(f"{t}: finished moisture {left:.1f} % > {tpl.max_moisture_pct} %")
+        for n, low in tpl.nutrient_min_per_100g.items():
+            have = sum(
+                g * getattr(self.ingredients[i].per_100g, n) / 1000
+                for i, g in tpl.base_recipe.items()
+                if i in self.ingredients
+            )
+            if have < low - 1e-9:
+                p.append(f"{t}: {n} {have:.2f} g/100 g < technology minimum {low}")
         sweet_per_100g = sweet / 10  # g sucrose-eq per 1000 g finished product → per 100 g
         if sweet_per_100g < tpl.sweetness_min - 1e-9:
             p.append(f"{t}: sweetness {sweet_per_100g:.2f} < sweetness_min {tpl.sweetness_min}")

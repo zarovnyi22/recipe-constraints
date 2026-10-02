@@ -10,7 +10,7 @@ technologist's requirements are soft. Every requirement becomes rows, a note in 
 import re
 
 from app import claims as C
-from app.allergens import CATEGORY_NAMES_UK, allergens_in_name
+from app.allergens import CATEGORY_NAMES_UK, allergens_in_name, named_nuts
 from app.data import TAGS, AllergenCategory, DataBundle, Ingredient, RefNutrients, Role, Template
 from app.schemas import (
     ConstraintSpec,
@@ -41,6 +41,8 @@ DIET_ANIMAL = {"fish", "crustaceans", "molluscs"}
 VEGAN_EXCLUDED = {"milk", "eggs"} | DIET_ANIMAL  # allergen categories a vegan product cannot have
 # "must include X" without a share: at least this % (or the role's minimum, if larger)
 MUST_INCLUDE_DEFAULT_PCT = 5.0
+# the named flavour is at least this share of its role (strawberry ≥ all other fruit together)
+FLAVOR_ROLE_SHARE = 0.5
 
 
 def _fmt(v: float) -> str:
@@ -87,10 +89,20 @@ def excluded_ids(term: str, ingredients: list[Ingredient]) -> set[str]:
     }
 
 
+def split_flavors(flavor: str) -> list[str]:
+    """«apple, orange» / «apple-orange» / «яблуко і апельсин» → one name per flavour."""
+    parts = re.split(r"\s*(?:[,;/+]|-|\s(?:and|і|й|та)\s)\s*", flavor.strip())
+    return [p for p in parts if p]
+
+
 def resolve_flavor(flavor: str, tpl: Template, ings: list[Ingredient]) -> list[Ingredient]:
-    """The characteristic ingredient(s) of the template for a flavor: one role only. If the name
-    matches several roles («apple»: apple puree is fruit, apple juice the base), the role with a
-    flavor minimum wins, then the fruit; still ambiguous → [] (unsupported)."""
+    """The characteristic ingredient(s) of the template for a flavor: one role only. A generic
+    word names the whole role («горіхи» → nuts). If the name matches several roles («apple»:
+    apple puree is fruit, apple juice the base), the role with a flavor minimum wins, then the
+    fruit; still ambiguous → [] (unsupported)."""
+    role = tpl.role_named(flavor)
+    if role is not None:
+        return [i for i in ings if i.id in tpl.roles[role].ingredients]
     found = match_ingredients(flavor, ings)
     for prefer in (
         lambda i: tpl.roles[tpl.role_of(i.id)].flavor_min_pct is not None,
@@ -273,8 +285,19 @@ class _Builder:
                 f"солодкість не менше {_fmt(tpl.sweetness_min)} г сахарозного екв./100 г",
                 kind="hard",
             )
+        for n, low in tpl.nutrient_min_per_100g.items():
+            name, unit = NUTRIENT_UK[n]
+            self.row(
+                f"tech_nutrient:{n}",
+                self.nutrient(n),
+                ">=",
+                low,
+                unit,
+                f"технологія «{tpl.name_uk}»: {name} ≥ {_fmt(low)} {unit}",
+                kind="hard",
+            )
         if self.spec.product.flavor:
-            self.flavor(self.spec.product.flavor, self.spec.product.source_phrase)
+            self.flavors(self.spec.product.flavor, self.spec.product.source_phrase)
 
     def water_balance(self) -> None:
         """Baking loses water only: the dough has at least that much water, and what is left is
@@ -301,59 +324,92 @@ class _Builder:
             kind="hard",
         )
 
-    def flavor(self, flavor: str, phrase: str) -> None:
-        """The characteristic ingredient: at least the role's flavor minimum, and the largest
-        ingredient of its role (a strawberry yogurt has more strawberry than any other fruit)."""
-        found = resolve_flavor(flavor, self.tpl, self.ings)
-        if not found:
-            fruit = [i.id for i in self.ings if i.group == "fruit"]
-            why = (
-                self.not_in_template(flavor)
-                if not match_ingredients(flavor, self.ings)
-                else f"смак «{flavor}» неоднозначний у шаблоні «{self.tpl.name_uk}»"
-            )
-            self.unsupported_(
-                "flavor", phrase, why + (f" (є: {', '.join(fruit)})" if fruit else "")
-            )
-            return
-        role_name = self.tpl.role_of(found[0].id)
+    def flavors(self, flavor: str, phrase: str) -> None:
+        """The characteristic ingredient(s) named in the product's name. Each named flavour: at
+        least the role's flavor minimum (several flavours in one role: half of an equal share
+        each, together the full minimum); the named ones together ≥ 50 % of their role. With a
+        100 % minimum (juice_100) the role holds the named juices only."""
+        picked: dict[str, list[tuple[str, list[str]]]] = {}
+        for name in split_flavors(flavor):
+            found = resolve_flavor(name, self.tpl, self.ings)
+            if not found:
+                fruit = [i.id for i in self.ings if i.group == "fruit"]
+                why = (
+                    self.not_in_template(name)
+                    if not match_ingredients(name, self.ings) and not self.tpl.role_named(name)
+                    else f"смак «{name}» неоднозначний у шаблоні «{self.tpl.name_uk}»"
+                )
+                self.unsupported_(
+                    "flavor", phrase, why + (f" (є: {', '.join(fruit)})" if fruit else "")
+                )
+                return
+            role_name = self.tpl.role_of(found[0].id)
+            picked.setdefault(role_name, []).append((name, [i.id for i in found]))
+        for role_name, named in picked.items():
+            self.flavor_role(role_name, named, phrase)
+
+    def flavor_role(self, role_name: str, named: list[tuple[str, list[str]]], phrase: str) -> None:
         role = self.tpl.roles[role_name]
-        ids = [i.id for i in found]
+        all_ids = sorted({i for _, ids in named for i in ids})
         minimum = role.flavor_min_pct
         if minimum is None:
             # no flavor minimum in the template: as must_include without a share (RR1 #7 — a
             # peanut bar without peanuts)
-            minimum = min(MUST_INCLUDE_DEFAULT_PCT, self.default_include_pct(role, ids))
+            minimum = min(MUST_INCLUDE_DEFAULT_PCT, self.default_include_pct(role, all_ids))
             self.assumptions.append(
                 f"«{phrase}»: мінімум характерного інгредієнта шаблоном не задано — прийнято "
                 f"не менше {_fmt(minimum)} %"
             )
-        names = ", ".join(i.name_uk for i in found)
-        if minimum is not None:
-            self.row(
-                "flavor_min",
-                self.pct(ids),
-                ">=",
-                minimum,
-                "%",
-                f"характерний інгредієнт ({names}) не менше {_fmt(minimum)} %",
-                kind="hard",
-                phrase=phrase,
-            )
-        for other in role.ingredients:
-            if other not in ids:
-                coeffs = {i: 1.0 for i in ids} | {other: -1.0}
+        names = ", ".join(self.data.ingredients[i].name_uk for i in all_ids)
+        self.row(
+            f"flavor_min:{role_name}",
+            self.pct(all_ids),
+            ">=",
+            min(minimum, self.dose_cap(role, all_ids)),
+            "%",
+            f"характерний інгредієнт ({names}) не менше {_fmt(minimum)} %",
+            kind="hard",
+            group="flavor",
+            phrase=phrase,
+        )
+        if len(named) > 1:
+            each = minimum / (2 * len(named))
+            for name, ids in named:
+                own = min(each, self.dose_cap(role, ids))
                 self.row(
-                    f"flavor_dominant:{other}",
-                    coeffs,
+                    f"flavor_each:{name}",
+                    self.pct(ids),
                     ">=",
-                    0.0,
-                    "г",
-                    f"{names} не менше, ніж {self.data.ingredients[other].name_uk}",
+                    own,
+                    "%",
+                    f"смак «{name}» не менше {_fmt(own)} %",
                     kind="hard",
-                    group="flavor_dominant",
+                    group="flavor",
                     phrase=phrase,
                 )
+        if set(role.ingredients) - set(all_ids):
+            share = FLAVOR_ROLE_SHARE
+            coeffs = {i: (1.0 if i in all_ids else 0.0) - share for i in role.ingredients}
+            self.row(
+                f"flavor_share:{role_name}",
+                coeffs,
+                ">=",
+                0.0,
+                "г",
+                f"{names} — не менше {_fmt(100 * share)} % ролі «{role_name}»",
+                kind="hard",
+                group="flavor",
+                phrase=phrase,
+            )
+
+    def dose_cap(self, role: Role, ids: list[str]) -> float:
+        """The most of `ids` the template allows: the role's max, or the sum of their doses."""
+        doses = [
+            self.tpl.dose_limits_pct.get(i, self.data.ingredients[i].max_dose_pct) for i in ids
+        ]
+        if all(d is not None for d in doses):
+            return min(role.max_pct, sum(doses))
+        return role.max_pct
 
     # --- requirements (soft) ------------------------------------------------------------------
 
@@ -604,6 +660,9 @@ class _Builder:
                 )
                 continue
             ids = {i.id for i in self.ings if req.allergen in i.allergens + i.may_contain}
+            nuts = self.specific_nuts(req.allergen, req.source_phrase)
+            if nuts:
+                ids = {i.id for i in self.ings if i.id in nuts or nuts & set(i.contains)}
             if req.allergen == "milk" and re.search(r"лактоз|lactose", req.source_phrase, re.I):
                 names = " ".join(
                     " ".join([i.name_uk, *i.aliases]) for i in self.ings if i.id in ids
@@ -642,6 +701,19 @@ class _Builder:
                 auto_relax=False,
             )
 
+    def specific_nuts(self, allergen: str, text: str) -> set[str]:
+        """«без мигдалю»: only that nut, not every tree nut («без горіхів» keeps the category)."""
+        if allergen != "nuts":
+            return set()
+        nuts = named_nuts(text, list(self.data.ingredients.values()))
+        if nuts:
+            names = ", ".join(self.data.ingredients[i].name_uk for i in sorted(nuts))
+            self.assumptions.append(
+                f"«{text}»: названо конкретний горіх — виключено лише його ({names}), "
+                "інші горіхи дозволені"
+            )
+        return nuts
+
     def exclusions(self) -> None:
         everything = list(self.data.ingredients.values())
         for k, req in enumerate(self.spec.exclude_ingredients):
@@ -650,6 +722,9 @@ class _Builder:
             # «без молока / лактози / глютену» as an ingredient: the word names an allergen, so
             # everything with that allergen goes, not only the ingredient that has the alias
             cats = allergens_in_name(term)
+            nut_named = bool(self.specific_nuts("nuts" if "nuts" in cats else "", term))
+            if nut_named:
+                cats = cats - {"nuts"}  # the nut itself is in `found` (by name)
             if cats:
                 found |= {i.id for i in self.ings if cats & set(i.allergens + i.may_contain)}
                 self.assumptions.append(
@@ -664,7 +739,9 @@ class _Builder:
                     "гарантувати виключення не можемо",
                 )
                 continue
-            self.exclude(gid, found, f"без «{term}»", req.source_phrase, auto_relax=not cats)
+            self.exclude(
+                gid, found, f"без «{term}»", req.source_phrase, auto_relax=not (cats or nut_named)
+            )
         sw = self.spec.sweeteners
         if sw is not None and sw.allowed:
             self.assumptions.append(
@@ -677,9 +754,10 @@ class _Builder:
     def must_include(self) -> None:
         for k, req in enumerate(self.spec.must_include):
             name = req.ingredient_or_role
-            if name in self.tpl.roles:
-                role = self.tpl.roles[name]
-                ids, label = role.ingredients, f"роль «{name}»"
+            role_name = self.tpl.role_named(name)
+            if role_name is not None:
+                role = self.tpl.roles[role_name]
+                ids, label = role.ingredients, f"роль «{role_name}»"
             else:
                 found = match_ingredients(name, self.ings)
                 if not found:
@@ -711,13 +789,7 @@ class _Builder:
     def default_include_pct(self, role: Role, ids: list[str]) -> float:
         """max(5 %, the role's minimum), capped by what the template allows for these ids."""
         want = max(MUST_INCLUDE_DEFAULT_PCT, role.min_pct, role.flavor_min_pct or 0)
-        doses = [
-            self.tpl.dose_limits_pct.get(i, self.data.ingredients[i].max_dose_pct) for i in ids
-        ]
-        cap = role.max_pct
-        if all(d is not None for d in doses):
-            cap = min(cap, sum(doses))
-        return min(want, cap)
+        return min(want, self.dose_cap(role, ids))
 
     def build(self) -> Expansion:
         self.template()
@@ -761,7 +833,17 @@ def _exclusions(spec: ConstraintSpec, everything: list[Ingredient]):
     allergen categories of a name that is not in the data) for every exclusion of the spec."""
     for k, a in enumerate(spec.exclude_allergens):
         if a.allergen in ALLERGENS:
+            nuts = named_nuts(a.source_phrase, everything) if a.allergen == "nuts" else set()
             what = f"{CATEGORY_NAMES_UK[a.allergen]} ({a.allergen})"
+            if nuts:
+                yield (
+                    f"allergen:{k}:{a.allergen}",
+                    a.source_phrase,
+                    ", ".join(i.name_uk for i in everything if i.id in nuts),
+                    lambda i, n=nuts: i.id in n or bool(n & set(i.contains)),
+                    lambda cats: False,
+                )
+                continue
             yield (
                 f"allergen:{k}:{a.allergen}",
                 a.source_phrase,
@@ -793,6 +875,8 @@ def _exclusions(spec: ConstraintSpec, everything: list[Ingredient]):
     for k, e in enumerate(spec.exclude_ingredients):
         ids = excluded_ids(e.ingredient, everything)
         cats = allergens_in_name(e.ingredient)
+        if "nuts" in cats and named_nuts(e.ingredient, everything):
+            cats = cats - {"nuts"}  # «без мигдалю»: the nut itself, by name
         yield (
             f"exclude:{k}:{e.ingredient}",
             e.source_phrase,
@@ -818,11 +902,14 @@ def find_contradictions(
         for k, m in enumerate(spec.must_include)
     ]
     if spec.product.flavor:
-        wants.append(("flavor", spec.product.source_phrase, spec.product.flavor))
+        wants += [
+            ("flavor", spec.product.source_phrase, f) for f in split_flavors(spec.product.flavor)
+        ]
     out = []
     for wid, wphrase, name in wants:
-        if name in tpl.roles:
-            found = [data.ingredients[i] for i in tpl.roles[name].ingredients]
+        role = tpl.role_named(name)
+        if role is not None:
+            found = [data.ingredients[i] for i in tpl.roles[role].ingredients]
         else:
             found = match_ingredients(name, everything)
         for xid, xphrase, what, on_ing, on_cats in _exclusions(spec, everything):

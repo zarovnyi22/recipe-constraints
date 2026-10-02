@@ -194,28 +194,26 @@ def test_unknown_category_names_every_other_requirement(data):
 
 def test_flavor_is_a_hard_minimum_of_the_characteristic_ingredient(data):
     spec = _spec(product={"template": "yog", "flavor": "strawberry", "source_phrase": "полуничний"})
-    row = _row(expand(spec, data), "flavor_min")
+    row = _row(expand(spec, data), "flavor_min:fruit")
     assert (row.kind, row.op, row.rhs, row.coeffs) == ("hard", ">=", 10, {"strawberry": 0.1})
     assert row.source_phrase == "полуничний"
 
 
-def test_flavor_dominates_its_role(data):
+def test_flavor_is_at_least_half_of_its_role(data):
     data.templates["yog"].roles["sweetener"].flavor_min_pct = 1  # honey as the flavor
     spec = _spec(product={"template": "yog", "flavor": "honey", "source_phrase": "медовий"})
     exp = expand(spec, data)
-    assert _row(exp, "flavor_min").coeffs == {"honey": 0.1}
-    dom = {r.id: r.coeffs for r in _rows(exp, "flavor_dominant")}
-    assert dom == {
-        "flavor_dominant:sugar": {"honey": 1.0, "sugar": -1.0},
-        "flavor_dominant:stevia": {"honey": 1.0, "stevia": -1.0},
-    }
+    assert _row(exp, "flavor_min:sweetener").coeffs == {"honey": 0.1}
+    share = _row(exp, "flavor_share:sweetener")
+    assert (share.op, share.rhs) == (">=", 0.0)
+    assert share.coeffs == {"honey": 0.5, "sugar": -0.5, "stevia": -0.5}  # honey ≥ ½ of the role
 
 
 def test_unknown_flavor_is_unsupported(data):
     spec = _spec(product={"template": "yog", "flavor": "mango", "source_phrase": "манговий"})
     exp = expand(spec, data)
     assert [u.phrase for u in exp.unsupported] == ["манговий"]
-    assert "flavor_min" not in {r.id for r in exp.constraints}
+    assert not [r for r in exp.constraints if r.group == "flavor"]
 
 
 def test_moisture_loss_scales_percent_but_not_nutrients(data):

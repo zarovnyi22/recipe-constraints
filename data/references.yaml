@@ -17,6 +17,11 @@
   name_uk: Звичайний соковмісний напій (яблучно-апельсиновий, з цукром)
   per_100g: {energy_kcal: 46, protein: 0.2, fat: 0.1, saturates: 0, carbs: 11.0, sugars: 10.8, fibre: 0.2, salt: 0}
   source: "типові значення нектарів/соковмісних напоїв (UA-ритейл, оцінка автора); USDA FDC (fruit juice drink)"
+- id: nectar
+  template: nectar
+  name_uk: Звичайний нектар (яблучний/апельсиновий, 50 % соку, з цукром)
+  per_100g: {energy_kcal: 50, protein: 0.2, fat: 0.1, saturates: 0, carbs: 12.0, sugars: 11.5, fibre: 0.2, salt: 0}
+  source: "типові значення нектарів 50 % соку на етикетках (UA-ритейл, оцінка автора); USDA FDC (apple nectar, порядок цифр)"
 - id: juice_100
   template: juice_100
   name_uk: Звичайний сік 100 % (яблучний/апельсиновий, відновлений, без цукру)

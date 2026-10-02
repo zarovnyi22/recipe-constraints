@@ -1,7 +1,11 @@
 # Шаблони продуктів (жорстка технологія). Одиниці: %, г.
 # roles.<роль>: min_pct/max_pct — сума ролі у % маси рецептури; mode: one_of = рівно один
 #   інгредієнт ролі (розв'язувач перебирає варіанти), blend = будь-яка суміш;
-#   flavor_min_pct — мінімум ролі, якщо технолог просить смак/характерний інгредієнт.
+#   flavor_min_pct — мінімум НАЗВАНОГО інгредієнта (смак/характерний), % рецептури; є в кожному
+#   шаблоні на ролях, які дають продукту назву. Крім того названий смак ≥ 50 % своєї ролі (полуничний
+#   йогурт: полуниці не менше, ніж усіх інших фруктів разом). Інгредієнт з дозою ≤ мінімуму (ванілін
+#   0,1 %) — мінімум обрізано його дозою. Значення — технологічні припущення (README).
+# nutrient_min_per_100g — технологічний мінімум нутрієнта в готовому продукті (жорстко).
 # dose_limits_pct — суворіші за ingredients.yaml межі доз для цього продукту (еритрит ≤ 8 % у м'яких).
 # sweetness_min — мінімум сахарозного еквівалента, г на 100 г ГОТОВОГО продукту (щоб «без цукру»
 #   не дав несолодкий продукт). moisture_loss_pct — частка маси сирої рецептури, що випаровується
@@ -44,10 +48,10 @@
       max_pct: 25
       flavor_min_pct: 10
       ingredients: [strawberry_frozen, raspberry_frozen, blueberry_frozen, banana_puree, apple_puree, mango_puree]
-    sweetener:
+    sweetener:  # цукор ≤ 10 %: типово 5–10 % у фруктових йогуртах (припущення, README)
       mode: blend
       min_pct: 0
-      max_pct: 15
+      max_pct: 10
       ingredients: [sugar, honey, glucose_syrup, stevia]
     bulking:
       mode: blend
@@ -68,11 +72,13 @@
       mode: blend
       min_pct: 0
       max_pct: 5
+      flavor_min_pct: 2
       ingredients: [cocoa_powder, vanillin, cinnamon]
     cream:
       mode: blend
       min_pct: 0
       max_pct: 15
+      flavor_min_pct: 5
       ingredients: [coconut_cream]
   base_recipe: {milk_2_5: 760, dvs_culture_dairy: 0.2, strawberry_frozen: 150, sugar: 80, pectin: 5, skim_milk_powder: 4.8}
 
@@ -109,10 +115,10 @@
       max_pct: 15
       flavor_min_pct: 5
       ingredients: [strawberry_frozen, raspberry_frozen, blueberry_frozen, banana_puree, apple_puree, mango_puree]
-    sweetener:
+    sweetener:  # цукор ≤ 10 %, як у густому (припущення, README)
       mode: blend
       min_pct: 0
-      max_pct: 12
+      max_pct: 10
       ingredients: [sugar, honey, glucose_syrup, stevia]
     bulking:
       mode: blend
@@ -133,12 +139,13 @@
       mode: blend
       min_pct: 0
       max_pct: 4
+      flavor_min_pct: 1
       ingredients: [cocoa_powder, vanillin, cinnamon]
   base_recipe: {milk_2_5: 850, dvs_culture_dairy: 0.2, strawberry_frozen: 80, sugar: 65, skim_milk_powder: 4, pectin: 0.8}
 
 - id: juice_drink
   name_uk: Соковмісний напій
-  aliases: [сокомісний напій, нектар, напій із соком]
+  aliases: [сокомісний напій, напій із соком, соковий напій]
   form: drinkable
   density_g_per_ml: 1.045  # розчин сахарози 11 °Brix ≈ 1,044 г/мл при 20 °C (таблиці Brix–густина сахарози, ICUMSA); соковмісний напій 10–12 °Brix
   description: Вода + сік (не менше 10 %) + цукри/підсолоджувачі + кислота. Мінімум соку 10 % — технологічне припущення (див. README).
@@ -150,7 +157,8 @@
     juice:
       mode: blend
       min_pct: 10
-      max_pct: 60
+      max_pct: 49  # 50 % і більше — це вже нектар (шаблон nectar)
+      flavor_min_pct: 10
       ingredients: [apple_juice, orange_juice]
     water:
       mode: blend
@@ -174,6 +182,49 @@
       ingredients: [citric_acid]
   base_recipe: {apple_juice: 250, orange_juice: 100, sugar: 50, citric_acid: 0.5, water: 599.5}
 
+- id: nectar
+  name_uk: Нектар
+  aliases: [нектар, фруктовий нектар, яблучний нектар, апельсиновий нектар]
+  form: drinkable
+  density_g_per_ml: 1.05  # нектар 12–13 °Brix ≈ 1,048–1,052 г/мл при 20 °C (таблиці Brix–густина сахарози, ICUMSA)
+  # Мінімум соку 50 %: Директива 2001/112/ЄС, додаток IV, частина II — яблучний, апельсиновий
+  # нектар ≥ 50 % фруктової частини; цукрів/меду ≤ 20 % маси (додаток I, частина II, п. 2).
+  # Україна перенесла ці вимоги у «Вимоги до фруктових соків та деяких аналогічних продуктів»
+  # (Держпродспоживслужба: «для нектарів — зазначений вміст фруктової частини»).
+  description: Сік (не менше 50 % — норматив нектару) + вода + цукри/підсолоджувачі (≤ 20 %) + кислота.
+  reference: nectar
+  sweetness_min: 8.0
+  moisture_loss_pct: 0
+  dose_limits_pct: {erythritol: 8}
+  roles:
+    juice:
+      mode: blend
+      min_pct: 50
+      max_pct: 95
+      flavor_min_pct: 50
+      ingredients: [apple_juice, orange_juice]
+    water:
+      mode: blend
+      min_pct: 0
+      max_pct: 50
+      ingredients: [water]
+    sweetener:
+      mode: blend
+      min_pct: 0
+      max_pct: 20
+      ingredients: [sugar, honey, glucose_syrup, stevia]
+    bulking:
+      mode: blend
+      min_pct: 0
+      max_pct: 5
+      ingredients: [erythritol, polydextrose]
+    acid:
+      mode: blend
+      min_pct: 0
+      max_pct: 1
+      ingredients: [citric_acid]
+  base_recipe: {apple_juice: 500, sugar: 60, citric_acid: 1, water: 439}
+
 - id: juice_100
   name_uk: Сік 100 % (відновлений)
   aliases: [сік, натуральний сік, 100% сік, сік 100 %, яблучний сік, апельсиновий сік]
@@ -188,6 +239,7 @@
       mode: blend
       min_pct: 100
       max_pct: 100
+      flavor_min_pct: 100  # названий сік — увесь сік; кілька смаків у запиті — суміш лише з них
       ingredients: [apple_juice, orange_juice, apple_puree]
   base_recipe: {apple_juice: 700, orange_juice: 300}
 
@@ -206,6 +258,7 @@
       mode: blend
       min_pct: 35
       max_pct: 80
+      flavor_min_pct: 20  # названий фрукт ≥ 20 % і ≥ половини фруктів (припущення)
       ingredients: [strawberry_frozen, raspberry_frozen, blueberry_frozen, banana_puree, apple_puree, mango_puree]
     base:
       mode: blend
@@ -241,21 +294,25 @@
       mode: blend
       min_pct: 0
       max_pct: 25
+      flavor_min_pct: 10
       ingredients: [spinach_frozen, carrot_puree]
     seeds:
       mode: blend
       min_pct: 0
       max_pct: 6
+      flavor_min_pct: 2
       ingredients: [chia_seeds, flax_seeds]
     cream:
       mode: blend
       min_pct: 0
       max_pct: 15
+      flavor_min_pct: 5
       ingredients: [coconut_cream]
     flavour:
       mode: blend
       min_pct: 0
       max_pct: 4
+      flavor_min_pct: 1
       ingredients: [cocoa_powder, vanillin, cinnamon]
   base_recipe: {banana_puree: 300, strawberry_frozen: 250, oat_drink: 405, sugar: 40, pectin: 5}
 
@@ -283,11 +340,13 @@
       mode: blend
       min_pct: 0
       max_pct: 25
+      flavor_min_pct: 10
       ingredients: [almonds_roasted, peanuts_roasted, hazelnuts_roasted, walnuts]
     dried_fruit:
       mode: blend
       min_pct: 0
       max_pct: 25
+      flavor_min_pct: 8
       ingredients: [raisins]
     protein:
       mode: blend
@@ -318,11 +377,13 @@
       mode: blend
       min_pct: 0
       max_pct: 15
+      flavor_min_pct: 5
       ingredients: [chia_seeds, flax_seeds, sesame_seeds]
     flavour:
       mode: blend
       min_pct: 0
       max_pct: 10
+      flavor_min_pct: 2
       ingredients: [cocoa_powder, vanillin, cinnamon]
   base_recipe: {oat_flakes: 387, almonds_roasted: 100, glucose_syrup: 220, raisins: 100, sunflower_oil: 40, pea_protein_crisps: 130, sugar: 20, salt: 3}
 
@@ -335,6 +396,8 @@
   sweetness_min: 15.0
   moisture_loss_pct: 10
   max_moisture_pct: 10  # soft cookies 8–12 %, shortbread 3–6 %: the upper bound (assumption)
+  # пісочне тісто — жирне: жиру в готовому ≥ 15 г/100 г (типово 18–28 %; припущення, README)
+  nutrient_min_per_100g: {fat: 15}
   dose_limits_pct: {erythritol: 15, polydextrose: 10, salt: 0.5, baking_soda: 0.5}  # salt/soda: typical doses, not a cheap filler (RR1 #8)
   roles:
     flour:
@@ -387,20 +450,22 @@
       min_pct: 0
       max_pct: 1
       ingredients: [salt]
-    water:
+    water:  # пісочне тісто майже без води: ≤ 5 % (припущення, README)
       mode: blend
       min_pct: 0
-      max_pct: 15
+      max_pct: 5
       ingredients: [water]
     seeds:
       mode: blend
       min_pct: 0
       max_pct: 8
+      flavor_min_pct: 3
       ingredients: [chia_seeds, flax_seeds, sesame_seeds]
     flavour:
       mode: blend
       min_pct: 0
       max_pct: 12
+      flavor_min_pct: 3
       ingredients: [cocoa_powder, vanillin, cinnamon]
   base_recipe: {wheat_flour: 557.1, butter_82: 250, sugar: 200, whole_egg: 100, salt: 2, baking_soda: 2}
 
@@ -418,6 +483,7 @@
       mode: blend
       min_pct: 15
       max_pct: 50
+      flavor_min_pct: 15
       ingredients: [tomato_paste_28]
     water:
       mode: blend
@@ -448,6 +514,7 @@
       mode: blend
       min_pct: 0.5
       max_pct: 2
+      flavor_min_pct: 1
       ingredients: [spice_blend]
     salt:
       mode: blend

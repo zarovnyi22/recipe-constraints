@@ -271,3 +271,24 @@ def allergens_in_name(text: str) -> set[AllergenCategory]:
         for m in pattern.finditer(text)
         if not any(s < m.end() and m.start() < e for s, e in masked)
     }
+
+
+# A specific tree nut in «без мигдалю» excludes only that nut, «без горіхів» — every nut (EU annex
+# II lists the nuts one by one). Words that do not name the species are skipped.
+_GENERIC_NUT_WORD = re.compile(r"горіх|nuts?$|смаж|roast|ядр")
+
+
+def named_nuts(text: str, ingredients) -> set[str]:
+    """Ids of the tree nuts (allergen «nuts») that `text` names by species — a 5-letter stem of
+    a word of the ingredient's name, aliases or id («мигдалю» → almonds_roasted). Empty: the
+    text names no particular nut (then a nut exclusion means all of them)."""
+    t = text.casefold()
+    out = set()
+    for ing in ingredients:
+        if "nuts" not in ing.allergens:
+            continue
+        for name in [ing.name_uk, *ing.aliases, ing.id.replace("_", " ")]:
+            for word in re.findall(r"\w+", name.casefold()):
+                if len(word) >= 4 and not _GENERIC_NUT_WORD.match(word) and word[:5] in t:
+                    out.add(ing.id)
+    return out

@@ -177,8 +177,11 @@ def write_report(
     from eval.metrics import write_markdown
 
     REPORTS.mkdir(exist_ok=True)
-    suffix = "_after_fixes" if after_fixes else "_head" if head else ""
-    path = REPORTS / f"{split}_{date.today().isoformat()}{suffix}.json"
+    if head:  # re-run on every commit: one file per split, overwritten (the date is inside)
+        path = REPORTS / f"{split}_head.json"
+    else:
+        suffix = "_after_fixes" if after_fixes else ""
+        path = REPORTS / f"{split}_{date.today().isoformat()}{suffix}.json"
     report = {
         "split": split,
         "date": date.today().isoformat(),
@@ -210,7 +213,7 @@ async def main(argv: list[str] | None = None) -> int:
         "--head",
         action="store_true",
         help="cache only, even if the prompt changed since: the model answers of the final "
-        "measurement on the CURRENT code and data; report <split>_<date>_head",
+        "measurement on the CURRENT code and data; report <split>_head (no date, overwritten)",
     )
     args = parser.parse_args(argv)
     if (args.after_fixes or args.head) and args.live:

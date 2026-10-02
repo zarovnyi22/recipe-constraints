@@ -92,12 +92,14 @@ async def test_juice_100_with_a_sweetener_exclusion_is_trivially_true():
     assert out.status == "feasible"
 
 
-def test_the_word_juice_means_100_percent_juice_and_nectar_means_the_drink():
+def test_the_word_juice_means_100_percent_juice_and_nectar_its_own_template():
     assert {"сік", "яблучний сік"} <= set(DATA.templates["juice_100"].aliases)
     assert "сік" not in DATA.templates["juice_drink"].aliases
     prompt = build_system_prompt(DATA)
     assert "juice_100" in prompt and "нектар" in prompt and "preservative" in prompt
-    assert PROMPT_VERSION == "p2"
+    assert "нектар" in DATA.templates["nectar"].aliases
+    assert "нектар" not in DATA.templates["juice_drink"].aliases
+    assert PROMPT_VERSION == "p3"
 
 
 # --- the data rules --------------------------------------------------------------------------
