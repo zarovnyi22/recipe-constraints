@@ -969,7 +969,7 @@
 
 - id: hazelnuts_roasted
   name_uk: Фундук смажений
-  aliases: [фундук, ліщинний горіх]
+  aliases: [фундук, ліщинний горіх, hazelnut]
   group: nuts_dried
   per_100g: {energy_kcal: 628, protein: 15.0, fat: 60.8, saturates: 4.5, carbs: 7.0, sugars: 4.3, fibre: 9.7, salt: 0, polyols: 0}
   nutrients_source: "USDA FDC (hazelnuts or filberts), типові значення; карбс = 16,7 − клітковина 9,7"
@@ -986,7 +986,7 @@
 
 - id: walnuts
   name_uk: Горіх грецький (ядро)
-  aliases: [грецький горіх, волоський горіх, горіхи]
+  aliases: [грецький горіх, волоський горіх, горіхи, walnut]
   group: nuts_dried
   per_100g: {energy_kcal: 654, protein: 15.2, fat: 65.2, saturates: 6.1, carbs: 7.0, sugars: 2.6, fibre: 6.7, salt: 0, polyols: 0}
   nutrients_source: "USDA FDC (nuts, walnuts, english), типові значення; карбс = 13,7 − клітковина 6,7"
@@ -1054,7 +1054,7 @@
 
 - id: chia_seeds
   name_uk: Насіння чіа
-  aliases: [чіа, насіння чіа]
+  aliases: [чіа, насіння чіа, chia]
   group: seeds
   per_100g: {energy_kcal: 486, protein: 16.5, fat: 30.7, saturates: 3.3, carbs: 7.7, sugars: 0, fibre: 34.4, salt: 0.04, polyols: 0}
   nutrients_source: "USDA FDC (seeds, chia seeds, dried); карбс = 42,1 − клітковина 34,4"
@@ -1071,7 +1071,7 @@
 
 - id: flax_seeds
   name_uk: Насіння льону
-  aliases: [льон, лляне насіння, насіння льону]
+  aliases: [льон, лляне насіння, насіння льону, flax]
   group: seeds
   per_100g: {energy_kcal: 534, protein: 18.3, fat: 42.2, saturates: 3.7, carbs: 1.6, sugars: 1.6, fibre: 27.3, salt: 0.08, polyols: 0}
   nutrients_source: "USDA FDC (seeds, flaxseed); карбс = 28,9 − клітковина 27,3"
@@ -1088,7 +1088,7 @@
 
 - id: sesame_seeds
   name_uk: Кунжут
-  aliases: [кунжут, насіння кунжуту]
+  aliases: [кунжут, насіння кунжуту, sesame]
   group: seeds
   per_100g: {energy_kcal: 573, protein: 17.7, fat: 49.7, saturates: 7.0, carbs: 11.7, sugars: 0.3, fibre: 11.8, salt: 0.03, polyols: 0}
   nutrients_source: "USDA FDC (seeds, sesame seeds, whole, dried); карбс = 23,5 − клітковина 11,8"

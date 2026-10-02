@@ -5,6 +5,7 @@ import pytest
 
 from app.allergens import allergens_in_name
 from app.data import TAGS, get_data
+from app.expand import match_ingredients
 from app.formulate import run_formulate
 from app.schemas import ConstraintSpec
 
@@ -128,3 +129,15 @@ async def test_hazelnut_recipe_declares_nuts_and_blocks_a_nut_free_request():
         pool=None,
     )
     assert nut_free.status == "infeasible" and nut_free.recipe is None
+
+
+@pytest.mark.parametrize(
+    ("name", "iid"),
+    [("hazelnut", "hazelnuts_roasted"), ("walnut", "walnuts"), ("sesame", "sesame_seeds"),
+     ("chia", "chia_seeds"), ("flax", "flax_seeds"), ("фундук", "hazelnuts_roasted"),
+     ("cocoa", "cocoa_powder"), ("spinach", "spinach_frozen"), ("mango", "mango_puree")],
+)  # fmt: skip
+def test_the_name_a_model_gives_finds_the_ingredient(name, iid):
+    """The model may answer with an English stem instead of the id («hazelnut»)."""
+    found = match_ingredients(name, list(DATA.ingredients.values()))
+    assert [i.id for i in found] == [iid]
