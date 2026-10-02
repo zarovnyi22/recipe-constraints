@@ -9,6 +9,7 @@ from app.data import get_data
 from app.formulate import run_formulate
 from app.llm.fake import FakeLLM
 from eval import metrics
+from eval.relax_check import recheck
 from eval.run import NotCachedError, cache_path, run_requests
 from eval.schema import EvalRequest
 from tests.test_parse import PRODUCT, _answer
@@ -64,6 +65,7 @@ async def _rows(*items):
                 "expected": req.expected.model_dump(),
                 "status": out.status,
                 "out": out.model_dump(mode="json", by_alias=True),
+                "relax_check": await recheck(out, get_data()),
             }
         )
     return rows

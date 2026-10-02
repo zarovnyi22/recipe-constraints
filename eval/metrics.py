@@ -16,6 +16,7 @@ from pathlib import Path
 from app.data import DataBundle, get_data
 from app.parse import _WORD, SERVICE_WORDS, _locate, _uncovered
 from app.schemas import FormulateOut, requirement_ids
+from eval.relax_check import proposals
 from eval.schema import Expected
 
 ABS_TOL = 0.005  # totals are shown to 2 decimals
@@ -257,19 +258,27 @@ def conflicts(rows: list[tuple[dict, FormulateOut]]) -> dict:
 
 
 def relaxations(rows: list[tuple[dict, FormulateOut]]) -> dict:
-    """Every proposed change (joint, alternatives, other options) carries `verified` — the solver
-    re-solved with it and found a recipe — and the recipe of the joint relaxation passed every
-    check. This counts what the service reports; it does not re-solve in the eval."""
+    """Proposals (the joint relaxation as one, every alternative and other option alone) that the
+    EVAL re-solved itself (eval/relax_check.py: the change put into the spec, run_formulate,
+    independent verify) and that gave a recipe with every enforced check passed. The service's
+    `verified` flag is not trusted. A row without the re-check (an old report) counts as failed.
+    Also: the recipe of the joint relaxation the service gave passed every check."""
     n = k = 0
     bad = []
     recipes_n = recipes_k = 0
     for row, out in rows:
-        for c in [*out.relaxations, *out.alternatives, *out.other_options]:
+        checked = row.get("relax_check")
+        if checked is None:
+            checked = [
+                {"proposal": p, "groups": [c.group for c in ch], "ok": False}
+                for p, ch in proposals(out)
+            ]
+        for c in checked:
             n += 1
-            ok = c.verified and c.cost_uah_per_kg > 0
-            k += ok
-            if not ok:
-                bad.append(f"{row['id']}: {c.group}")
+            k += c["ok"]
+            if not c["ok"]:
+                what = f"{c['proposal']} [{', '.join(c['groups'])}]"
+                bad.append(f"{row['id']}: {what} — {c.get('problem', 'не перевірено eval')}")
         if out.relaxations:
             recipes_n += 1
             rr = out.relaxed_recipe
@@ -421,7 +430,8 @@ def summary(report: dict, m: dict) -> list[str]:
         ("Конфлікти: recall (infeasible)", pct(m["conflicts"]["recall"])),
         ("Конфлікти: precision", pct(m["conflicts"]["precision"])),
         (
-            "**Послаблення:** запропоновані зміни, що дають рішення (мета 100 %)",
+            "**Послаблення:** запропоновані зміни, що при повторному розв'язку в eval дають "
+            "рецептуру з усіма checks pass (мета 100 %)",
             pct(m["relaxations"]["changes"]),
         ),
         (
@@ -461,7 +471,7 @@ def markdown(report: dict, m: dict) -> str:
     _list(lines, "Зайві обмеження", m["parsing"]["extra"])
     _list(lines, "Не названі фрази", m["phrases"]["missed"])
     _list(lines, "Конфлікти не названо", m["conflicts"]["missed"])
-    _list(lines, "Послаблення без підтвердження", m["relaxations"]["bad"])
+    _list(lines, "Послаблення не підтвердилися в eval", m["relaxations"]["bad"])
     _list(lines, "Загублені слова", m["nothing_lost"]["lost"])
     _list(lines, "Помилки", [f"{e['id']}: {e['code']}" for e in m["errors"]])
     return "\n".join(lines) + "\n"

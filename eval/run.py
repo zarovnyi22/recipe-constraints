@@ -14,6 +14,8 @@ run). With --live only the missing ones call the model, EVAL_PAUSE_SECONDS apart
 under the free-tier RPM); the DB parse_cache de-duplicates repeated live runs. No fallback
 provider: the number is the primary model's.
 A parse error does not stop the run: the row is `error`, counted apart and not cached.
+Every proposed relaxation is then put back into the spec and run again (eval/relax_check.py):
+the relaxation metric counts those, not the service's own `verified` flag.
 Result: eval/reports/<split>_<date>.json (rows with the full answer) and .md (metrics).
 """
 
@@ -34,6 +36,7 @@ from app.formulate import SolveFn, run_formulate
 from app.llm.base import LLMClient
 from app.llm.prompt import PROMPT_VERSION, build_system_prompt
 from app.parse import ParseResult, parse_request, spec_from_raw
+from eval.relax_check import recheck
 from eval.schema import REQUESTS, EvalRequest, load_dir
 
 ROOT = Path(__file__).resolve().parent
@@ -154,6 +157,8 @@ async def run_requests(
             log(f"{r.id}: error internal_error")
         else:
             row |= {"status": out.status, "out": out.model_dump(mode="json", by_alias=True)}
+            # every proposed relaxation re-solved and re-verified by the eval itself
+            row["relax_check"] = await recheck(out, data, solve_fn)
             log(f"{r.id}: {out.status}")
         rows.append(row)
     return rows
