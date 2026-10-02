@@ -577,3 +577,22 @@ def test_real_data_cost_row_matches_the_base_recipe_cost():
         row = _row(expand(spec, data), "cost_max")
         cost = sum(row.coeffs.get(i, 0) * g for i, g in tpl.base_recipe.items())
         assert cost == pytest.approx(data.base_recipe_cost_uah_per_kg(tpl.id)), tpl.id
+
+
+def test_lactose_free_is_milk_exclusion_with_a_stated_assumption():
+    spec = ConstraintSpec.model_validate(
+        {
+            "product": {"template": "drinking_yogurt", "source_phrase": "питний йогурт"},
+            "exclude_allergens": [{"allergen": "milk", "source_phrase": "без лактози"}],
+        }
+    )
+    exp = expand(spec, get_data())
+    assert (
+        "у базі немає безлактозних молочних інгредієнтів, тому «без лактози» виконано через "
+        "виключення всієї молочної сировини" in exp.assumptions
+    )
+    plain = ConstraintSpec.model_validate(
+        spec.model_dump()
+        | {"exclude_allergens": [{"allergen": "milk", "source_phrase": "без молока"}]}
+    )
+    assert not any("лактоз" in a for a in expand(plain, get_data()).assumptions)

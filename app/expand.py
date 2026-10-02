@@ -7,6 +7,8 @@ technologist's requirements are soft. Every requirement becomes rows, a note in 
 (nothing to do, e.g. an excluded ingredient the template never uses) or `unsupported` with a reason.
 """
 
+import re
+
 from app import claims as C
 from app.allergens import allergens_in_name
 from app.data import TAGS, AllergenCategory, DataBundle, Ingredient, RefNutrients, Role, Template
@@ -594,6 +596,15 @@ class _Builder:
                 )
                 continue
             ids = {i.id for i in self.ings if req.allergen in i.allergens + i.may_contain}
+            if req.allergen == "milk" and re.search(r"лактоз|lactose", req.source_phrase, re.I):
+                names = " ".join(
+                    " ".join([i.name_uk, *i.aliases]) for i in self.ings if i.id in ids
+                ).casefold()
+                if "безлактоз" not in names:
+                    self.assumptions.append(
+                        "у базі немає безлактозних молочних інгредієнтів, тому «без лактози» "
+                        "виконано через виключення всієї молочної сировини"
+                    )
             self.exclude(
                 f"allergen:{k}:{req.allergen}",
                 ids,

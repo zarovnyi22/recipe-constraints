@@ -1,0 +1,16 @@
+{
+ "id": "d01",
+ "text_sha": "d47ab5810b1d921ea8f821402cff12d53993b1dd58997ecfbbc64f35a37cfd3e",
+ "prompt_sha": "ab4d91f24201fe68ef4bd358c0e4a40f74daf5da93971c9616582c5b5ba83451",
+ "prompt_version": "p2",
+ "model": "gemini:gemini-3.5-flash-lite",
+ "usage": {
+  "provider": "gemini",
+  "http_attempts": 1,
+  "input_tokens": 3731,
+  "output_tokens": 253,
+  "reasoning_tokens": 0,
+  "total_tokens": 3984
+ },
+ "raw_text": "{\n  \"product\": {\n    \"template\": \"yogurt_spoonable\",\n    \"flavor\": \"strawberry\",\n    \"source_phrase\": \"полуничний йогурт\"\n  },\n  \"exclude_allergens\": [\n    {\n      \"allergen\": \"milk\",\n      \"source_phrase\": \"без молока\"\n    }\n  ],\n  \"nutrients\": [\n    {\n      \"nutrient\": \"protein\",\n      \"op\": \">=\",\n      \"relative\": {\n        \"to\": \"reference\",\n        \"factor\": 1.0\n      },\n      \"source_phrase\": \"білка не менше, ніж у звичайного\"\n    }\n  ],\n  \"cost_max\": {\n    \"max_uah_per_kg\": 45,\n    \"source_phrase\": \"собівартість до 45 грн/кг\"\n  },\n  \"claims\": [\n    {\n      \"claim\": \"reduced_sugars\",\n      \"source_phrase\": \"зі зниженим вмістом цукру\"\n    }\n  ]\n}"
+}

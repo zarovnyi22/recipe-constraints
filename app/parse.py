@@ -198,6 +198,11 @@ def _json_object(raw: str) -> dict:
     return value
 
 
+def spec_from_raw(raw: str, text: str) -> ConstraintSpec:
+    """The model's raw answer → the validated spec, on the current code (eval replays caches)."""
+    return validate_spec(ConstraintSpec.model_validate(_json_object(raw)), text)
+
+
 def _label(llm: LLMClient, providers: list[str]) -> str:
     models = llm.models
     names = [p for p in providers if p in models] or [llm.provider]

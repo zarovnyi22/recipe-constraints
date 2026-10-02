@@ -159,6 +159,12 @@
   каталозі лише з умовою таски, FORMAT.md і копією схеми; прочитав тільки FORMAT.md; файли
   скопійовано без читання. Вміст test у основному контексті не відкривався.
 
+## Раннер, метрики, proof (B4b)
+- `eval/run.py`: кеш — сира відповідь моделі `eval/cache/<split>/<id>.json` (ключ: sha тексту + sha системного промпту [+ модель при --live]); після кешу `spec_from_raw` (validate_spec) і весь код далі — на поточному коді. Без `--live` нема кешу → `NotCachedError` з переліком. DB `parse_cache` лише з `--live`. Помилка розбору/сервісу — рядок `error`, не падіння.
+- `eval/metrics.py`: відповідність (checks, `verification_failed` рахується як провал), статус + confusion, розбір (precision/recall ключових обмежень; вільні слова — за основами слів), названі unsupported/unparsed, конфлікти, послаблення (`verified` + relaxed_recipe checks; **eval не розв'язує повторно сам**), нічого не загублено, `satisfies_expected` — рецептура проти файлу запиту (не проти spec моделі; claims і vegetarian не перевіряє).
+- `make proof [SPLIT=test]` → `docs/proof.md` (dev → `docs/proof_dev.md`) з останнього `eval/reports/<split>_<date>.json`. Звіти й proof_dev не коміщу, поки замір неповний.
+- Дрібниця B4a: «без лактози» → запис в assumptions (expand).
+
 ## Відкриті питання
 - Округлення: між LP-оптимумом і найдешевшою округленою рецептурою лишається вікно лімітів
   собівартості, де відповідь — 500 `rounding_failed`, хоча LP здійсненний (смузі вище: 95,0–95,3
