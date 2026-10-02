@@ -199,3 +199,84 @@ class Infeasible(BaseModel):
     alternatives: list[Change]
     # not offered automatically (allergen, diet): only "another option" with a warning
     other_options: list[Change]
+    # the recipe found with `relaxations` applied (None if there is no joint relaxation)
+    relaxed_recipe: Recipe | None = None
+
+
+# --- response (docs/SPEC.md §1, §5) -------------------------------------------------------------
+
+
+class Check(BaseModel):
+    """One requirement or technology rule, evaluated by app.verify on the rounded grams."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    id: str  # soft: the requirement's group id (cost_max, claim:reduced_sugars, …); hard: rule id
+    kind: Literal["hard", "soft"]
+    requested: str
+    actual: str
+    passed: bool = Field(alias="pass")
+    source_phrase: Phrase | None = None
+    # relaxed_recipe only: what the requirement was relaxed to ("relax"), or "drop" — a dropped
+    # requirement is shown (pass is about the original) but is not enforced.
+    relaxed: str | None = None
+    enforced: bool = True
+
+
+class RecipeLine(BaseModel):
+    ingredient: str
+    name: str
+    role: str
+    grams: float
+    cost_uah: float
+
+
+class Totals(BaseModel):
+    mass_g: float
+    cost_uah_per_kg: float
+    per_100g: dict[str, float]  # of finished product
+
+
+class RelaxedRecipe(BaseModel):
+    """The recipe for the recommended relaxation; its checks use the RELAXED requirements."""
+
+    changes: list[Change]
+    recipe: list[RecipeLine]
+    totals: Totals
+    checks: list[Check]
+
+
+class ErrorBody(BaseModel):
+    code: str
+    message: str
+
+
+Status = Literal["feasible", "partial", "infeasible", "unsupported", "error"]
+
+
+class FormulateOut(BaseModel):
+    run_id: int | None
+    status: Status
+    template: str | None = None
+    recipe: list[RecipeLine] | None = None
+    totals: Totals | None = None
+    checks: list[Check] = []
+    parsed: ConstraintSpec
+    unparsed: list[Phrase] = []
+    unsupported: list[Unsupported] = []
+    conflicts: list[ConflictItem] = []
+    relaxations: list[Change] = []  # the recommended joint relaxation (verified)
+    alternatives: list[Change] = []  # "it is enough to change one of…" (each verified)
+    other_options: list[Change] = []  # allergen/diet: only with a warning
+    relaxed_recipe: RelaxedRecipe | None = None
+    assumptions: list[str] = []
+    model: str | None = None
+    data_version: str
+    duration_ms: int
+    error: ErrorBody | None = None
+
+
+class StructuredIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    spec: ConstraintSpec

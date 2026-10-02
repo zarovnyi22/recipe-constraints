@@ -71,6 +71,26 @@
 - Базові шаблони без вимог дають мінімалістичні рецептури (печиво без яєць) — жорстких мінімумів
   ролей мало.
 
+## Перевірка і /formulate/structured (B3a)
+- `verify(grams, spec, data, reported_cost, relaxed) → (checks, totals, lines)`: з грамів і YAML,
+  без рядків розв'язувача; спільні лише пошук (find_template, match_ingredients) і юридичні пороги
+  (`app.claims`). Id soft-перевірок = group з expand (`cost_max`, `nutrient:0:protein`,
+  `claim:…`, `allergen:0:milk`, `must_include:0:…`) — так послаблення мапиться на перевірку.
+  Hard: template, mass, grams (крок 0,01), role:*, one_of:*, dose:*, sweetness_min,
+  pairing:base:culture, flavor, cost_reported; у formulate — `coverage` (кожна фраза spec має
+  перевірку або unsupported).
+- Алергени в verify = allergens ∪ may_contain ∪ словник label-check по name_uk/aliases
+  (`app/allergens.py`; додано «без X» маскує X і «мигдалев-»). Тест тримає словник ≡ дані.
+- `relaxed_recipe`: розв'язувач повертає рецептуру спільного послаблення (`Infeasible.relaxed_recipe`);
+  verify з `relaxed=relaxations` — нове число (`relaxed` = мітка), `drop` → `enforced: false`.
+  Приклад з умови: 52,84 грн/кг, усі 24 перевірки pass, cost_max «≤ 52.9 (послаблено)».
+- Будь-яка enforced-перевірка fail (і в relaxed_recipe) → run зі status `error` у БД (рецептура
+  для аудиту), відповідь 500 `verification_failed` з id/вимогою/фактом; GET не віддає рецептуру.
+- БД без нових міграцій: `totals` = {totals, template, assumptions}, `relaxations` = {conflicts,
+  relaxations, alternatives, other_options, relaxed_recipe}. Окремий стовпець `response` — чистіше
+  (нова міграція), не робив без погодження.
+- `run_formulate(spec, pool=None)` — без БД для eval (run_id None); `solve_fn` для FakeSolver.
+
 ## Розбір LLM (B3b)
 
 ## Відкриті питання

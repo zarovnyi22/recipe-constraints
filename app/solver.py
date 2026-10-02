@@ -446,6 +446,7 @@ def explain(exp: Expansion, data: DataBundle) -> Infeasible:
         )
     conflict = _conflict(exp, groups)
     relaxations: list[Change] = []
+    relaxed_recipe = None
     # The smallest joint change: first among the conflicting requirements, then among all.
     for scope in (conflict, list(groups)):
         rows = [r for g in scope for r in groups[g] if r.auto_relax]
@@ -453,6 +454,7 @@ def explain(exp: Expansion, data: DataBundle) -> Infeasible:
         verified = _verify(exp, data, *joint) if joint is not None else None
         if verified is not None:
             relaxations = _changes(exp, joint[0], *verified)
+            relaxed_recipe = verified[1]
             break
 
     alternatives, other = [], []
@@ -480,6 +482,7 @@ def explain(exp: Expansion, data: DataBundle) -> Infeasible:
         relaxations=relaxations,
         alternatives=alternatives,
         other_options=other,
+        relaxed_recipe=relaxed_recipe,
     )
 
 

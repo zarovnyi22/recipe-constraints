@@ -18,18 +18,27 @@
               "grams": 180.0, "cost_uah": 12.6}],
   "totals": {"cost_uah_per_kg": 43.1, "per_100g": {"energy_kcal": 71, "protein": 3.3,
              "fat": 1.8, "saturates": 0.3, "carbs": 9.2, "sugars": 6.4, "fibre": 1.1, "salt": 0.08}},
-  "checks": [{"id": "protein_vs_reference", "requested": ">= 3.2 г/100 г (звичайний йогурт)",
-              "actual": "3.3", "pass": true, "source_phrase": "білка не менше, ніж у звичайного"}],
+  "checks": [{"id": "nutrient:0:protein", "kind": "soft",
+              "requested": "protein >= 3.2 г/100 г (1 × еталон 3.2)", "actual": "3.3 г/100 г",
+              "pass": true, "source_phrase": "білка не менше, ніж у звичайного",
+              "relaxed": null, "enforced": true}],
   "parsed": ConstraintSpec,
   "unparsed": ["фрази, які модель не змогла віднести до обмеження"],
   "unsupported": [{"phrase": "...", "reason": "..."}],
-  "relaxations": [{"constraint": "cost_max", "from": 45, "to": 52.3, "unit": "грн/кг",
-                   "verified": true}],
-  "conflicts": [["cost_max", "protein_vs_reference"]],
+  "conflicts": [{"group": "cost_max", "label_uk": "...", "source_phrase": "..."}],
+  "relaxations": [{"group": "cost_max", "action": "relax", "rows": [{"from_rhs": 45,
+                   "to_rhs": 52.9, "unit": "грн/кг", ...}], "verified": true,
+                   "cost_uah_per_kg": 52.84}],
+  "alternatives": [...], "other_options": [{"...": "...", "warning": "алерген — лише інший варіант"}],
+  "relaxed_recipe": {"changes": [...], "recipe": [...], "totals": {...},
+                     "checks": [... перевірка відносно ПОСЛАБЛЕНИХ вимог, "relaxed": "..."]},
   "assumptions": ["еталон: звичайний полуничний йогурт 2,5 %, джерело …"],
   "model": "...", "duration_ms": 2100
 }
 ```
+`status: error` лише в збереженому run (verification_failed: рецептура в БД для аудиту, назовні не
+віддається). `relaxed_recipe` — рецептура для рекомендованого спільного послаблення (`relaxations`),
+теж через незалежну перевірку; відкинута вимога (`drop`) показана з `enforced: false`.
 `partial` = рецептура є і пройшла перевірку, але частину запиту не враховано (`unsupported`
 або `unparsed` непорожні). `unsupported` = категорія продукту не підтримується.
 
