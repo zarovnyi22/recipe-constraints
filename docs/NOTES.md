@@ -86,9 +86,13 @@
   Приклад з умови: 52,84 грн/кг, усі 24 перевірки pass, cost_max «≤ 52.9 (послаблено)».
 - Будь-яка enforced-перевірка fail (і в relaxed_recipe) → run зі status `error` у БД (рецептура
   для аудиту), відповідь 500 `verification_failed` з id/вимогою/фактом; GET не віддає рецептуру.
-- БД без нових міграцій: `totals` = {totals, template, assumptions}, `relaxations` = {conflicts,
-  relaxations, alternatives, other_options, relaxed_recipe}. Окремий стовпець `response` — чистіше
-  (нова міграція), не робив без погодження.
+- (fix) `runs.response` (міграція 002) — уся відповідь; GET віддає її (run_id = id рядка; для
+  status error рецептури приховано). Інші стовпці — частини для SQL. Запуски до 002 → 404.
+- (fix) solver_error / template_infeasible / rounding_failed і непередбачений виняток теж пишуться
+  в runs зі status error (виняток потім прокидається → 500 internal_error).
+- (fix) Покриття — за id вимоги (`schemas.requirement_ids` = group expand = id перевірки verify),
+  `Unsupported.id`; дві вимоги з однієї фрази потребують двох перевірок. `sweeteners.allowed: true`
+  — дозвіл: рядок у assumptions, перевірки не потребує (раніше покриття за фразою його б завалило).
 - `run_formulate(spec, pool=None)` — без БД для eval (run_id None); `solve_fn` для FakeSolver.
 
 ## Розбір LLM (B3b)

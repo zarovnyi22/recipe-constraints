@@ -90,8 +90,38 @@ class ConstraintSpec(BaseModel):
 
 
 class Unsupported(BaseModel):
+    id: str | None = None  # the requirement (requirement_ids), None if not one of the spec's
     phrase: Phrase
     reason: str
+
+
+def requirement_ids(spec: ConstraintSpec) -> list[tuple[str, Phrase]]:
+    """(id, phrase) of every requirement of the spec. The id is the group expand gives its rows
+    and the check id verify gives its check: coverage is by id, never by the phrase text (two
+    requirements may come from one phrase). sweeteners allowed: a permission, nothing to check."""
+    out = [("template", spec.product.source_phrase)]
+    if spec.product.flavor:
+        out.append(("flavor", spec.product.source_phrase))
+    out += [
+        (f"allergen:{k}:{r.allergen}", r.source_phrase)
+        for k, r in enumerate(spec.exclude_allergens)
+    ]
+    out += [(f"diet:{k}:{r.diet}", r.source_phrase) for k, r in enumerate(spec.diet)]
+    out += [
+        (f"exclude:{k}:{r.ingredient}", r.source_phrase)
+        for k, r in enumerate(spec.exclude_ingredients)
+    ]
+    out += [(f"nutrient:{k}:{r.nutrient}", r.source_phrase) for k, r in enumerate(spec.nutrients)]
+    if spec.cost_max is not None:
+        out.append(("cost_max", spec.cost_max.source_phrase))
+    out += [(f"claim:{r.claim}", r.source_phrase) for r in spec.claims]
+    if spec.sweeteners is not None and not spec.sweeteners.allowed:
+        out.append(("no_sweeteners", spec.sweeteners.source_phrase))
+    out += [
+        (f"must_include:{k}:{r.ingredient_or_role}", r.source_phrase)
+        for k, r in enumerate(spec.must_include)
+    ]
+    return out
 
 
 class LinearConstraint(BaseModel):

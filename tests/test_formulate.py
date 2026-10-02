@@ -4,8 +4,13 @@ A broken solver (right shape, wrong grams) must never give a recipe: verificatio
 and the run is kept for the audit.
 """
 
+import json
+
+import pytest
+
 from app import formulate as F
-from app.schemas import Recipe, RecipeItem
+from app.errors import AppError
+from app.schemas import Check, Recipe, RecipeItem
 from app.solver import solve
 from app.verify import failed
 from tests.test_solver import TASK
@@ -129,13 +134,99 @@ async def test_unknown_run_is_404(db_client):
     assert r.status_code == 404 and r.json()["error"]["code"] == "not_found"
 
 
-def test_coverage_catches_a_phrase_without_a_check():
+def test_coverage_is_by_requirement_id_not_by_phrase():
+    """Two requirements from one phrase: a check for one of them does not cover the other."""
+    phrase = "менше цукру й жиру"
     spec = F.ConstraintSpec(
-        product=PRODUCT, cost_max={"max_uah_per_kg": 45, "source_phrase": "до 45"}
+        product=PRODUCT,
+        nutrients=[
+            {"nutrient": "sugars", "op": "<=", "value": 8, "source_phrase": phrase},
+            {"nutrient": "fat", "op": "<=", "value": 2, "source_phrase": phrase},
+        ],
     )
-    check = F._coverage(spec, [], [])
-    assert not check.passed and "до 45" in check.actual and "полуничний йогурт" in check.actual
+    sugars = Check(id="nutrient:0:sugars", kind="soft", requested="", actual="", passed=True,
+                   source_phrase=phrase)  # fmt: skip
+    hard = [Check(id=i, kind="hard", requested="", actual="", passed=True)
+            for i in ("template", "flavor")]  # fmt: skip
+    check = F._coverage(spec, [*hard, sugars], [])
+    assert not check.passed and "nutrient:1:fat" in check.actual
     assert failed([check]) == [check]
+    fat = sugars.model_copy(update={"id": "nutrient:1:fat"})
+    assert F._coverage(spec, [*hard, sugars, fat], []).passed
+    unsupported = [F.Unsupported(id="nutrient:1:fat", phrase=phrase, reason="x")]
+    assert F._coverage(spec, [*hard, sugars], unsupported).passed
+
+
+async def test_one_phrase_two_requirements_one_unchecked_is_verification_failed(
+    db_client, monkeypatch
+):
+    """verify forgets a check (a bug): the coverage check refuses the recipe."""
+    phrase = "менше цукру й жиру"
+    real = F.verify
+
+    def forgetful(*args, **kwargs):
+        checks, totals, lines = real(*args, **kwargs)
+        return [c for c in checks if c.id != "nutrient:1:fat"], totals, lines
+
+    monkeypatch.setattr(F, "verify", forgetful)
+    r = await _post(
+        db_client,
+        nutrients=[
+            {"nutrient": "sugars", "op": "<=", "value": 12, "source_phrase": phrase},
+            {"nutrient": "fat", "op": "<=", "value": 3, "source_phrase": phrase},
+        ],
+    )
+    assert r.status_code == 500
+    assert r.json()["error"]["code"] == "verification_failed"
+    assert (
+        "coverage" in r.json()["error"]["message"]
+        and "nutrient:1:fat" in r.json()["error"]["message"]
+    )
+
+
+async def test_sweeteners_allowed_is_a_permission_not_a_lost_requirement(db_client):
+    r = await _post(db_client, sweeteners={"allowed": True, "source_phrase": "можна стевію"})
+    body = r.json()
+    assert r.status_code == 200 and body["status"] == "feasible"
+    assert any("можна стевію" in a for a in body["assumptions"])
+
+
+@pytest.mark.parametrize(
+    ("code", "message"),
+    [("solver_error", "linprog: numerical trouble"), ("template_infeasible", "template x")],
+)
+async def test_solver_errors_are_kept_in_runs(db_client, db_pool, monkeypatch, code, message):
+    def failing(exp, data):
+        raise AppError(500, code, message)
+
+    monkeypatch.setattr(F, "solve", failing)
+    r = await _post(db_client)
+    assert r.status_code == 500 and r.json()["error"]["code"] == code
+    row = await db_pool.fetchrow("SELECT status, error, response FROM runs WHERE id = 1")
+    assert row["status"] == "error"
+    assert json.loads(row["error"]) == {"code": code, "message": message}
+    stored = (await db_client.get("/formulate/1")).json()
+    assert stored["status"] == "error" and stored["error"]["code"] == code
+
+
+async def test_unexpected_exception_is_kept_and_reraised(db_client, db_pool, monkeypatch):
+    def boom(exp, data):
+        raise KeyError("oops")
+
+    monkeypatch.setattr(F, "solve", boom)
+    # in the app the middleware turns it into 500 internal_error; ASGITransport re-raises it
+    with pytest.raises(KeyError):
+        await _post(db_client)
+    error = json.loads(await db_pool.fetchval("SELECT error FROM runs WHERE id = 1"))
+    assert error["code"] == "internal_error" and "KeyError" in error["message"]
+
+
+async def test_get_returns_the_stored_response(db_client, db_pool):
+    body = (await _post(db_client, **TASK)).json()
+    response = json.loads(await db_pool.fetchval("SELECT response FROM runs WHERE id = 1"))
+    assert response | {"run_id": 1} == body
+    await db_pool.execute("UPDATE runs SET response = NULL WHERE id = 1")
+    assert (await db_client.get("/formulate/1")).status_code == 404
 
 
 async def test_run_formulate_without_a_pool_for_the_eval():

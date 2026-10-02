@@ -123,13 +123,13 @@ class _Builder:
         """Coefficients that give the nutrient per 100 g of finished product."""
         return {i.id: getattr(i.per_100g, n) / 1000 for i in self.ings}
 
-    def unsupported_(self, phrase: str, reason: str) -> None:
-        self.unsupported.append(Unsupported(phrase=phrase, reason=reason))
+    def unsupported_(self, id: str, phrase: str, reason: str) -> None:
+        self.unsupported.append(Unsupported(id=id, phrase=phrase, reason=reason))
 
-    def ref_value(self, nutrient: str, phrase: str, what: str) -> float | None:
+    def ref_value(self, id: str, nutrient: str, phrase: str, what: str) -> float | None:
         if self.reference is None:
             self.unsupported_(
-                phrase, f"{what}: для «{self.tpl.name_uk}» немає еталона «звичайного» продукту"
+                id, phrase, f"{what}: для «{self.tpl.name_uk}» немає еталона «звичайного» продукту"
             )
             return None
         if not self._reference_noted:
@@ -242,7 +242,9 @@ class _Builder:
                 if not found
                 else f"смак «{flavor}» не відповідає інгредієнтам шаблону «{self.tpl.name_uk}»"
             )
-            self.unsupported_(phrase, why + (f" (є: {', '.join(fruit)})" if fruit else ""))
+            self.unsupported_(
+                "flavor", phrase, why + (f" (є: {', '.join(fruit)})" if fruit else "")
+            )
             return
         role_name = roles.pop()
         role = self.tpl.roles[role_name]
@@ -250,7 +252,9 @@ class _Builder:
         minimum = role.flavor_min_pct
         if minimum is None and role.min_pct == 0:
             self.unsupported_(
-                phrase, f"для ролі «{role_name}» шаблону не задано мінімум характерного інгредієнта"
+                "flavor",
+                phrase,
+                f"для ролі «{role_name}» шаблону не задано мінімум характерного інгредієнта",
             )
             return
         names = ", ".join(i.name_uk for i in found)
@@ -284,8 +288,10 @@ class _Builder:
 
     def nutrients(self) -> None:
         for k, req in enumerate(self.spec.nutrients):
+            gid = f"nutrient:{k}:{req.nutrient}"
             if req.nutrient not in NUTRIENTS:
                 self.unsupported_(
+                    gid,
                     req.source_phrase,
                     f"поживна речовина «{req.nutrient}» не підтримується "
                     f"(є: {', '.join(NUTRIENTS)})",
@@ -294,12 +300,11 @@ class _Builder:
             name, unit = NUTRIENT_UK[req.nutrient]
             value, what = req.value, ""
             if req.relative is not None:
-                ref = self.ref_value(req.nutrient, req.source_phrase, "порівняння з еталоном")
+                ref = self.ref_value(gid, req.nutrient, req.source_phrase, "порівняння з еталоном")
                 if ref is None:
                     continue
                 value = req.relative.factor * ref
                 what = f" ({_fmt(req.relative.factor)} × еталон {_fmt(ref)})"
-            gid = f"nutrient:{k}:{req.nutrient}"
             coeffs = self.nutrient(req.nutrient)
             if req.op == "==":
                 lo, hi = value * (1 - EQ_TOLERANCE), value * (1 + EQ_TOLERANCE)
@@ -366,7 +371,9 @@ class _Builder:
             cid, phrase = req.claim, req.source_phrase
             if cid not in C.CLAIM_IDS:
                 self.unsupported_(
-                    phrase, f"твердження «{cid}» не підтримується (є: {', '.join(C.CLAIM_IDS)})"
+                    f"claim:{cid}",
+                    phrase,
+                    f"твердження «{cid}» не підтримується (є: {', '.join(C.CLAIM_IDS)})",
                 )
                 continue
             g = f"claim:{cid}"
@@ -478,12 +485,12 @@ class _Builder:
     def comparative(self, cid: str, g: str, phrase: str) -> None:
         nutrient, op, factor = C.COMPARATIVE[cid]
         title = f"«{C.TITLE_UK[cid]}»"
-        ref = self.ref_value(nutrient, phrase, f"порівняльне твердження {title}")
+        ref = self.ref_value(g, nutrient, phrase, f"порівняльне твердження {title}")
         if ref is None:
             return
         name, unit = NUTRIENT_UK[nutrient]
         if op == "<=" and ref <= 0:
-            self.unsupported_(phrase, f"{title}: в еталоні {name} = 0, знижувати нікуди")
+            self.unsupported_(g, phrase, f"{title}: в еталоні {name} = 0, знижувати нікуди")
             return
         value = factor * ref
         sign = "≤" if op == "<=" else "≥"
@@ -516,6 +523,7 @@ class _Builder:
         for k, req in enumerate(self.spec.exclude_allergens):
             if req.allergen not in ALLERGENS:
                 self.unsupported_(
+                    f"allergen:{k}:{req.allergen}",
                     req.source_phrase,
                     f"«{req.allergen}» — не одна з 14 категорій алергенів ЄС "
                     f"({', '.join(sorted(ALLERGENS))})",
@@ -538,6 +546,7 @@ class _Builder:
                 ids = {i.id for i in self.ings if "cereals" in i.allergens + i.may_contain}
             else:
                 self.unsupported_(
+                    f"diet:{k}:{req.diet}",
                     req.source_phrase,
                     f"дієта «{req.diet}» не підтримується (є: vegan, vegetarian, gluten_free)",
                 )
@@ -567,6 +576,10 @@ class _Builder:
                 req.source_phrase,
             )
         sw = self.spec.sweeteners
+        if sw is not None and sw.allowed:
+            self.assumptions.append(
+                f"«{sw.source_phrase}»: підсолоджувачі дозволено — окремого обмеження немає"
+            )
         if sw is not None and not sw.allowed:
             ids = {i.id for i in self.ings if is_sweetener(i)}
             self.exclude("no_sweeteners", ids, "без підсолоджувачів", sw.source_phrase)
@@ -580,7 +593,9 @@ class _Builder:
             else:
                 found = match_ingredients(name, self.ings)
                 if not found:
-                    self.unsupported_(req.source_phrase, self.not_in_template(name))
+                    self.unsupported_(
+                        f"must_include:{k}:{name}", req.source_phrase, self.not_in_template(name)
+                    )
                     continue
                 ids = [i.id for i in found]
                 role = self.tpl.roles[self.tpl.role_of(ids[0])]
@@ -659,6 +674,7 @@ def expand(spec: ConstraintSpec, data: DataBundle) -> Expansion:
             template_id=None,
             unsupported=[
                 Unsupported(
+                    id="template",
                     phrase=spec.product.source_phrase,
                     reason=f"категорія «{spec.product.template}» не підтримується; "
                     f"підтримуємо: {supported}",
