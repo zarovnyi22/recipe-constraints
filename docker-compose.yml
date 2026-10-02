@@ -1,0 +1,79 @@
+services:
+  db:
+    # Pinned minor version (16-bookworm floats): bump deliberately.
+    image: postgres:16.15-bookworm
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: recipe
+    ports:
+      # Host access for local tools only: not published on the LAN with the default password.
+      # 5434: 5432 is the pet project's database, 5433 is label-check's.
+      - "127.0.0.1:5434:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks: [default, offline]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d recipe"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+
+  api:
+    build: .
+    env_file: .env
+    environment:
+      # .env points at localhost:5434 for host-side runs; inside compose the DB host is `db`.
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/recipe
+    ports:
+      - "127.0.0.1:8020:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ruff + pytest: `docker compose run --rm test` (append a command to override).
+  # Behind a profile, so `docker compose up` never starts it. Runs offline and keyless: only the
+  # `offline` network (internal: db reachable, internet not), LLM keys forced empty.
+  test:
+    profiles: ["test"]
+    build:
+      context: .
+      target: dev
+    environment:
+      # Env vars win over the mounted .env (which points at localhost and holds real keys).
+      # A separate *_test database: the fixtures create it and truncate it before each test.
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/recipe_test
+      GEMINI_API_KEY: ""
+      GROQ_API_KEY: ""
+      LLM_FALLBACK_PROVIDER: ""
+      TEST_NETWORK_ISOLATED: "1"
+    networks: [offline]
+    volumes:
+      - .:/src
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # One-off scripts that need the internet (live LLM, eval): the dev image, the repo mounted,
+  # the default network and the real keys from .env. Never part of `make test`.
+  tools:
+    profiles: ["tools"]
+    build:
+      context: .
+      target: dev
+    env_file: .env
+    environment:
+      PYTHONPATH: /src
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/recipe
+    volumes:
+      - .:/src
+    depends_on:
+      db:
+        condition: service_healthy
+
+networks:
+  offline:
+    internal: true
+
+volumes:
+  pgdata:

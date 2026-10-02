@@ -117,7 +117,7 @@ docs/ OVERVIEW, SPEC, NOTES, steps/, proof.md (генерується)
 | Крок | Що | Статус |
 |---|---|---|
 | B0 | рішення, план, репозиторій | [x] |
-| B1a | скелет з label-check: FastAPI, compose, БД, /health, CI | [ ] |
+| B1a | скелет з label-check: FastAPI, compose, БД, /health, CI | [x] |
 | B1b | дані: інгредієнти + ціни, еталони, шаблони, валідація | [ ] |
 | B2a | ConstraintSpec + розгортання в лінійні обмеження | [ ] |
 | B2b | розв'язувач, округлення, «що послабити» | [ ] |

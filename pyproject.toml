@@ -1,0 +1,39 @@
+[project]
+name = "recipe-constraints"
+version = "0.1.0"
+description = "Recipe formulation from a technologist's free-text constraints (LP solver + independent verification)"
+requires-python = "==3.12.*"
+# Direct deps pinned exactly (== what uv.lock resolved); transitive deps are pinned by uv.lock.
+dependencies = [
+    "asyncpg==0.31.0",
+    "fastapi==0.141.1",
+    "httpx==0.28.1",
+    "pydantic-settings==2.15.0",
+    "pyyaml==6.0.3",
+    "scipy==1.16.3",
+    "uvicorn[standard]==0.54.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest==9.1.1",
+    "pytest-asyncio==1.4.0",
+    "ruff==0.16.9",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
+# The project is not installed (package = false), so tests import `app` from the repo root.
+pythonpath = ["."]

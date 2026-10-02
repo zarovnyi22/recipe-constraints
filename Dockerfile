@@ -1,0 +1,46 @@
+# Pinned versions: both stages use the SAME python image, so the venv built in stage 1
+# runs on exactly the same interpreter in stage 2. Bump versions here deliberately.
+ARG PYTHON_IMAGE=python:3.12.14-slim-bookworm
+ARG UV_IMAGE=ghcr.io/astral-sh/uv:0.9.30
+
+FROM ${UV_IMAGE} AS uv
+
+# --- Stage 1: uv resolves and installs dependencies into /app/.venv ---
+FROM ${PYTHON_IMAGE} AS builder
+COPY --from=uv /uv /usr/local/bin/uv
+
+ENV UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy \
+    UV_PYTHON_DOWNLOADS=0
+
+WORKDIR /app
+COPY pyproject.toml uv.lock .python-version ./
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-dev --no-install-project
+
+# --- Dev stage: runtime venv + dev group (pytest, ruff) for `docker compose run --rm test` ---
+# Only built on demand (target: dev). The code is not copied: compose mounts the repo at /src.
+FROM builder AS dev
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-install-project
+WORKDIR /src
+ENV PATH="/app/.venv/bin:$PATH" \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    RUFF_NO_CACHE=true
+CMD ["sh", "-c", "ruff check . && ruff format --check . && pytest -q -p no:cacheprovider"]
+
+# --- Stage 2: runtime — only the venv and the code, no uv, no build cache ---
+FROM ${PYTHON_IMAGE}
+
+WORKDIR /app
+ENV PATH="/app/.venv/bin:$PATH" \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
+
+COPY --from=builder /app/.venv /app/.venv
+COPY migrations ./migrations
+COPY app ./app
+
+EXPOSE 8000
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
