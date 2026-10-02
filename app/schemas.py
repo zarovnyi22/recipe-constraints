@@ -1,0 +1,130 @@
+"""ConstraintSpec (what the request asks for) and the linear model expand.py builds from it.
+
+Every requirement carries the request phrase it came from (`source_phrase`): the model only
+transfers requirements from the text, the code turns them into numbers (docs/SPEC.md §2–§3).
+Ids that the code may not support (allergen, diet, claim, nutrient) are plain strings: an
+unknown one becomes `unsupported` with a reason, never a validation error that loses the phrase.
+"""
+
+from typing import Literal, Self
+
+from pydantic import BaseModel, ConfigDict, Field, model_validator
+
+Phrase = str  # the fragment of the request a requirement comes from
+
+
+class _Item(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    source_phrase: Phrase = Field(min_length=1)
+
+
+class ProductReq(_Item):
+    template: str = Field(min_length=1)
+    flavor: str | None = None  # characteristic ingredient: "strawberry" → strawberry_frozen
+
+
+class AllergenReq(_Item):
+    allergen: str  # one of the 14 EU categories (app.data.AllergenCategory)
+
+
+class IngredientReq(_Item):
+    ingredient: str  # ingredient id, alias or group
+
+
+class DietReq(_Item):
+    diet: str  # vegan | vegetarian | gluten_free
+
+
+class Relative(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    to: Literal["reference"] = "reference"
+    factor: float = Field(default=1.0, gt=0)
+
+
+class NutrientReq(_Item):
+    nutrient: str  # energy_kcal, protein, fat, saturates, carbs, sugars, fibre, salt
+    op: Literal["<=", ">=", "=="]
+    value: float | None = Field(default=None, ge=0)  # per 100 g of finished product
+    relative: Relative | None = None
+
+    @model_validator(mode="after")
+    def _one_target(self) -> Self:
+        if (self.value is None) == (self.relative is None):
+            raise ValueError("exactly one of value / relative")
+        return self
+
+
+class CostReq(_Item):
+    max_uah_per_kg: float = Field(gt=0)
+
+
+class ClaimReq(_Item):
+    claim: str  # id from app.claims.CLAIM_IDS
+
+
+class SweetenersReq(_Item):
+    allowed: bool
+
+
+class MustInclude(_Item):
+    ingredient_or_role: str
+    min_pct: float | None = Field(default=None, gt=0, le=100)  # % of the recipe mass
+
+
+class ConstraintSpec(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    product: ProductReq
+    exclude_allergens: list[AllergenReq] = []
+    exclude_ingredients: list[IngredientReq] = []
+    diet: list[DietReq] = []
+    nutrients: list[NutrientReq] = []
+    cost_max: CostReq | None = None
+    claims: list[ClaimReq] = []
+    sweeteners: SweetenersReq | None = None
+    must_include: list[MustInclude] = []
+    optimize: Literal["cost"] = "cost"
+    unparsed: list[Phrase] = []  # phrases the model could not map to a requirement
+
+
+class Unsupported(BaseModel):
+    phrase: Phrase
+    reason: str
+
+
+class LinearConstraint(BaseModel):
+    """Σ coeffs[i]·x_i op rhs, x_i in grams per batch. Coefficients are scaled so that the
+    left side is in `unit` (per 100 g, UAH/kg, %): rhs is the human number a relaxation moves."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    id: str
+    group: str  # the requirement it belongs to (one requirement may give several rows)
+    kind: Literal["hard", "soft"]  # hard = technology; soft = the technologist's requirement
+    coeffs: dict[str, float]
+    op: Literal["<=", ">=", "=="]  # "==" only for the hard mass balance
+    rhs: float
+    unit: str
+    label_uk: str
+    source_phrase: Phrase | None = None
+    weight: float = Field(default=1.0, gt=0)
+    # False: never relaxed by the elastic LP, only offered as "another option" with a warning
+    # (allergen and diet exclusions).
+    auto_relax: bool = True
+
+
+class Expansion(BaseModel):
+    """The linear model of one request. `template_id` None = the category is unsupported."""
+
+    template_id: str | None
+    form: str | None = None
+    batch_mass_g: float = 1000.0
+    variables: list[str] = []
+    constraints: list[LinearConstraint] = []
+    one_of: dict[str, list[str]] = {}  # role -> candidates: exactly one is used (solver enumerates)
+    min_dose_g: dict[str, float] = {}  # if the ingredient is used at all, at least this much
+    reference_id: str | None = None
+    unsupported: list[Unsupported] = []
+    assumptions: list[str] = []

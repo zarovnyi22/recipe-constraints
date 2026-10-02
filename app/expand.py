@@ -1,0 +1,609 @@
+"""ConstraintSpec → linear constraints over x_i, grams of ingredient i per batch (docs/SPEC.md §3).
+
+The batch yields 1000 g of finished product (for baked goods it weighs batch_mass_g before the
+moisture loss), so: nutrient per 100 g of product = Σ x_i·n_i / 1000, cost per kg = Σ x_i·price_i
+/ 1000, % of the recipe = 100·x_i / batch_mass_g. Template rows are hard (technology), the
+technologist's requirements are soft. Every requirement becomes rows, a note in `assumptions`
+(nothing to do, e.g. an excluded ingredient the template never uses) or `unsupported` with a reason.
+"""
+
+from app import claims as C
+from app.data import AllergenCategory, DataBundle, Ingredient, RefNutrients, Template
+from app.schemas import ConstraintSpec, Expansion, LinearConstraint, Unsupported
+
+NUTRIENTS = list(RefNutrients.model_fields)
+NUTRIENT_UK = {
+    "energy_kcal": ("енергетична цінність", "ккал/100 г"),
+    "protein": ("білки", "г/100 г"),
+    "fat": ("жири", "г/100 г"),
+    "saturates": ("насичені жири", "г/100 г"),
+    "carbs": ("вуглеводи", "г/100 г"),
+    "sugars": ("цукри", "г/100 г"),
+    "fibre": ("клітковина", "г/100 г"),
+    "salt": ("сіль", "г/100 г"),
+}
+ALLERGENS = set(AllergenCategory.__args__)
+EQ_TOLERANCE = 0.02  # "==" on a nutrient is a ±2 % band
+# A sweetener (E950–E969 sense): sweetens, is not a sugar. Polydextrose (sweetness 0.05) is a
+# bulking agent, not a sweetener.
+SWEETENER_MIN_SWEETNESS = 0.1
+DIET_ANIMAL = {"fish", "crustaceans", "molluscs"}
+
+
+def _fmt(v: float) -> str:
+    return f"{v:.2f}".rstrip("0").rstrip(".").replace(".", ",")
+
+
+def find_template(name: str, data: DataBundle) -> Template | None:
+    key = name.strip().casefold()
+    for tpl in data.templates.values():
+        if key in {tpl.id, tpl.name_uk.casefold(), *(a.casefold() for a in tpl.aliases)}:
+            return tpl
+    return None
+
+
+def match_ingredients(name: str, ingredients: list[Ingredient]) -> list[Ingredient]:
+    """By id, id prefix ("strawberry" → strawberry_frozen), alias, Ukrainian name or group."""
+    key = name.strip().casefold()
+    exact = [
+        i
+        for i in ingredients
+        if key in {i.id, i.name_uk.casefold(), *(a.casefold() for a in i.aliases)}
+    ]
+    if exact:
+        return exact
+    prefixed = [i for i in ingredients if i.id.startswith(key + "_")]
+    return prefixed or [i for i in ingredients if i.group == key]
+
+
+def is_sweetener(ing: Ingredient) -> bool:
+    return (
+        ing.group == "sweeteners"
+        and not ing.added_sugar
+        and ing.sweetness >= SWEETENER_MIN_SWEETNESS
+    )
+
+
+class _Builder:
+    def __init__(self, spec: ConstraintSpec, data: DataBundle, tpl: Template) -> None:
+        self.spec, self.data, self.tpl = spec, data, tpl
+        self.mass = tpl.batch_mass_g
+        self.variables = [i for role in tpl.roles.values() for i in role.ingredients]
+        self.ings = [data.ingredients[i] for i in self.variables]
+        self.rows: list[LinearConstraint] = []
+        self.unsupported: list[Unsupported] = []
+        self.assumptions: list[str] = []
+        self.reference = data.references.get(tpl.reference)
+        self._reference_noted = False
+
+    # --- helpers ------------------------------------------------------------------------------
+
+    def row(
+        self,
+        id: str,
+        coeffs: dict[str, float],
+        op: str,
+        rhs: float,
+        unit: str,
+        label: str,
+        *,
+        kind: str = "soft",
+        group: str | None = None,
+        phrase: str | None = None,
+        auto_relax: bool = True,
+    ) -> None:
+        coeffs = {i: c for i, c in coeffs.items() if c != 0}
+        self.rows.append(
+            LinearConstraint(
+                id=id,
+                group=group or id,
+                kind=kind,
+                coeffs=coeffs,
+                op=op,
+                rhs=rhs,
+                unit=unit,
+                label_uk=label,
+                source_phrase=phrase,
+                auto_relax=auto_relax,
+            )
+        )
+
+    def pct(self, ids: list[str]) -> dict[str, float]:
+        """Coefficients that give % of the recipe mass."""
+        return {i: 100 / self.mass for i in ids}
+
+    def nutrient(self, n: str) -> dict[str, float]:
+        """Coefficients that give the nutrient per 100 g of finished product."""
+        return {i.id: getattr(i.per_100g, n) / 1000 for i in self.ings}
+
+    def unsupported_(self, phrase: str, reason: str) -> None:
+        self.unsupported.append(Unsupported(phrase=phrase, reason=reason))
+
+    def ref_value(self, nutrient: str, phrase: str, what: str) -> float | None:
+        if self.reference is None:
+            self.unsupported_(
+                phrase, f"{what}: для «{self.tpl.name_uk}» немає еталона «звичайного» продукту"
+            )
+            return None
+        if not self._reference_noted:
+            self._reference_noted = True
+            self.assumptions.append(
+                f"еталон «звичайного»: {self.reference.name_uk} — {self.reference.source}"
+            )
+        return getattr(self.reference.per_100g, nutrient)
+
+    def exclude(
+        self, group: str, ids: set[str], label: str, phrase: str, *, auto_relax: bool = True
+    ) -> None:
+        used = [i for i in self.variables if i in ids]
+        if not used:
+            self.assumptions.append(
+                f"«{phrase}»: шаблон «{self.tpl.name_uk}» не містить таких інгредієнтів — "
+                "виконано автоматично"
+            )
+            return
+        names = ", ".join(self.data.ingredients[i].name_uk for i in used)
+        self.row(
+            group,
+            {i: 1.0 for i in used},
+            "<=",
+            0.0,
+            "г",
+            f"{label}: виключено {names}",
+            phrase=phrase,
+            auto_relax=auto_relax,
+        )
+
+    # --- template (hard) ----------------------------------------------------------------------
+
+    def template(self) -> None:
+        tpl = self.tpl
+        self.row(
+            "mass",
+            {i: 1.0 for i in self.variables},
+            "==",
+            self.mass,
+            "г",
+            f"маса рецептури {_fmt(self.mass)} г на 1000 г продукту",
+            kind="hard",
+        )
+        for name, role in tpl.roles.items():
+            coeffs = self.pct(role.ingredients)
+            if role.min_pct > 0:
+                self.row(
+                    f"role_min:{name}",
+                    coeffs,
+                    ">=",
+                    role.min_pct,
+                    "%",
+                    f"роль «{name}» не менше {_fmt(role.min_pct)} %",
+                    kind="hard",
+                )
+            if role.max_pct < 100:
+                self.row(
+                    f"role_max:{name}",
+                    coeffs,
+                    "<=",
+                    role.max_pct,
+                    "%",
+                    f"роль «{name}» не більше {_fmt(role.max_pct)} %",
+                    kind="hard",
+                )
+        for ing in self.ings:
+            top = tpl.dose_limits_pct.get(ing.id, ing.max_dose_pct)
+            if top is not None:
+                self.row(
+                    f"dose_max:{ing.id}",
+                    self.pct([ing.id]),
+                    "<=",
+                    top,
+                    "%",
+                    f"{ing.name_uk} не більше {_fmt(top)} %",
+                    kind="hard",
+                )
+        if tpl.sweetness_min > 0:
+            self.row(
+                "sweetness_min",
+                {i.id: i.sweetness / 10 for i in self.ings},
+                ">=",
+                tpl.sweetness_min,
+                "г сахарозного екв./100 г",
+                f"солодкість не менше {_fmt(tpl.sweetness_min)} г сахарозного екв./100 г",
+                kind="hard",
+            )
+        if self.spec.product.flavor:
+            self.flavor(self.spec.product.flavor, self.spec.product.source_phrase)
+
+    def flavor(self, flavor: str, phrase: str) -> None:
+        """The characteristic ingredient: at least the role's flavor minimum, and the largest
+        ingredient of its role (a strawberry yogurt has more strawberry than any other fruit)."""
+        found = match_ingredients(flavor, self.ings)
+        roles = {self.tpl.role_of(i.id) for i in found}
+        if not found or len(roles) != 1:
+            fruit = [i.id for i in self.ings if i.group == "fruit"]
+            self.unsupported_(
+                phrase,
+                f"смак «{flavor}» не відповідає інгредієнтам шаблону «{self.tpl.name_uk}»"
+                + (f" (є: {', '.join(fruit)})" if fruit else ""),
+            )
+            return
+        role_name = roles.pop()
+        role = self.tpl.roles[role_name]
+        ids = [i.id for i in found]
+        minimum = role.flavor_min_pct
+        if minimum is None and role.min_pct == 0:
+            self.unsupported_(
+                phrase, f"для ролі «{role_name}» шаблону не задано мінімум характерного інгредієнта"
+            )
+            return
+        names = ", ".join(i.name_uk for i in found)
+        if minimum is not None:
+            self.row(
+                "flavor_min",
+                self.pct(ids),
+                ">=",
+                minimum,
+                "%",
+                f"характерний інгредієнт ({names}) не менше {_fmt(minimum)} %",
+                kind="hard",
+                phrase=phrase,
+            )
+        for other in role.ingredients:
+            if other not in ids:
+                coeffs = {i: 1.0 for i in ids} | {other: -1.0}
+                self.row(
+                    f"flavor_dominant:{other}",
+                    coeffs,
+                    ">=",
+                    0.0,
+                    "г",
+                    f"{names} не менше, ніж {self.data.ingredients[other].name_uk}",
+                    kind="hard",
+                    group="flavor_dominant",
+                    phrase=phrase,
+                )
+
+    # --- requirements (soft) ------------------------------------------------------------------
+
+    def nutrients(self) -> None:
+        for k, req in enumerate(self.spec.nutrients):
+            if req.nutrient not in NUTRIENTS:
+                self.unsupported_(
+                    req.source_phrase,
+                    f"поживна речовина «{req.nutrient}» не підтримується "
+                    f"(є: {', '.join(NUTRIENTS)})",
+                )
+                continue
+            name, unit = NUTRIENT_UK[req.nutrient]
+            value, what = req.value, ""
+            if req.relative is not None:
+                ref = self.ref_value(req.nutrient, req.source_phrase, "порівняння з еталоном")
+                if ref is None:
+                    continue
+                value = req.relative.factor * ref
+                what = f" ({_fmt(req.relative.factor)} × еталон {_fmt(ref)})"
+            gid = f"nutrient:{k}:{req.nutrient}"
+            coeffs = self.nutrient(req.nutrient)
+            if req.op == "==":
+                lo, hi = value * (1 - EQ_TOLERANCE), value * (1 + EQ_TOLERANCE)
+                self.row(
+                    f"{gid}:lo",
+                    coeffs,
+                    ">=",
+                    lo,
+                    unit,
+                    f"{name} ≥ {_fmt(lo)} {unit}{what}",
+                    group=gid,
+                    phrase=req.source_phrase,
+                )
+                self.row(
+                    f"{gid}:hi",
+                    coeffs,
+                    "<=",
+                    hi,
+                    unit,
+                    f"{name} ≤ {_fmt(hi)} {unit}{what}",
+                    group=gid,
+                    phrase=req.source_phrase,
+                )
+            else:
+                sign = "≥" if req.op == ">=" else "≤"
+                self.row(
+                    gid,
+                    coeffs,
+                    req.op,
+                    value,
+                    unit,
+                    f"{name} {sign} {_fmt(value)} {unit}{what}",
+                    phrase=req.source_phrase,
+                )
+
+    def cost(self) -> None:
+        req = self.spec.cost_max
+        if req is None:
+            return
+        self.row(
+            "cost_max",
+            {i.id: i.price_uah_per_kg / 1000 for i in self.ings},
+            "<=",
+            req.max_uah_per_kg,
+            "грн/кг",
+            f"собівартість не більше {_fmt(req.max_uah_per_kg)} грн/кг",
+            phrase=req.source_phrase,
+        )
+
+    def claims(self) -> None:
+        liquid = C.is_liquid(self.tpl.form)
+        if liquid and self.spec.claims:
+            self.assumptions.append(
+                "напій: пороги тверджень для рідин (на 100 мл) застосовано до 100 г, "
+                "густина ≈ 1 г/мл"
+            )
+        for req in self.spec.claims:
+            cid, phrase = req.claim, req.source_phrase
+            if cid not in C.CLAIM_IDS:
+                self.unsupported_(
+                    phrase, f"твердження «{cid}» не підтримується (є: {', '.join(C.CLAIM_IDS)})"
+                )
+                continue
+            g = f"claim:{cid}"
+            title = f"«{C.TITLE_UK[cid]}»"
+            if cid in C.MAX_LIMITS:
+                n, solid_limit, liquid_limit = C.MAX_LIMITS[cid]
+                limit = liquid_limit if liquid else solid_limit
+                name, unit = NUTRIENT_UK[n]
+                self.row(
+                    g,
+                    self.nutrient(n),
+                    "<=",
+                    limit,
+                    unit,
+                    f"{title}: {name} ≤ {_fmt(limit)} {unit}",
+                    phrase=phrase,
+                )
+            elif cid == "satfat_low":
+                limit = C.SATFAT_LIMITS[1 if liquid else 0] - C.SATFAT_MARGIN
+                self.row(
+                    f"{g}:g",
+                    self.nutrient("saturates"),
+                    "<=",
+                    limit,
+                    "г/100 г",
+                    f"{title}: насичені жири ≤ {_fmt(limit)} г/100 г (запас на транс-жири)",
+                    group=g,
+                    phrase=phrase,
+                )
+                share = C.SATFAT_MAX_ENERGY_PCT / 100
+                coeffs = {
+                    i.id: (9 * i.per_100g.saturates - share * i.per_100g.energy_kcal) / 1000
+                    for i in self.ings
+                }
+                self.row(
+                    f"{g}:energy",
+                    coeffs,
+                    "<=",
+                    0.0,
+                    "ккал/100 г",
+                    f"{title}: насичені жири ≤ {_fmt(C.SATFAT_MAX_ENERGY_PCT)} % енергії",
+                    group=g,
+                    phrase=phrase,
+                )
+            elif cid in C.PROTEIN_MIN_ENERGY_PCT:
+                self.protein_energy(cid, g, phrase)
+            elif cid in C.FIBRE_MIN:
+                limit = C.FIBRE_MIN[cid]
+                self.row(
+                    g,
+                    self.nutrient("fibre"),
+                    ">=",
+                    limit,
+                    "г/100 г",
+                    f"{title}: клітковина ≥ {_fmt(limit)} г/100 г",
+                    phrase=phrase,
+                )
+            elif cid == "no_added_sugar":
+                ids = {i.id for i in self.ings if i.added_sugar}
+                self.exclude(g, ids, title, phrase)
+                self.assumptions.append(
+                    f"{title}: якщо цукри природно присутні, на етикетці потрібен напис "
+                    "«містить природні цукри» (Наказ МОЗ № 1145)"
+                )
+            else:
+                self.comparative(cid, g, phrase)
+
+    def protein_energy(self, cid: str, g: str, phrase: str) -> None:
+        """4·protein ≥ k·energy, per 100 g: linear in x."""
+        k = C.PROTEIN_MIN_ENERGY_PCT[cid] / 100
+        coeffs = {
+            i.id: (4 * i.per_100g.protein - k * i.per_100g.energy_kcal) / 1000 for i in self.ings
+        }
+        self.row(
+            g,
+            coeffs,
+            ">=",
+            0.0,
+            "ккал/100 г",
+            f"«{C.TITLE_UK[cid]}»: білок дає ≥ {_fmt(100 * k)} % енергії",
+            group=g,
+            phrase=phrase,
+        )
+
+    def comparative(self, cid: str, g: str, phrase: str) -> None:
+        nutrient, op, factor = C.COMPARATIVE[cid]
+        title = f"«{C.TITLE_UK[cid]}»"
+        ref = self.ref_value(nutrient, phrase, f"порівняльне твердження {title}")
+        if ref is None:
+            return
+        name, unit = NUTRIENT_UK[nutrient]
+        if op == "<=" and ref <= 0:
+            self.unsupported_(phrase, f"{title}: в еталоні {name} = 0, знижувати нікуди")
+            return
+        value = factor * ref
+        sign = "≤" if op == "<=" else "≥"
+        self.row(
+            f"{g}:{nutrient}",
+            self.nutrient(nutrient),
+            op,
+            value,
+            unit,
+            f"{title}: {name} {sign} {_fmt(value)} {unit} ({_fmt(factor)} × еталон {_fmt(ref)})",
+            group=g,
+            phrase=phrase,
+        )
+        if cid == "reduced_sugars":
+            energy = self.reference.per_100g.energy_kcal
+            self.row(
+                f"{g}:energy_kcal",
+                self.nutrient("energy_kcal"),
+                "<=",
+                energy,
+                "ккал/100 г",
+                f"{title}: енергія ≤ еталона {_fmt(energy)} ккал/100 г",
+                group=g,
+                phrase=phrase,
+            )
+        if cid == "increased_protein":
+            self.protein_energy("protein_source", g, phrase)
+
+    def allergens_and_diets(self) -> None:
+        for k, req in enumerate(self.spec.exclude_allergens):
+            if req.allergen not in ALLERGENS:
+                self.unsupported_(
+                    req.source_phrase,
+                    f"«{req.allergen}» — не одна з 14 категорій алергенів ЄС "
+                    f"({', '.join(sorted(ALLERGENS))})",
+                )
+                continue
+            ids = {i.id for i in self.ings if req.allergen in i.allergens + i.may_contain}
+            self.exclude(
+                f"allergen:{k}:{req.allergen}",
+                ids,
+                f"без алергену {req.allergen}",
+                req.source_phrase,
+                auto_relax=False,
+            )
+        for k, req in enumerate(self.spec.diet):
+            if req.diet == "vegan":
+                ids = {i.id for i in self.ings if not i.vegan}
+            elif req.diet == "vegetarian":
+                ids = {i.id for i in self.ings if DIET_ANIMAL & set(i.allergens)}
+            elif req.diet == "gluten_free":
+                ids = {i.id for i in self.ings if "cereals" in i.allergens + i.may_contain}
+            else:
+                self.unsupported_(
+                    req.source_phrase,
+                    f"дієта «{req.diet}» не підтримується (є: vegan, vegetarian, gluten_free)",
+                )
+                continue
+            self.exclude(
+                f"diet:{k}:{req.diet}",
+                ids,
+                f"дієта {req.diet}",
+                req.source_phrase,
+                auto_relax=False,
+            )
+
+    def exclusions(self) -> None:
+        everything = list(self.data.ingredients.values())
+        for k, req in enumerate(self.spec.exclude_ingredients):
+            found = match_ingredients(req.ingredient, everything)
+            if not found:
+                self.assumptions.append(
+                    f"«{req.source_phrase}»: «{req.ingredient}» немає в базі інгредієнтів — "
+                    "у рецептурі його не буде"
+                )
+                continue
+            self.exclude(
+                f"exclude:{k}:{req.ingredient}",
+                {i.id for i in found},
+                f"без «{req.ingredient}»",
+                req.source_phrase,
+            )
+        sw = self.spec.sweeteners
+        if sw is not None and not sw.allowed:
+            ids = {i.id for i in self.ings if is_sweetener(i)}
+            self.exclude("no_sweeteners", ids, "без підсолоджувачів", sw.source_phrase)
+
+    def must_include(self) -> None:
+        for k, req in enumerate(self.spec.must_include):
+            name = req.ingredient_or_role
+            if name in self.tpl.roles:
+                role = self.tpl.roles[name]
+                ids, label = role.ingredients, f"роль «{name}»"
+            else:
+                found = match_ingredients(name, self.ings)
+                if not found:
+                    elsewhere = match_ingredients(name, list(self.data.ingredients.values()))
+                    why = "не передбачено шаблоном" if elsewhere else "немає в базі інгредієнтів"
+                    self.unsupported_(req.source_phrase, f"«{name}» {why} «{self.tpl.name_uk}»")
+                    continue
+                ids = [i.id for i in found]
+                role = self.tpl.roles[self.tpl.role_of(ids[0])]
+                label = ", ".join(i.name_uk for i in found)
+            minimum = req.min_pct if req.min_pct is not None else role.flavor_min_pct
+            if minimum is None:
+                self.unsupported_(
+                    req.source_phrase,
+                    f"«{name}»: не вказано частку, а шаблон не задає мінімуму — уточніть %",
+                )
+                continue
+            self.row(
+                f"must_include:{k}:{name}",
+                self.pct(ids),
+                ">=",
+                minimum,
+                "%",
+                f"{label} не менше {_fmt(minimum)} %",
+                phrase=req.source_phrase,
+            )
+
+    def build(self) -> Expansion:
+        self.template()
+        self.nutrients()
+        self.cost()
+        self.claims()
+        self.allergens_and_diets()
+        self.exclusions()
+        self.must_include()
+        one_of = {
+            name: list(role.ingredients)
+            for name, role in self.tpl.roles.items()
+            if role.mode == "one_of"
+        }
+        min_dose = {
+            i.id: i.min_dose_pct * self.mass / 100 for i in self.ings if i.min_dose_pct is not None
+        }
+        if self.tpl.moisture_loss_pct:
+            self.assumptions.append(
+                f"втрата вологи при випіканні {_fmt(self.tpl.moisture_loss_pct)} %: "
+                f"{_fmt(self.mass)} г рецептури дають 1000 г продукту"
+            )
+        return Expansion(
+            template_id=self.tpl.id,
+            form=self.tpl.form,
+            batch_mass_g=self.mass,
+            variables=self.variables,
+            constraints=self.rows,
+            one_of=one_of,
+            min_dose_g=min_dose,
+            reference_id=self.reference.id if self.reference else None,
+            unsupported=self.unsupported,
+            assumptions=self.assumptions,
+        )
+
+
+def expand(spec: ConstraintSpec, data: DataBundle) -> Expansion:
+    tpl = find_template(spec.product.template, data)
+    if tpl is None:
+        supported = "; ".join(f"{t.name_uk} ({t.id})" for t in data.templates.values())
+        return Expansion(
+            template_id=None,
+            unsupported=[
+                Unsupported(
+                    phrase=spec.product.source_phrase,
+                    reason=f"категорія «{spec.product.template}» не підтримується; "
+                    f"підтримуємо: {supported}",
+                )
+            ],
+        )
+    return _Builder(spec, data, tpl).build()

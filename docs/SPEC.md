@@ -36,19 +36,24 @@
 ## §2. ConstraintSpec (результат розбору; кожне поле з `source_phrase`)
 
 ```yaml
+# кожен елемент має source_phrase (фраза запиту); нижче вона пропущена для стислості
 product: {template: yogurt_spoonable, flavor: strawberry}     # template з data/templates.yaml
-exclude_allergens: [milk]          # 14 категорій ЄС (ключі як у label-check)
-exclude_ingredients: [palm_oil]
-diet: [vegan]                      # vegan → виключити milk, eggs, fish, crustaceans, molluscs, мед, желатин
-nutrients:                         # на 100 г готового продукту
-  - {nutrient: protein, op: ">=", value: null, relative: {to: reference, factor: 1.0}}
+exclude_allergens: [{allergen: milk}]   # 14 категорій ЄС (ключі як у label-check)
+exclude_ingredients: [{ingredient: palm_oil}]   # id, аліас або група
+diet: [{diet: vegan}]              # vegan → виключити vegan: false (молочне, яйця, мед…);
+                                   # vegetarian, gluten_free; інше → unsupported
+nutrients:                         # на 100 г готового продукту; рівно одне з value / relative
+  - {nutrient: protein, op: ">=", relative: {to: reference, factor: 1.0}}
   - {nutrient: sugars, op: "<=", value: 5.0}
-cost_max_uah_per_kg: 45
-claims: [reduced_sugars]           # id з §3
-sweeteners_allowed: true | false | null   # «без підсолоджувачів»
-must_include: [{ingredient_or_role: strawberry, min_pct: 15}]
+cost_max: {max_uah_per_kg: 45}
+claims: [{claim: reduced_sugars}]  # id з §3
+sweeteners: {allowed: false}       # «без підсолоджувачів»; null — не згадано
+must_include: [{ingredient_or_role: strawberry, min_pct: 15}]   # min_pct null → flavor_min_pct ролі
 optimize: cost
+unparsed: ["фраза, яку модель не змогла віднести"]
 ```
+Ідентифікатори алергенів, дієт, тверджень і нутрієнтів — рядки, а не перелік: невідомий →
+`unsupported` з причиною в `expand`, а не помилка валідації, що губить фразу.
 `op`: `<=`, `>=`, `==` (± допуск 2 %). Невідоме значення → не вигадувати: фраза в `unparsed`.
 
 ## §3. Розгортання в лінійні обмеження (`expand.py`)
