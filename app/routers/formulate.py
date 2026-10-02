@@ -69,7 +69,5 @@ async def formulate_structured(
 async def get_run(request: Request, run_id: int) -> FormulateOut:
     out = await load_run(request.app.state.pool, run_id)
     if out is None:
-        raise AppError(
-            404, "not_found", f"run {run_id} not found (or saved before migration 002)"
-        )
+        raise AppError(404, "not_found", f"run {run_id} not found (or saved before migration 002)")
     return out
