@@ -9,17 +9,17 @@
   для тестів, eval і демо).
 - `GET /formulate/{id}`, `GET /ingredients`, `GET /templates`, `GET /health`.
 
-`FormulateOut`:
+`FormulateOut` (скорочено; числа реальні, із запиту з умови: recipe/totals/checks — варіант з молоком, relaxations — варіант без молока):
 ```json
 {
-  "run_id": 12,
+  "run_id": 1,
   "status": "feasible | partial | infeasible | unsupported",
   "recipe": [{"ingredient": "strawberry_frozen", "name": "Полуниця заморожена",
-              "grams": 180.0, "cost_uah": 12.6}],
-  "totals": {"cost_uah_per_kg": 43.1, "per_100g": {"energy_kcal": 71, "protein": 3.3,
-             "fat": 1.8, "saturates": 0.3, "carbs": 9.2, "sugars": 6.4, "fibre": 1.1, "salt": 0.08}},
+              "grams": 100.0, "cost_uah": 11.0}],
+  "totals": {"cost_uah_per_kg": 36.03, "per_100g": {"energy_kcal": 71.44, "protein": 3.2,
+             "fat": 2.14, "saturates": 1.35, "carbs": 9.7, "sugars": 9.45, "fibre": 0.23, "salt": 0.11}},
   "checks": [{"id": "nutrient:0:protein", "kind": "soft",
-              "requested": "protein >= 3.2 г/100 г (1 × еталон 3.2)", "actual": "3.3 г/100 г",
+              "requested": "protein >= 3.2 г/100 г (1 × еталон 3.2)", "actual": "3.203 г/100 г",
               "pass": true, "source_phrase": "білка не менше, ніж у звичайного",
               "relaxed": null, "enforced": true}],
   "parsed": ConstraintSpec,
@@ -32,8 +32,8 @@
   "alternatives": [...], "other_options": [{"...": "...", "warning": "алерген — лише інший варіант"}],
   "relaxed_recipe": {"changes": [...], "recipe": [...], "totals": {...},
                      "checks": [... перевірка відносно ПОСЛАБЛЕНИХ вимог, "relaxed": "..."]},
-  "assumptions": ["еталон: звичайний полуничний йогурт 2,5 %, джерело …"],
-  "model": "...", "duration_ms": 2100
+  "assumptions": ["еталон «звичайного»: Звичайний фруктовий йогурт 2,5 % (з цукром) — джерело у references.yaml"],
+  "model": "...", "duration_ms": "…"
 }
 ```
 `status: error` лише в збереженому run (verification_failed: рецептура в БД для аудиту, назовні не
@@ -124,17 +124,17 @@ unsupported: [{phrase: "щільної текстури", reason: "..."}]   # з
 - id: oat_drink
   name_uk: Вівсяний напій
   aliases: [вівсяне молоко]
-  per_100g: {energy_kcal: 46, protein: 1.0, fat: 1.5, saturates: 0.2, carbs: 6.7, sugars: 3.3,
+  per_100g: {energy_kcal: 46, protein: 1.0, fat: 1.5, saturates: 0.2, carbs: 6.7, sugars: 4.0,
              fibre: 0.8, salt: 0.1, polyols: 0}
   nutrients_source: "USDA FDC #... / типові значення специфікацій"
   allergens: [cereals]       # 14 категорій
   may_contain: []
   vegan: true
   added_sugar: false         # для no_added_sugar
-  sweetness: 0               # сахароза = 1
+  sweetness: 0.016           # сахароза = 1
   max_dose_pct: null
   roles: [base]
-  price_uah_per_kg: 38
+  price_uah_per_kg: 40
   price_source: "оцінка за порядком оптових цін в UA, група plant_bases (PRICES.md)"
   price_date: 2026-10
 ```
