@@ -90,8 +90,13 @@ async def run_formulate(
         template=exp.template_id,
         parsed=spec,
         unparsed=spec.unparsed,
-        unsupported=exp.unsupported,
-        assumptions=exp.assumptions,
+        unsupported=[*spec.unsupported, *exp.unsupported],
+        assumptions=exp.assumptions
+        + (
+            [f"«{spec.optimize_phrase}»: окремої межі немає, сервіс завжди шукає найдешевше"]
+            if spec.optimize_phrase
+            else []
+        ),
         model=model,
         data_version=data.data_version,
         duration_ms=0,
@@ -117,7 +122,7 @@ async def _solve_and_verify(out, spec, data, exp, solve_fn: SolveFn) -> None:
     if isinstance(result, Recipe):
         checks, totals, lines = await asyncio.to_thread(_verified, result, spec, data, exp)
         out.checks, out.totals, out.recipe = checks, totals, lines
-        out.status = "partial" if exp.unsupported or spec.unparsed else "feasible"
+        out.status = "partial" if out.unsupported or spec.unparsed else "feasible"
         if failed(checks):
             out.error = _failure(checks, "рецептура")
         return

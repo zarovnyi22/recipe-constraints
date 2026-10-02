@@ -2,9 +2,11 @@ from typing import Annotated
 
 from fastapi import APIRouter, Body, Request
 
+from app.data import get_data
 from app.errors import AppError
 from app.formulate import load_run, run_formulate
-from app.schemas import FormulateOut, StructuredIn
+from app.parse import parse_request
+from app.schemas import FormulateIn, FormulateOut, StructuredIn
 
 router = APIRouter(tags=["formulate"])
 
@@ -13,7 +15,14 @@ _ERRORS = {
         "description": "verification_failed (a bug: the recipe failed the independent check), "
         "solver_error, template_infeasible"
     },
+    502: {"description": "llm_bad_output: the model twice returned an invalid ConstraintSpec"},
+    503: {"description": "the LLM is not configured, rate limited or unavailable"},
 }
+
+TASK_TEXT = (
+    "полуничний йогурт без молока, білка не менше, ніж у звичайного, собівартість до 45 грн/кг, "
+    'і щоб можна було написати "зі зниженим вмістом цукру"'
+)
 
 # «полуничний йогурт без молока, білка не менше, ніж у звичайного, собівартість до 45 грн/кг,
 # і щоб можна було написати "зі зниженим вмістом цукру"»
@@ -55,6 +64,33 @@ EXAMPLES = {
         "value": {"spec": {"product": {"template": "ковбаса", "source_phrase": "ковбаса"}}},
     },
 }
+
+
+@router.post("/formulate", response_model=FormulateOut, responses=_ERRORS)
+async def formulate(
+    request: Request,
+    body: Annotated[
+        FormulateIn,
+        Body(
+            openapi_examples={
+                "task": {"summary": "Приклад з умови", "value": {"request": TASK_TEXT}},
+                "unsupported": {
+                    "summary": "Непідтримувана категорія",
+                    "value": {"request": "пиріг з нутелою"},
+                },
+            }
+        ),
+    ],
+) -> FormulateOut:
+    """A technologist's text → LLM structuring → the same path as /formulate/structured."""
+    data = get_data()
+    parsed = await parse_request(body.request, request.app.state.llm, data, request.app.state.pool)
+    return await run_formulate(
+        parsed.spec,
+        pool=request.app.state.pool,
+        request_text=body.request,
+        model=parsed.model,
+    )
 
 
 @router.post("/formulate/structured", response_model=FormulateOut, responses=_ERRORS)

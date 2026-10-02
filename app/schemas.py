@@ -73,6 +73,12 @@ class MustInclude(_Item):
     min_pct: float | None = Field(default=None, gt=0, le=100)  # % of the recipe mass
 
 
+class Unsupported(BaseModel):
+    id: str | None = None  # the requirement (requirement_ids), None if not one of the spec's
+    phrase: Phrase
+    reason: str
+
+
 class ConstraintSpec(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -86,13 +92,11 @@ class ConstraintSpec(BaseModel):
     sweeteners: SweetenersReq | None = None
     must_include: list[MustInclude] = []
     optimize: Literal["cost"] = "cost"
+    # «якомога дешевше»: no limit, the service always minimizes cost; the phrase is accounted for
+    optimize_phrase: Phrase | None = None
     unparsed: list[Phrase] = []  # phrases the model could not map to a requirement
-
-
-class Unsupported(BaseModel):
-    id: str | None = None  # the requirement (requirement_ids), None if not one of the spec's
-    phrase: Phrase
-    reason: str
+    # understood but outside what the service does (texture, shelf life, …): phrase + reason
+    unsupported: list[Unsupported] = []
 
 
 def requirement_ids(spec: ConstraintSpec) -> list[tuple[str, Phrase]]:
@@ -307,6 +311,13 @@ class FormulateOut(BaseModel):
     data_version: str
     duration_ms: int
     error: ErrorBody | None = None
+
+
+class FormulateIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    request: str = Field(min_length=3, max_length=2000)
+    optimize: Literal["cost"] = "cost"
 
 
 class StructuredIn(BaseModel):

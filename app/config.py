@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     llm_model: str = "gemini-3.5-flash-lite"
     groq_api_key: str = ""
     groq_model: str = "openai/gpt-oss-120b"
+    groq_reasoning_effort: str = "low"  # gpt-oss only: low | medium | high
     llm_timeout_seconds: float = 45.0  # one HTTP attempt
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
 

@@ -9,6 +9,7 @@ from fastapi import FastAPI, Request
 from app.config import get_settings
 from app.db import apply_migrations, create_pool
 from app.errors import register_error_handlers
+from app.llm.base import get_llm_client
 from app.logs import request_id_var, setup_logging
 from app.routers import formulate, health, ingredients, templates
 
@@ -23,7 +24,9 @@ async def lifespan(app: FastAPI):
     settings = get_settings()
     app.state.pool = await create_pool(settings.database_url)
     await apply_migrations(app.state.pool)
+    app.state.llm = get_llm_client(settings)
     yield
+    await app.state.llm.aclose()
     await app.state.pool.close()
 
 

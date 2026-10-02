@@ -123,7 +123,7 @@ docs/ OVERVIEW, SPEC, NOTES, steps/, proof.md (генерується)
 | B2b | розв'язувач, округлення, «що послабити» | [x] |
 | B3a | незалежний перевіряльник + POST /formulate/structured + БД | [x] |
 | RR1 | глибоке рев'ю: зламати відповідність | [x] |
-| B3b | LLM-розбір тексту + POST /formulate | [ ] |
+| B3b | LLM-розбір тексту + POST /formulate | [x] |
 | B4a | набір запитів dev/test | [ ] |
 | B4b | раннер, метрики, proof.md | [ ] |
 | B5 | замір dev, одне покращення, фінальний test | [ ] |
