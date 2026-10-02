@@ -52,9 +52,9 @@ async def test_excluding_gluten_in_a_cookie_drops_wheat():
 
 
 async def test_unknown_non_allergen_exclusion_is_unsupported_not_silently_done():
-    out = await _run(_spec("cookie", exclude_ingredients=[_ph(ingredient="пальмова олія")]))
+    out = await _run(_spec("cookie", exclude_ingredients=[_ph(ingredient="желатин")]))
     assert out.status == "partial"
-    assert [u.id for u in out.unsupported] == ["exclude:0:пальмова олія"]
+    assert [u.id for u in out.unsupported] == ["exclude:0:желатин"]
 
 
 def test_verify_catches_milk_word_exclusion_independently():

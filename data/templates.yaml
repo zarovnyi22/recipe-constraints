@@ -159,6 +159,23 @@
       ingredients: [citric_acid]
   base_recipe: {apple_juice: 250, orange_juice: 100, sugar: 50, citric_acid: 0.5, water: 599.5}
 
+- id: juice_100
+  name_uk: Сік 100 % (відновлений)
+  aliases: [сік, натуральний сік, 100% сік, сік 100 %, яблучний сік, апельсиновий сік]
+  form: drinkable
+  density_g_per_ml: 1.045  # сік 11–12 °Brix ≈ 1,044–1,048 г/мл при 20 °C (таблиці Brix–густина, ICUMSA)
+  description: Лише соки й пюре з бази — без води, цукру, підсолоджувачів і добавок (100 % соку; технологічне припущення, див. README).
+  reference: juice_100
+  sweetness_min: 8.0
+  moisture_loss_pct: 0
+  roles:
+    juice:
+      mode: blend
+      min_pct: 100
+      max_pct: 100
+      ingredients: [apple_juice, orange_juice, apple_puree]
+  base_recipe: {apple_juice: 700, orange_juice: 300}
+
 - id: smoothie
   name_uk: Смузі
   aliases: [смузі, фруктове смузі]
@@ -246,7 +263,7 @@
       mode: blend
       min_pct: 0
       max_pct: 10
-      ingredients: [sunflower_oil, butter_82, plant_margarine]
+      ingredients: [sunflower_oil, palm_oil, butter_82, plant_margarine]
     sweetener:
       mode: blend
       min_pct: 0
@@ -284,7 +301,7 @@
       mode: blend
       min_pct: 15
       max_pct: 32
-      ingredients: [butter_82, plant_margarine, sunflower_oil]
+      ingredients: [butter_82, plant_margarine, sunflower_oil, palm_oil]
     sweetener:
       mode: blend
       min_pct: 0
@@ -367,4 +384,9 @@
       min_pct: 0.5
       max_pct: 3
       ingredients: [salt]
+    preservative:
+      mode: blend
+      min_pct: 0
+      max_pct: 0.1
+      ingredients: [potassium_sorbate]
   base_recipe: {tomato_paste_28: 300, sugar: 160, spirit_vinegar_9: 60, modified_starch: 40, spice_blend: 15, salt: 15, water: 410}

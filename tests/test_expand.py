@@ -422,14 +422,14 @@ def test_exclude_ingredient(data):
         _spec(
             exclude_ingredients=[
                 {"ingredient": "honey", "source_phrase": "без меду"},
-                {"ingredient": "palm_oil", "source_phrase": "без пальмової олії"},
+                {"ingredient": "gelatin", "source_phrase": "без желатину"},
             ]
         ),
         data,
     )
     assert set(_row(exp, "exclude:0:honey").coeffs) == {"honey"}
     # not in the database and not an allergen word: cannot be guaranteed (RR1 #2)
-    assert [u.id for u in exp.unsupported] == ["exclude:1:palm_oil"]
+    assert [u.id for u in exp.unsupported] == ["exclude:1:gelatin"]
 
 
 def test_must_include(data):

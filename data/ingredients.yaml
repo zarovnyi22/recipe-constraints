@@ -345,7 +345,7 @@
   added_sugar: false
   sweetness: 0.1
   max_dose_pct: 50
-  roles: [fruit]
+  roles: [fruit, juice]
   price_uah_per_kg: 38
   price_source: *p_fruit
   price_date: "2026-10"
@@ -444,6 +444,7 @@
   sweetness: 0.65
   max_dose_pct: 15
   roles: [bulking]
+  tags: [sweetener]
   price_uah_per_kg: 230
   price_source: *p_sweet
   price_date: "2026-10"
@@ -478,6 +479,7 @@
   sweetness: 250
   max_dose_pct: 0.05
   roles: [sweetener]
+  tags: [sweetener]
   price_uah_per_kg: 3500
   price_source: *p_sweet
   price_date: "2026-10"
@@ -495,6 +497,7 @@
   sweetness: 0.42
   max_dose_pct: 30
   roles: [binder]
+  tags: [sweetener]
   price_uah_per_kg: 140
   price_source: *p_sweet
   price_date: "2026-10"
@@ -546,6 +549,7 @@
   sweetness: 0
   max_dose_pct: 1.5
   roles: [stabilizer]
+  tags: [thickener]
   price_uah_per_kg: 900
   price_source: *p_add
   price_date: "2026-10"
@@ -563,6 +567,7 @@
   sweetness: 0.005
   max_dose_pct: 6
   roles: [stabilizer]
+  tags: [thickener]
   price_uah_per_kg: 85
   price_source: *p_add
   price_date: "2026-10"
@@ -580,6 +585,7 @@
   sweetness: 0
   max_dose_pct: 0.5
   roles: [stabilizer]
+  tags: [thickener]
   price_uah_per_kg: 420
   price_source: *p_add
   price_date: "2026-10"
@@ -677,8 +683,45 @@
   added_sugar: false
   sweetness: 0.0005
   roles: [fat]
+  contains: [palm_oil]
+  tags: [palm_oil]
   price_uah_per_kg: 115
   price_source: *p_bak
+  price_date: "2026-10"
+
+- id: palm_oil
+  name_uk: Олія пальмова рафінована
+  aliases: [пальмова олія, пальмовий жир, пальмове масло]
+  group: bakery
+  per_100g: {energy_kcal: 884, protein: 0, fat: 100.0, saturates: 49.3, carbs: 0, sugars: 0, fibre: 0, salt: 0, polyols: 0}
+  nutrients_source: "USDA FDC (palm oil), типові значення"
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0
+  roles: [fat]
+  tags: [palm_oil]
+  price_uah_per_kg: 78
+  price_source: "оцінка: порядок оптових цін на імпортну пальмову олію в UA (дещо нижче за соняшникову), група bakery (PRICES.md)"
+  price_date: "2026-10"
+
+- id: potassium_sorbate
+  name_uk: Сорбат калію (Е202)
+  aliases: [сорбат калію, Е202, E202]
+  group: additives
+  per_100g: {energy_kcal: 0, protein: 0, fat: 0, saturates: 0, carbs: 0, sugars: 0, fibre: 0, salt: 0, polyols: 0}
+  nutrients_source: "харчова добавка: у дозах до 0,1 % вкладом в енергію й нутрієнти нехтуємо (0)"
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0
+  max_dose_pct: 0.1
+  roles: [preservative]
+  tags: [preservative]
+  price_uah_per_kg: 450
+  price_source: "оцінка: порядок цін харчових консервантів (Е202) на UA-ринку добавок, група additives (PRICES.md)"
   price_date: "2026-10"
 
 - id: whole_egg
@@ -796,6 +839,7 @@
   sweetness: 0.07
   max_dose_pct: 2
   roles: [spice]
+  tags: [flavouring]
   price_uah_per_kg: 450
   price_source: *p_sauce
   price_date: "2026-10"

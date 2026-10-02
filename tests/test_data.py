@@ -323,3 +323,19 @@ def test_yogurt_pairings_forbid_dairy_cultures_in_plant_bases():
     assert ("milk_2_5", "dvs_culture_plant") in pairs
     assert ("milk_2_5", "dvs_culture_dairy") not in pairs
     assert ("oat_drink", "dvs_culture_plant") not in pairs
+
+
+def test_unknown_tag_and_unknown_contains_are_rejected(tmp_path):
+    def tag(items):
+        _find(items, "sugar")["tags"] = ["magic"]
+
+    with pytest.raises(Exception, match="unknown tags"):
+        load_data(_broken_copy(tmp_path, _edit("ingredients.yaml", tag)))
+
+    def contains(items):
+        _find(items, "plant_margarine")["contains"] = ["no_such_ingredient"]
+
+    other = tmp_path / "b"
+    other.mkdir()
+    with pytest.raises(DataError, match="contains unknown ingredient"):
+        load_data(_broken_copy(other, _edit("ingredients.yaml", contains)))

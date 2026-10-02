@@ -7,10 +7,10 @@ parse cache key).
 """
 
 from app.claims import ABSOLUTE, COMPARATIVE, TITLE_UK
-from app.data import AllergenCategory, DataBundle
+from app.data import TAGS, AllergenCategory, DataBundle
 from app.verify import NUTRIENTS
 
-PROMPT_VERSION = "p1"
+PROMPT_VERSION = "p2"
 
 _RULES = """\
 Ти — розбирач запитів технолога харчового виробництва. Перетвори текст запиту на ОДИН JSON-об'єкт
@@ -46,7 +46,9 @@ _RULES = """\
    "relative": {"to": "reference", "factor": 1.0}. Інші кратності («на 20 % більше») — unsupported
    (є лише твердження "increased_protein" і подібні — див. список).
 4. «без X»: X — алерген (молоко, лактоза, глютен, горіхи, соя, яйця…) → exclude_allergens;
-   X — інший інгредієнт (пальмова олія, цукор…) → exclude_ingredients; «веганський»,
+   X — інший інгредієнт (пальмова олія, цукор…) або клас добавок (консерванти, барвники,
+   ароматизатори, підсолоджувачі, загущувачі) → exclude_ingredients, для класу — id класу зі
+   списку «Класи»; «веганський»,
    «вегетаріанський», «без глютену» як дієта → diet.
    «Без підсолоджувачів» → sweeteners.allowed=false; «з підсолоджувачами» → true.
 5. Твердження на упаковці («зі зниженим вмістом цукру», «без цукру», «джерело білка») — claims,
@@ -54,6 +56,8 @@ _RULES = """\
 6. Смак/характерний інгредієнт («полуничний», «з малиною») → product.flavor (англійською, id
    інгредієнта чи його початок: strawberry, raspberry, apple…). Інгредієнт, який просять
    додати («з горіхами», «з вівсяними пластівцями») → must_include.
+6а. «Сік», «натуральний сік», «яблучний сік» (100 %, без води й цукру) → шаблон juice_100;
+   «соковмісний напій», «нектар», «напій із соком» → juice_drink.
 7. product.template — id шаблону зі списку, якщо категорія підтримується. Якщо категорії немає
    в списку — все одно заповни product: template = категорія так, як вона названа в запиті
    («пиріг»), source_phrase = фраза з нею. Якщо категорії в запиті немає взагалі —
@@ -85,6 +89,7 @@ def build_system_prompt(data: DataBundle) -> str:
         f"{_RULES}\n"
         f"Шаблони продуктів (product.template):\n{templates}\n\n"
         f"Алергени (allergen): {', '.join(AllergenCategory.__args__)}\n"
+        f"Класи інгредієнтів для «без …» (ingredient): {', '.join(TAGS)}\n"
         f"Нутрієнти (nutrient, на 100 г): {', '.join(NUTRIENTS)}\n\n"
         f"Твердження (claim):\n{claims}\n\n"
         f"Інгредієнти бази (для exclude_ingredients, must_include, flavor):\n{ingredients}\n"

@@ -17,7 +17,7 @@ from collections.abc import Iterable
 from app import claims as C
 from app.allergens import allergens_in_name
 from app.data import AllergenCategory, DataBundle, Ingredient, Role, Template
-from app.expand import find_template, match_ingredients, resolve_flavor
+from app.expand import excluded_ids, find_template, match_ingredients, resolve_flavor
 from app.schemas import Change, Check, ConstraintSpec, RecipeLine, Totals
 
 NUTRIENTS = ("energy_kcal", "protein", "fat", "saturates", "carbs", "sugars", "fibre", "salt")
@@ -434,7 +434,7 @@ class _Verifier:
             self.excluded(f"diet:{k}:{req.diet}", f"дієта {req.diet}", bad, req.source_phrase)
         everything = list(self.data.ingredients.values())
         for k, req in enumerate(self.spec.exclude_ingredients):
-            ids = {i.id for i in match_ingredients(req.ingredient, everything)}
+            ids = excluded_ids(req.ingredient, everything)
             cats = allergens_in_name(req.ingredient)  # «молоко», «лактоза», «глютен»
             bad = [i for i, ing in self.known.items() if i in ids or cats & self.allergens(ing)]
             self.excluded(

@@ -19,6 +19,24 @@ AllergenCategory = Literal[
     "celery", "mustard", "sesame", "sulphites", "lupin", "molluscs",
 ]  # fmt: skip
 
+# Classes an ingredient can belong to (Ingredient.tags) -> the words a technologist uses for the
+# class, in the forms that occur in «без …» (matching is by exact word, no stemming).
+TAGS: dict[str, list[str]] = {
+    "palm_oil": [
+        "palm_oil", "пальмова олія", "пальмової олії", "пальмову олію", "пальмовий жир",
+        "пальмового жиру", "пальмове масло", "пальмового масла",
+    ],
+    "preservative": [
+        "preservative", "консервант", "консерванти", "консервантів", "консервантами",
+    ],
+    "colour": ["colour", "барвник", "барвники", "барвників", "барвниками"],
+    "flavouring": [
+        "flavouring", "ароматизатор", "ароматизатори", "ароматизаторів", "ароматизаторами",
+    ],
+    "sweetener": ["sweetener", "підсолоджувач", "підсолоджувачі", "підсолоджувачів"],
+    "thickener": ["thickener", "загущувач", "загущувачі", "загущувачів", "стабілізатори"],
+}  # fmt: skip
+
 ATWATER_TOLERANCE = 0.15
 ATWATER_ABS_TOLERANCE_KCAL = 2.0
 FIBRE_KCAL_MAX = 2.0
@@ -104,6 +122,10 @@ class Ingredient(BaseModel):
     min_dose_pct: float | None = Field(default=None, gt=0, le=100)
     max_dose_pct: float | None = Field(default=None, gt=0, le=100)
     roles: list[str] = Field(min_length=1)
+    # ids of ingredients this one is made of («без пальмової олії» also excludes a margarine
+    # with palm oil) and classes it belongs to (TAGS): what «без X» looks at besides the id
+    contains: list[str] = []
+    tags: list[str] = []
     price_uah_per_kg: float = Field(gt=0)
     price_source: str = Field(min_length=3)
     price_date: str = Field(pattern=r"^\d{4}-(0[1-9]|1[0-2])$")
@@ -116,6 +138,10 @@ class Ingredient(BaseModel):
             and self.min_dose_pct > self.max_dose_pct
         ):
             raise ValueError(f"{self.id}: min_dose_pct > max_dose_pct")
+        if unknown := set(self.tags) - set(TAGS):
+            raise ValueError(f"{self.id}: unknown tags {sorted(unknown)} (known: {sorted(TAGS)})")
+        if self.id in self.contains:
+            raise ValueError(f"{self.id}: contains itself")
         animal = {"milk", "eggs", "fish", "crustaceans", "molluscs"}
         if self.vegan and animal & set(self.allergens):
             raise ValueError(f"{self.id}: vegan but has an animal allergen")
@@ -222,6 +248,11 @@ class DataBundle(BaseModel):
         problems: list[str] = []
         for ing in self.ingredients.values():
             problems += _check_energy(f"ingredient {ing.id}", ing.per_100g)
+            problems += [
+                f"ingredient {ing.id}: contains unknown ingredient {c}"
+                for c in ing.contains
+                if c not in self.ingredients
+            ]
         for ref in self.references.values():
             problems += _check_energy(f"reference {ref.id}", ref.per_100g)
             if ref.template not in self.templates:

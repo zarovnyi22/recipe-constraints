@@ -9,7 +9,7 @@ technologist's requirements are soft. Every requirement becomes rows, a note in 
 
 from app import claims as C
 from app.allergens import allergens_in_name
-from app.data import AllergenCategory, DataBundle, Ingredient, RefNutrients, Role, Template
+from app.data import TAGS, AllergenCategory, DataBundle, Ingredient, RefNutrients, Role, Template
 from app.schemas import ConstraintSpec, Expansion, LinearConstraint, Unsupported
 
 NUTRIENTS = list(RefNutrients.model_fields)
@@ -57,6 +57,24 @@ def match_ingredients(name: str, ingredients: list[Ingredient]) -> list[Ingredie
         return exact
     prefixed = [i for i in ingredients if i.id.startswith(key + "_")]
     return prefixed or [i for i in ingredients if i.group == key]
+
+
+def tag_of(term: str) -> str | None:
+    """The class (Ingredient.tags) a «без …» word names: «консерванти» → preservative."""
+    key = term.strip().casefold()
+    return next((tag for tag, words in TAGS.items() if key in {w.casefold() for w in words}), None)
+
+
+def excluded_ids(term: str, ingredients: list[Ingredient]) -> set[str]:
+    """Ingredients «без <term>» rules out: the term's own ingredients (id, alias, name, group),
+    those made of them (`contains`) and, if the term names a class, everything tagged with it."""
+    named = {i.id for i in match_ingredients(term, ingredients)}
+    tag = tag_of(term)
+    return {
+        i.id
+        for i in ingredients
+        if i.id in named or named & set(i.contains) or (tag is not None and tag in i.tags)
+    }
 
 
 def resolve_flavor(flavor: str, tpl: Template, ings: list[Ingredient]) -> list[Ingredient]:
@@ -609,7 +627,7 @@ class _Builder:
         everything = list(self.data.ingredients.values())
         for k, req in enumerate(self.spec.exclude_ingredients):
             gid, term = f"exclude:{k}:{req.ingredient}", req.ingredient
-            found = {i.id for i in match_ingredients(term, everything)}
+            found = excluded_ids(term, everything)
             # «без молока / лактози / глютену» as an ingredient: the word names an allergen, so
             # everything with that allergen goes, not only the ingredient that has the alias
             cats = allergens_in_name(term)
@@ -619,7 +637,7 @@ class _Builder:
                     f"«{req.source_phrase}»: «{term}» — алерген {', '.join(sorted(cats))}: "
                     "виключено все, що його містить або може містити"
                 )
-            if not found:
+            if not found and tag_of(term) is None:
                 self.unsupported_(
                     gid,
                     req.source_phrase,

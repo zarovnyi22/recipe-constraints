@@ -118,6 +118,18 @@
   Причина: смузі low_sugar + білок 6 % — LP 94,90, але 0,5 % на low_sugar коштувало +1,5 грн,
   а 2 % на всіх рядках давали 100,89 і `rounding_failed` для лімітів 95,0–100,8. Тепер 95,32.
 
+## Теги виключень, пальмова олія, juice_100 (між B3b і B4a)
+- `Ingredient.contains` (id складових: маргарин → palm_oil) і `tags` (словник `app.data.TAGS`:
+  palm_oil, preservative, colour, flavouring, sweetener, thickener — слова «без …» у відмінках).
+  `expand.excluded_ids(term)` (спільний пошук для expand і verify): id/аліас/назва/група ∪ ті, що
+  `contains` назване ∪ усе з тегом класу. Відомий клас без жодного інгредієнта в базі («барвники») —
+  не unsupported, а «виконано автоматично» (в базі їх справді немає).
+- Додано `palm_oil` (78 грн/кг, оцінка) у жирові ролі cookie/cereal_bar і `potassium_sorbate` (Е202,
+  роль preservative у кетчупі, ≤ 0,1 %; розв'язувач його не бере без вимоги). Маргарин = з пальмовою
+  олією (консервативно). Шаблон `juice_100` (8-й): лише apple_juice/orange_juice/apple_puree, роль
+  juice рівно 100 %; еталон juice_100; «сік» → juice_100, «нектар/соковмісний напій» → juice_drink.
+  100 % сік не може бути reduced_sugars/low_sugar — чесний infeasible. PROMPT_VERSION = p2.
+
 ## Розбір LLM (B3b)
 - `app/llm/` — копія з `pet` (base/gemini/groq/fallback/fake); `LLMClient.model`/`models`, модель у
   `FormulateOut.model` = `provider:model` того, хто відповів. `PROMPT_VERSION = p1`; промпт будується
