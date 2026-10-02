@@ -13,7 +13,7 @@ import httpx
 STATUS = {
     "feasible": "✅ feasible — рецептура є, усі перевірки пройдено",
     "partial": "⚠️  partial — рецептура є, але частину запиту не виконано (див. «Не враховано»)",
-    "infeasible": "❌ infeasible — за цих вимог рецептури немає (див. «Конфлікт» і «Що послабити»)",
+    "infeasible": "❌ infeasible — за цих вимог рецептури немає",
     "unsupported": "🚫 unsupported — запит поза підтримуваними категоріями",
     "error": "💥 error",
 }
@@ -86,11 +86,30 @@ def _change(c: dict) -> str:
     return line
 
 
+def _alternatives(out: dict) -> list[dict]:
+    return [a for a in out.get("alternatives", []) if a not in out.get("relaxations", [])]
+
+
+def _status(out: dict) -> str:
+    """The status line; for infeasible it points to the sections this answer really has."""
+    text = STATUS.get(out["status"], out["status"])
+    if out["status"] != "infeasible":
+        return text
+    sections = ["«Конфлікт»"]
+    if out.get("relaxations"):
+        sections.append("«Щоб рецептура існувала…»")
+    if _alternatives(out):
+        sections.append("«Або достатньо змінити одне з…»")
+    if out.get("other_options"):
+        sections.append("«Інший варіант»")
+    return f"{text} (див. {', '.join(sections)})"
+
+
 def render(out: dict) -> str:
     if out.get("error"):
         e = out["error"]
         return f"💥 {e.get('code')}: {e.get('message')}"
-    lines = [f"Статус: {STATUS.get(out['status'], out['status'])}"]
+    lines = [f"Статус: {_status(out)}"]
     if out.get("template"):
         lines.append(f"Шаблон: {out['template']}")
 
@@ -122,7 +141,7 @@ def render(out: dict) -> str:
     if out.get("relaxations"):
         lines += ["", "Щоб рецептура існувала, треба одночасно:"]
         lines += [_change(c) for c in out["relaxations"]]
-    alternatives = [a for a in out.get("alternatives", []) if a not in out.get("relaxations", [])]
+    alternatives = _alternatives(out)
     if alternatives:
         lines += ["", "Або достатньо змінити одне з:"]
         lines += [_change(c) for c in alternatives]

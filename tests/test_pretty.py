@@ -32,7 +32,7 @@ async def test_infeasible_shows_conflict_relaxation_and_relaxed_recipe():
     text = render(await _answer(TASK_SPEC))
     assert "infeasible" in text and "Конфлікт" in text
     assert "собівартість не більше 45 грн/кг" in text and "без молока" in text
-    assert "→ 52,9 грн/кг" in text and "Що послабити" in text
+    assert "→ 52,9 грн/кг" in text and "Щоб рецептура існувала, треба одночасно:" in text
     assert "Інший варіант" in text and "⚠️" in text  # the allergen is only another option
     assert "relaxed_recipe" in text and "Соєвий напій" in text
     assert "Рецептура на 1000 г" not in text  # the original request has no recipe

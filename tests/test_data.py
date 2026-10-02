@@ -127,6 +127,8 @@ def test_allergen_name_heuristic_has_no_gaps(data):
     }
     for ing in data.ingredients.values():
         for word, allergen in keywords.items():
+            if word == "oat" and "gluten_free_certified" in ing.tags:
+                continue  # certified gluten-free oats (≤ 20 mg/kg): not declared as cereals
             if word in ing.id:
                 assert allergen in ing.allergens, f"{ing.id} should declare {allergen}"
 

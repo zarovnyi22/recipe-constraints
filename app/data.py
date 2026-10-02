@@ -27,6 +27,11 @@ ROLE_WORDS: dict[str, list[str]] = {
     "dried_fruit": ["dried fruit", "сухофрукти", "сухофруктів", "сухофруктами"],
 }
 
+# Marker tags: a property of the ingredient, not a class «без …» excludes (not in the prompt).
+# gluten_free_certified: oats grown and processed apart from wheat, ≤ 20 mg/kg gluten (Reg. (EU)
+# 828/2014: may be sold as «без глютену»); the data does not declare them as allergen «cereals».
+MARKER_TAGS = {"gluten_free_certified"}
+
 # Classes an ingredient can belong to (Ingredient.tags) -> the words a technologist uses for the
 # class, in the forms that occur in «без …» (matching is by exact word, no stemming).
 TAGS: dict[str, list[str]] = {
@@ -146,8 +151,9 @@ class Ingredient(BaseModel):
             and self.min_dose_pct > self.max_dose_pct
         ):
             raise ValueError(f"{self.id}: min_dose_pct > max_dose_pct")
-        if unknown := set(self.tags) - set(TAGS):
-            raise ValueError(f"{self.id}: unknown tags {sorted(unknown)} (known: {sorted(TAGS)})")
+        if unknown := set(self.tags) - set(TAGS) - MARKER_TAGS:
+            known = sorted(set(TAGS) | MARKER_TAGS)
+            raise ValueError(f"{self.id}: unknown tags {sorted(unknown)} (known: {known})")
         if self.id in self.contains:
             raise ValueError(f"{self.id}: contains itself")
         animal = {"milk", "eggs", "fish", "crustaceans", "molluscs"}

@@ -639,6 +639,41 @@
   price_source: *p_bak
   price_date: "2026-10"
 
+- id: oat_flakes_gluten_free
+  name_uk: Пластівці вівсяні безглютенові (сертифіковані)
+  aliases: [безглютенові вівсяні пластівці, вівсяні пластівці без глютену, gluten-free oats]
+  group: bakery
+  per_100g: {energy_kcal: 379, protein: 13.2, fat: 6.5, saturates: 1.1, carbs: 57.6, sugars: 1.0, fibre: 10.1, salt: 0.02, polyols: 0}
+  nutrients_source: "як oat_flakes: USDA FDC (oats), типові значення; карбс = 67,7 − клітковина 10,1"
+  # Сертифіковані (≤ 20 мг/кг глютену, Регл. (ЄС) 828/2014: можна «без глютену»): алерген cereals не
+  # декларуємо — припущення, README. Звичайні вівсяні пластівці лишаються cereals.
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0.01
+  roles: [cereal]
+  tags: [gluten_free_certified]
+  price_uah_per_kg: 110
+  price_source: "оцінка: сертифіковані безглютенові пластівці у 2,5–3,5 раза дорожчі за звичайні (35 грн/кг) — нішеве окреме виробництво; живих прайсів не перевірено"
+  price_date: "2026-10"
+
+- id: rice_flakes
+  name_uk: Пластівці рисові
+  aliases: [рисові пластівці, rice flakes]
+  group: bakery
+  per_100g: {energy_kcal: 360, protein: 7.0, fat: 1.0, saturates: 0.3, carbs: 79.0, sugars: 0.5, fibre: 1.5, salt: 0.01, polyols: 0}
+  nutrients_source: "USDA FDC (rice, white, dry / rice flakes), типові значення; карбс = 80,5 − клітковина 1,5"
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0.01
+  roles: [cereal]
+  price_uah_per_kg: 60
+  price_source: "оцінка: рисова крупа ~45 грн/кг (опт, UA) + переробка в пластівці; живих прайсів не перевірено"
+  price_date: "2026-10"
+
 - id: sunflower_oil
   name_uk: Олія соняшникова рафінована
   aliases: [олія]

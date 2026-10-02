@@ -262,9 +262,18 @@ PATTERNS: dict[AllergenCategory, re.Pattern[str]] = {
 EXCLUSION_PATTERNS: list[re.Pattern[str]] = [re.compile(rf"(?<!\w){x}", re.I) for x in EXCLUSIONS]
 
 
+# «вівсяні … безглютенові» (certified, ≤ 20 mg/kg gluten): the oat word is not the allergen; wheat,
+# rye, barley words still are
+_GLUTEN_FREE = re.compile(r"безглютенов\w*|без\s+глютену|gluten[- ]free", re.I)
+_OAT_WORD = re.compile(r"вівс\w*|овес|овс\w*|oats?(?!\w)|oatmeal", re.I)
+
+
 def allergens_in_name(text: str) -> set[AllergenCategory]:
     """Categories the dictionary finds in `text`, minus the words masked by an exclusion."""
     masked = [m.span("x") for p in EXCLUSION_PATTERNS for m in p.finditer(text)]
+    if _GLUTEN_FREE.search(text):  # certified gluten-free oats: the oat words are masked,
+        masked += [m.span() for m in _OAT_WORD.finditer(text)]  # and the marker itself
+        masked += [m.span() for m in _GLUTEN_FREE.finditer(text)]
     return {
         category
         for category, pattern in PATTERNS.items()

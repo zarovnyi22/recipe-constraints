@@ -330,7 +330,7 @@
       mode: blend
       min_pct: 25
       max_pct: 55
-      ingredients: [oat_flakes]
+      ingredients: [oat_flakes, oat_flakes_gluten_free, rice_flakes]
     binder:
       mode: blend
       min_pct: 15
