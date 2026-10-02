@@ -113,6 +113,9 @@ class LinearConstraint(BaseModel):
     # False: never relaxed by the elastic LP, only offered as "another option" with a warning
     # (allergen and diet exclusions).
     auto_relax: bool = True
+    # Set on rows of an either-or requirement (Expansion.either_or): the row applies only when
+    # the solver picks this alternative of its group.
+    alt: str | None = None
 
 
 class Expansion(BaseModel):
@@ -125,6 +128,8 @@ class Expansion(BaseModel):
     constraints: list[LinearConstraint] = []
     one_of: dict[str, list[str]] = {}  # role -> candidates: exactly one is used (solver enumerates)
     min_dose_g: dict[str, float] = {}  # if the ingredient is used at all, at least this much
+    # group -> alternatives: rows of exactly one alternative apply (an OR, solver enumerates)
+    either_or: dict[str, list[str]] = {}
     reference_id: str | None = None
     unsupported: list[Unsupported] = []
     assumptions: list[str] = []

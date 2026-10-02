@@ -8,7 +8,7 @@ technologist's requirements are soft. Every requirement becomes rows, a note in 
 """
 
 from app import claims as C
-from app.data import AllergenCategory, DataBundle, Ingredient, RefNutrients, Template
+from app.data import AllergenCategory, DataBundle, Ingredient, RefNutrients, Role, Template
 from app.schemas import ConstraintSpec, Expansion, LinearConstraint, Unsupported
 
 NUTRIENTS = list(RefNutrients.model_fields)
@@ -28,6 +28,8 @@ EQ_TOLERANCE = 0.02  # "==" on a nutrient is a ±2 % band
 # bulking agent, not a sweetener.
 SWEETENER_MIN_SWEETNESS = 0.1
 DIET_ANIMAL = {"fish", "crustaceans", "molluscs"}
+# "must include X" without a share: at least this % (or the role's minimum, if larger)
+MUST_INCLUDE_DEFAULT_PCT = 5.0
 
 
 def _fmt(v: float) -> str:
@@ -71,6 +73,7 @@ class _Builder:
         self.variables = [i for role in tpl.roles.values() for i in role.ingredients]
         self.ings = [data.ingredients[i] for i in self.variables]
         self.rows: list[LinearConstraint] = []
+        self.either_or: dict[str, list[str]] = {}
         self.unsupported: list[Unsupported] = []
         self.assumptions: list[str] = []
         self.reference = data.references.get(tpl.reference)
@@ -91,6 +94,7 @@ class _Builder:
         group: str | None = None,
         phrase: str | None = None,
         auto_relax: bool = True,
+        alt: str | None = None,
     ) -> None:
         coeffs = {i: c for i, c in coeffs.items() if c != 0}
         self.rows.append(
@@ -105,6 +109,7 @@ class _Builder:
                 label_uk=label,
                 source_phrase=phrase,
                 auto_relax=auto_relax,
+                alt=alt,
             )
         )
 
@@ -391,16 +396,7 @@ class _Builder:
             elif cid in C.PROTEIN_MIN_ENERGY_PCT:
                 self.protein_energy(cid, g, phrase)
             elif cid in C.FIBRE_MIN:
-                limit = C.FIBRE_MIN[cid]
-                self.row(
-                    g,
-                    self.nutrient("fibre"),
-                    ">=",
-                    limit,
-                    "г/100 г",
-                    f"{title}: клітковина ≥ {_fmt(limit)} г/100 г",
-                    phrase=phrase,
-                )
+                self.fibre(cid, g, phrase)
             elif cid == "no_added_sugar":
                 ids = {i.id for i in self.ings if i.added_sugar}
                 self.exclude(g, ids, title, phrase)
@@ -410,6 +406,39 @@ class _Builder:
                 )
             else:
                 self.comparative(cid, g, phrase)
+
+    def fibre(self, cid: str, g: str, phrase: str) -> None:
+        """≥ N g per 100 g OR ≥ M g per 100 kcal: two alternatives, the solver tries both."""
+        title = f"«{C.TITLE_UK[cid]}»"
+        limit, per_kcal = C.FIBRE_MIN[cid], C.FIBRE_MIN_PER_100KCAL[cid]
+        self.row(
+            f"{g}:per_100g",
+            self.nutrient("fibre"),
+            ">=",
+            limit,
+            "г/100 г",
+            f"{title}: клітковина ≥ {_fmt(limit)} г/100 г",
+            group=g,
+            phrase=phrase,
+            alt="per_100g",
+        )
+        # fibre ≥ per_kcal · energy / 100, per 100 g of product: linear in x
+        coeffs = {
+            i.id: (i.per_100g.fibre - per_kcal / 100 * i.per_100g.energy_kcal) / 1000
+            for i in self.ings
+        }
+        self.row(
+            f"{g}:per_100kcal",
+            coeffs,
+            ">=",
+            0.0,
+            "г/100 г",
+            f"{title}: клітковина ≥ {_fmt(per_kcal)} г/100 ккал",
+            group=g,
+            phrase=phrase,
+            alt="per_100kcal",
+        )
+        self.either_or[g] = ["per_100g", "per_100kcal"]
 
     def protein_energy(self, cid: str, g: str, phrase: str) -> None:
         """4·protein ≥ k·energy, per 100 g: linear in x."""
@@ -540,13 +569,14 @@ class _Builder:
                 ids = [i.id for i in found]
                 role = self.tpl.roles[self.tpl.role_of(ids[0])]
                 label = ", ".join(i.name_uk for i in found)
-            minimum = req.min_pct if req.min_pct is not None else role.flavor_min_pct
+            minimum = req.min_pct
             if minimum is None:
-                self.unsupported_(
-                    req.source_phrase,
-                    f"«{name}»: не вказано частку, а шаблон не задає мінімуму — уточніть %",
+                minimum = self.default_include_pct(role, ids)
+                self.assumptions.append(
+                    f"«{req.source_phrase}»: частку не вказано — прийнято {label} "
+                    f"не менше {_fmt(minimum)} % (max({_fmt(MUST_INCLUDE_DEFAULT_PCT)} %, "
+                    "мінімум ролі), не більше дозволеного шаблоном)"
                 )
-                continue
             self.row(
                 f"must_include:{k}:{name}",
                 self.pct(ids),
@@ -556,6 +586,17 @@ class _Builder:
                 f"{label} не менше {_fmt(minimum)} %",
                 phrase=req.source_phrase,
             )
+
+    def default_include_pct(self, role: Role, ids: list[str]) -> float:
+        """max(5 %, the role's minimum), capped by what the template allows for these ids."""
+        want = max(MUST_INCLUDE_DEFAULT_PCT, role.min_pct, role.flavor_min_pct or 0)
+        doses = [
+            self.tpl.dose_limits_pct.get(i, self.data.ingredients[i].max_dose_pct) for i in ids
+        ]
+        cap = role.max_pct
+        if all(d is not None for d in doses):
+            cap = min(cap, sum(doses))
+        return min(want, cap)
 
     def build(self) -> Expansion:
         self.template()
@@ -586,6 +627,7 @@ class _Builder:
             constraints=self.rows,
             one_of=one_of,
             min_dose_g=min_dose,
+            either_or=self.either_or,
             reference_id=self.reference.id if self.reference else None,
             unsupported=self.unsupported,
             assumptions=self.assumptions,

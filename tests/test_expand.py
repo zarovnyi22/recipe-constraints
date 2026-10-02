@@ -312,10 +312,21 @@ def test_satfat_low_has_grams_with_margin_and_energy_share(data):
     assert energy.rhs == 0 and energy.coeffs["milk"] == pytest.approx((9 * 1.6 - 0.1 * 53) / 1000)
 
 
-def test_fibre_source(data):
+def test_fibre_source_is_per_100g_or_per_100kcal(data):
     exp = expand(_spec(claims=[{"claim": "fibre_source", "source_phrase": "клітковина"}]), data)
-    row = _row(exp, "claim:fibre_source")
-    assert (row.op, row.rhs, row.coeffs["cocoa"]) == (">=", 3.0, pytest.approx(0.03))
+    per_g, per_kcal = _rows(exp, "claim:fibre_source")
+    assert (per_g.alt, per_g.op, per_g.rhs) == ("per_100g", ">=", 3.0)
+    assert per_g.coeffs["cocoa"] == pytest.approx(0.03)
+    # fibre − 1.5/100 · kcal ≥ 0, per 100 g of product
+    assert (per_kcal.alt, per_kcal.op, per_kcal.rhs) == ("per_100kcal", ">=", 0)
+    assert per_kcal.coeffs["cocoa"] == pytest.approx((30 - 0.015 * 250) / 1000)
+    assert per_kcal.coeffs["sugar"] == pytest.approx(-0.006)
+    assert exp.either_or == {"claim:fibre_source": ["per_100g", "per_100kcal"]}
+    high = expand(_spec(claims=[{"claim": "fibre_high", "source_phrase": "багато"}]), data)
+    assert _row(high, "claim:fibre_high:per_100g").rhs == 6.0
+    assert _row(high, "claim:fibre_high:per_100kcal").coeffs["cocoa"] == pytest.approx(
+        (30 - 0.03 * 250) / 1000
+    )
 
 
 def test_reduced_sugars_needs_sugars_and_energy_below_reference(data):
@@ -429,21 +440,50 @@ def test_must_include(data):
     )
     first = _row(exp, "must_include:0:strawberry")
     assert (first.op, first.rhs, first.coeffs) == (">=", 15, {"strawberry": 0.1})
-    assert _row(exp, "must_include:1:strawberry").rhs == 10  # the role's flavor minimum
+    assert _row(exp, "must_include:1:strawberry").rhs == 10  # the role's flavor minimum > 5 %
     assert _row(exp, "must_include:2:protein").coeffs == {"whey": 0.1}
+    assert not exp.unsupported
+    # only the phrase without a share is an assumption
+    assert [a for a in exp.assumptions if "частку не вказано" in a] == [
+        "«з полуницею»: частку не вказано — прийнято strawberry не менше 10 % "
+        "(max(5 %, мінімум ролі), не більше дозволеного шаблоном)"
+    ]
 
 
-def test_must_include_without_basis_is_unsupported(data):
+def test_must_include_without_share_defaults_to_5_pct_capped_by_doses(data):
     exp = expand(
         _spec(
             must_include=[
                 {"ingredient_or_role": "protein", "source_phrase": "з білком"},
-                {"ingredient_or_role": "mango", "min_pct": 5, "source_phrase": "з манго"},
+                {"ingredient_or_role": "stevia", "source_phrase": "зі стевією"},
+                {"ingredient_or_role": "extra", "source_phrase": "з какао"},
             ]
         ),
         data,
     )
-    assert [u.phrase for u in exp.unsupported] == ["з білком", "з манго"]
+    assert not exp.unsupported
+    assert _row(exp, "must_include:0:protein").rhs == 5  # max(5 %, role min 0)
+    assert _row(exp, "must_include:1:stevia").rhs == 0.05  # stevia max dose 0.05 %
+    assert _row(exp, "must_include:2:extra").rhs == 5  # role max 5 %
+    assert sum("частку не вказано" in a for a in exp.assumptions) == 3
+
+
+def test_must_include_absent_ingredient_is_unsupported(data):
+    data.ingredients["mango"] = _ing(
+        "mango", (60, 0.8, 0.4, 0.1, 15, 14, 1.6, 0), roles=["fruit"], price=90
+    )
+    exp = expand(
+        _spec(
+            must_include=[
+                {"ingredient_or_role": "mango", "source_phrase": "з манго"},
+                {"ingredient_or_role": "kiwi", "min_pct": 5, "source_phrase": "з ківі"},
+            ]
+        ),
+        data,
+    )
+    reasons = {u.phrase: u.reason for u in exp.unsupported}
+    assert "не передбачено шаблоном" in reasons["з манго"]
+    assert "немає в базі" in reasons["з ківі"]
 
 
 def test_nothing_is_lost_silently(data):

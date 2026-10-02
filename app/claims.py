@@ -20,9 +20,10 @@ SATFAT_MAX_ENERGY_PCT = 10.0
 # much room under the limit (g), as label-check does.
 SATFAT_MARGIN = 0.1
 PROTEIN_MIN_ENERGY_PCT = {"protein_source": 12.0, "protein_high": 20.0}
-# g/100 g (solid, liquid are the same in the law); the alternative per-100-kcal condition
-# (1.5 / 3 g per 100 kcal) is an OR, which is not linear: the recipe meets the per-100-g one.
+# Fibre: at least this much per 100 g OR per 100 kcal (solid, liquid are the same in the law).
+# The OR is not linear: the solver tries both alternatives as separate LPs, like one_of.
 FIBRE_MIN = {"fibre_source": 3.0, "fibre_high": 6.0}
+FIBRE_MIN_PER_100KCAL = {"fibre_source": 1.5, "fibre_high": 3.0}
 
 # Comparative claims: (nutrient, max or min factor of the reference). reduced_sugars also needs
 # energy <= the reference; increased_protein also needs protein_source.

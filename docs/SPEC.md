@@ -48,7 +48,7 @@ nutrients:                         # на 100 г готового продукт
 cost_max: {max_uah_per_kg: 45}
 claims: [{claim: reduced_sugars}]  # id з §3
 sweeteners: {allowed: false}       # «без підсолоджувачів»; null — не згадано
-must_include: [{ingredient_or_role: strawberry, min_pct: 15}]   # min_pct null → flavor_min_pct ролі
+must_include: [{ingredient_or_role: strawberry, min_pct: 15}]   # min_pct null → max(5 %, мінімум ролі), в assumptions
 optimize: cost
 unparsed: ["фраза, яку модель не змогла віднести"]
 ```
@@ -67,7 +67,7 @@ unparsed: ["фраза, яку модель не змогла віднести"]
 **Твердження** (поріг на 100 г; тверде/рідке з шаблону):
 - абсолютні — як у label-check (`sugar_free` ≤ 0,5; `low_sugar` ≤ 5/2,5; `protein_source` ≥ 12 %
   енергії; `protein_high` ≥ 20 %; `fat_low` ≤ 3/1,5; `fat_free` ≤ 0,5; `satfat_low`;
-  `fibre_source`/`fibre_high`; `salt_low`; `salt_very_low`; `energy_low` ≤ 40/20;
+  `fibre_source`/`fibre_high` (на 100 г АБО на 100 ккал — два LP); `salt_low`; `salt_very_low`; `energy_low` ≤ 40/20;
   `no_added_sugar` — жодного інгредієнта з `added_sugar: true`);
 - порівняльні (еталон категорії): `reduced_sugars` — цукри ≤ 0,7·еталон **і** енергія ≤
   еталон; `reduced_fat` ≤ 0,7·еталон; `reduced_energy` ≤ 0,7·еталон; `reduced_salt` —
