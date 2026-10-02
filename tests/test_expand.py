@@ -295,10 +295,13 @@ def test_absolute_claims_solid_and_liquid(data):
     assert _row(exp, "claim:energy_low").rhs == 40
     assert _row(exp, "claim:low_sugar").coeffs["sugar"] == pytest.approx(0.1)
     data.templates["yog"].form = "drinkable"
+    data.templates["yog"].density_g_per_ml = 1.05
     exp = expand(_spec(claims=claims), data)
-    assert _row(exp, "claim:low_sugar").rhs == 2.5
-    assert _row(exp, "claim:energy_low").rhs == 20
-    assert any("100 мл" in a for a in exp.assumptions)
+    # liquids: per 100 ml in the law → per 100 g = limit / density
+    assert _row(exp, "claim:low_sugar").rhs == pytest.approx(2.5 / 1.05)
+    assert _row(exp, "claim:energy_low").rhs == pytest.approx(20 / 1.05)
+    assert "2,5 г/100 мл" in _row(exp, "claim:low_sugar").label_uk
+    assert any("густиною шаблону 1,05" in a for a in exp.assumptions)
 
 
 def test_protein_source_is_an_energy_share(data):

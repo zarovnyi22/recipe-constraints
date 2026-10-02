@@ -41,7 +41,7 @@ TOL = 1e-7  # row check tolerance, relative to max(1, |rhs|)
 MICRO_G = 1.0  # below this, round to 0.01 g instead of 0.1 g
 MASS_TOL_G = 0.05  # the batch mass is rounded to 0.1 g (1111.1 g for a 10 % moisture loss)
 DROP_WEIGHT = 10.0  # the elastic LP prefers moving a number to dropping a requirement
-REPAIRS = 4  # rounds of "tighten the rows rounding broke" per margin
+REPAIRS = 4  # rounds of "tighten the rows rounding broke" per margin (a row broken again: ×2)
 NUDGES = 3  # outward steps tried when a proposed number fails the re-solve after rounding
 
 
@@ -95,11 +95,21 @@ def _tightenable(row: LinearConstraint) -> bool:
     return not (row.op == "<=" and row.rhs == 0 and all(c > 0 for c in row.coeffs.values()))
 
 
-def _rhs(row: LinearConstraint, margin: float, only: set[str] | None = None) -> float:
-    if not margin or not _tightenable(row) or (only is not None and row.id not in only):
+def _delta(row: LinearConstraint, margin: float) -> float:
+    return margin * abs(row.rhs) if row.rhs else MARGIN_ABS
+
+
+def _rhs(row: LinearConstraint, margin: float, only: dict[str, float] | None = None) -> float:
+    """`only` {row id: delta in the row's unit}: those rows alone, instead of `margin` on all."""
+    delta = only.get(row.id, 0.0) if only is not None else (margin and _delta(row, margin))
+    if not delta or not _tightenable(row):
         return row.rhs
-    delta = margin * abs(row.rhs) if row.rhs else MARGIN_ABS
     return row.rhs - delta if row.op == "<=" else row.rhs + delta
+
+
+def _rounding_error(row: LinearConstraint, x: dict[str, float]) -> float:
+    """How far rounding can move the row: half a weighing step of every ingredient in it."""
+    return sum(abs(c) * (0.005 if x.get(i, 0.0) < MICRO_G else 0.05) for i, c in row.coeffs.items())
 
 
 def _lp(
@@ -109,7 +119,7 @@ def _lp(
     *,
     elastic: dict[str, float] | None = None,
     margin: float = 0.0,
-    only: set[str] | None = None,
+    only: dict[str, float] | None = None,
 ) -> tuple[np.ndarray, dict[str, float]] | None:
     """Minimise cost (None: any feasible point) or, with `elastic` {row id: objective weight},
     the weighted slacks of those rows. Returns (x, slack by row id) or None if infeasible."""
@@ -255,24 +265,40 @@ def _repair(
 ) -> Recipe | None:
     """Round; if that breaks rows, re-solve with a margin on THOSE rows only (a margin on every
     row, cost included, made tight but feasible requests infeasible — RR1 #4), adding rows as
-    they break; then a margin on every row; then the same with the larger margin."""
+    they break and doubling the margin of a row rounding breaks again. The first margin is the
+    row's own rounding error (a share of rhs is too much for a binding low-sugar limit: 0.5 %
+    cost a smoothie 1.5 UAH/kg; too little for sweetness: stevia rounded to 0.01 g moves it ~2 %);
+    then shares of rhs, on the broken rows and then on every row."""
     broken: set[str] = set()
     if recipe := _round(exp, data, v, x, 0.0, broken):
         return recipe
-    for margin in MARGINS:
-        tighten = set(broken)
+    rows = {r.id: r for r in v.rows}
+    xs = {i: float(g) for i, g in zip(exp.variables, x, strict=True)}
+
+    def first(rid: str, margin: float | None) -> float:
+        row = rows[rid]
+        if margin is None:
+            return max(_rounding_error(row, xs), TOL * max(1.0, abs(row.rhs)))
+        return _delta(row, margin)
+
+    for margin in (None, *MARGINS):
+        tighten = {rid: first(rid, margin) for rid in broken}
         for _ in range(REPAIRS):
             if not tighten:
                 break
-            found = _lp(exp, v, cost, margin=margin, only=tighten)
+            found = _lp(exp, v, cost, only=tighten)
             if found is None:
                 break
             now: set[str] = set()
-            if recipe := _round(exp, data, v, found[0], margin, now):
+            share = max(d / _scale(rows[rid]) for rid, d in tighten.items())
+            if recipe := _round(exp, data, v, found[0], share, now):
                 return recipe
-            if now <= tighten:
-                break
-            tighten |= now
+            if not now:
+                break  # not a broken row (a min dose, a closed variable): margins will not help
+            for rid in now:
+                tighten[rid] = 2 * tighten[rid] if rid in tighten else first(rid, margin)
+        if margin is None:
+            continue
         found = _lp(exp, v, cost, margin=margin)
         if found is not None and (recipe := _round(exp, data, v, found[0], margin)):
             return recipe
@@ -482,8 +508,8 @@ def _single(exp: Expansion, data: DataBundle, g: str, rows: list[LinearConstrain
 def _template_rules(exp: Expansion, others: set[str]) -> list[str]:
     """The template's own rules the conflict runs into (RR1 #6: ketchup «без гірчиці» fails on
     «спеції ≥ 0,5 %», all spice blends may contain mustard). With only the conflicting
-    requirements, the smallest move of the hard rows that would make it feasible — shown, never
-    offered: technology is not relaxed."""
+    requirements, the hard rows an elastic LP has to move — named, never offered and without the
+    moved number (it is not a recipe anyone checked): technology is not relaxed."""
     core = _without(exp, others)
     hard = [r for r in core.constraints if r.kind == "hard" and r.op != "=="]
     relaxed = _elastic(core, hard) if hard else None
@@ -491,8 +517,9 @@ def _template_rules(exp: Expansion, others: set[str]) -> list[str]:
         return []
     by_id = {r.id: r for r in hard}
     return [
-        f"{by_id[rid].label_uk} (щоб виконати запит, мало б бути {_fmt(v)} {by_id[rid].unit})"
-        for rid, v in relaxed[1].items()
+        "на результат також впливає технологічне правило шаблону: "
+        f"{by_id[rid].label_uk} (не послаблюється)"
+        for rid in relaxed[1]
     ]
 
 

@@ -94,7 +94,8 @@ def test_dough_must_have_the_water_it_loses():
 # #4 — rounding must not turn a feasible request into rounding_failed -----------------------
 
 
-@pytest.mark.parametrize("cost", [89.6, 90])
+# LP optimum 94.90 UAH/kg (low_sugar per 100 ml, RR1 #10); rounded 95.32 — 95.4 is within 0.1 %
+@pytest.mark.parametrize("cost", [95.4, 96])
 async def test_tight_smoothie_is_found(cost):
     spec = _spec(
         "smoothie",
@@ -132,6 +133,9 @@ async def test_ketchup_without_mustard_names_the_spice_rule():
     out = await _run(_spec("ketchup_sauce", exclude_allergens=[_ph(allergen="mustard")]))
     assert out.status == "infeasible"
     assert any("spice" in r for r in out.template_rules)
+    for rule in out.template_rules:  # named, not relaxed, no computed "would have to be" number
+        assert rule.startswith("на результат також впливає технологічне правило шаблону: ")
+        assert rule.endswith("(не послаблюється)") and "мало б бути" not in rule
 
 
 # #7 — flavor: ambiguous name, role without a minimum ---------------------------------------
@@ -176,3 +180,24 @@ async def test_salt_stays_within_a_typical_dose(template, top):
 )  # fmt: skip
 def test_acids_and_fibres_use_eu_energy_factors(ingredient, kcal):
     assert DATA.ingredients[ingredient].per_100g.energy_kcal == kcal
+
+
+# #10 — liquids: claim limits per 100 ml, the recipe per 100 g ------------------------------
+
+
+async def test_low_sugar_juice_stays_under_the_limit_per_100_ml():
+    out = await _run(_spec("juice_drink", claims=[_ph(claim="low_sugar")]))
+    assert out.status == "feasible", out.unsupported
+    density = DATA.templates["juice_drink"].density_g_per_ml
+    assert out.totals.per_100g["sugars"] * density <= 2.5 + 1e-6
+    assert out.totals.per_100g["sugars"] <= 2.5 / density + 1e-6
+
+
+@pytest.mark.parametrize(("apple_juice", "passes"), [(249.0, True), (250.0, False)])
+def test_low_sugar_juice_on_the_100_ml_boundary(apple_juice, passes):
+    # apple juice 9.6 g sugars/100 g: 250 g → 2.40 g/100 g = 2.508 g/100 ml (density 1.045) —
+    # over 2.5, though it passed when the limit was applied to 100 g; 249 g → 2.497 g/100 ml
+    spec = _spec("juice_drink", claims=[_ph(claim="low_sugar")])
+    grams = {"apple_juice": apple_juice, "stevia": 0.1, "water": 1000 - apple_juice - 0.1}
+    checks, _, _ = verify(grams, spec, DATA)
+    assert ("claim:low_sugar" not in {c.id for c in failed(checks)}) is passes

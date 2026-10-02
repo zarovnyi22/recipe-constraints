@@ -165,6 +165,8 @@ class Template(BaseModel):
     moisture_loss_pct: float = Field(ge=0, lt=50)
     # finished product moisture limit, % (with moisture_loss_pct: the water balance, RR1 #3)
     max_moisture_pct: float | None = Field(default=None, gt=0, lt=100)
+    # liquids only: claim limits are per 100 ml, the recipe is per 100 g (RR1 #10)
+    density_g_per_ml: float | None = Field(default=None, ge=0.9, le=1.5)
     dose_limits_pct: dict[str, float] = {}
     pairings: list[Pairing] = []
     roles: dict[str, Role] = Field(min_length=1)
@@ -174,6 +176,8 @@ class Template(BaseModel):
     def _water_balance(self) -> Self:
         if self.moisture_loss_pct and self.max_moisture_pct is None:
             raise ValueError(f"{self.id}: moisture_loss_pct needs max_moisture_pct")
+        if (self.form == "drinkable") != (self.density_g_per_ml is not None):
+            raise ValueError(f"{self.id}: density_g_per_ml is set for drinkable templates only")
         return self
 
     @property

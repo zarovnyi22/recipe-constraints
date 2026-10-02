@@ -1,7 +1,8 @@
 """Nutrition claims of MoH Order 1145 (= annex of Reg. 1924/2006): thresholds and conditions only.
 
 Ported from label-check (app/rules/claims.py); finding claims in text is the LLM's job here
-(it maps a phrase to a claim id). Per 100 g of finished product; solid/liquid from the template.
+(it maps a phrase to a claim id). Limits are per 100 g (solids) or per 100 ml (liquids: the
+recipe is per 100 g, so a liquid's limit is divided by the template's density).
 """
 
 # claim -> (nutrient, limit solid, limit liquid): the amount per 100 g / 100 ml is at most
@@ -70,3 +71,8 @@ LIQUID_FORMS = {"drinkable"}
 
 def is_liquid(template_form: str) -> bool:
     return template_form in LIQUID_FORMS
+
+
+def per_100g(limit_per_100ml: float, density_g_per_ml: float) -> float:
+    """A liquid's limit per 100 ml as a limit per 100 g: 100 ml weigh 100·density g."""
+    return limit_per_100ml / density_g_per_ml

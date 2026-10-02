@@ -139,15 +139,18 @@ def test_every_template_solves_with_the_mass_exact():
 
 def test_rounding_that_breaks_a_tight_row_is_redone_with_a_margin():
     """juice_drink: the plain LP optimum rounded to 0.1 g breaks a row; the solver re-solves
-    with the rows tightened by 0.5 % and the rounded recipe holds."""
+    with the broken rows tightened by their rounding error and the rounded recipe holds — no
+    dearer than with 0.5 % on every row."""
     exp = _real("juice_drink")
     cost = S._prices(exp, REAL)
     (v,) = S._variants(exp)
     x, _ = S._lp(exp, v, cost)
     assert S._round(exp, REAL, v, x, 0.0) is None  # naive rounding fails
     recipe = solve(exp, REAL)
-    assert recipe.margin_pct == pytest.approx(0.5)
+    assert recipe.margin_pct > 0
     _assert_holds(exp, recipe)
+    x_half_pct, _ = S._lp(exp, v, cost, margin=0.005)
+    assert recipe.cost_uah_per_kg <= float(cost @ x_half_pct) + 0.01
 
 
 def test_cookie_batch_is_1111_1_g():

@@ -62,6 +62,8 @@ class _Verifier:
         self.cost = sum(g * self.known[i].price_uah_per_kg for i, g in self._known()) / 1000
         self.reference = data.references.get(tpl.reference)
         self.liquid = C.is_liquid(tpl.form)
+        # liquids: limits are per 100 ml, so the recipe's amount per 100 g is taken to 100 ml
+        self.density = tpl.density_g_per_ml or 1.0
         relaxed = list(relaxed)
         self.new_rhs = {r.id: r.to_rhs for c in relaxed if c.action == "relax" for r in c.rows}
         self.changes = {c.group: c for c in relaxed}
@@ -311,16 +313,27 @@ class _Verifier:
             title = f"«{C.TITLE_UK[cid]}»"
             if cid in C.MAX_LIMITS:
                 n, solid, liquid = C.MAX_LIMITS[cid]
-                limit = liquid if self.liquid else solid
-                parts = [(f"{n} ≤ {_n(limit)}", f"{n} {_n(p[n])}", _holds(p[n], "<=", limit))]
+                limit, amount, per = solid, p[n], "100 г"
+                if self.liquid:
+                    limit, amount, per = liquid, p[n] * self.density, "100 мл"
+                parts = [
+                    (
+                        f"{n} ≤ {_n(limit)} на {per}",
+                        f"{n} {_n(amount)} на {per}",
+                        _holds(amount, "<=", limit),
+                    )
+                ]
             elif cid == "satfat_low":
                 limit = C.SATFAT_LIMITS[1 if self.liquid else 0] - C.SATFAT_MARGIN
+                sat, per = p["saturates"], "100 г"
+                if self.liquid:
+                    sat, per = sat * self.density, "100 мл"
                 share = 100 * 9 * p["saturates"] / e if e else 0.0
                 parts = [
                     (
-                        f"saturates ≤ {_n(limit)}",
-                        f"saturates {_n(p['saturates'])}",
-                        _holds(p["saturates"], "<=", limit),
+                        f"saturates ≤ {_n(limit)} на {per}",
+                        f"saturates {_n(sat)} на {per}",
+                        _holds(sat, "<=", limit),
                     ),
                     (
                         f"≤ {_n(C.SATFAT_MAX_ENERGY_PCT)} % енергії",

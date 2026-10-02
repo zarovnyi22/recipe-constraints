@@ -187,7 +187,7 @@ class Recipe(BaseModel):
     total_g: float
     cost_uah_per_kg: float  # of the rounded recipe
     choices: dict[str, str]  # one_of role -> ingredient, either-or group -> alternative
-    margin_pct: float = 0.0  # ε the rows were tightened by so that rounding keeps them
+    margin_pct: float = 0.0  # largest ε (% of rhs) a row was tightened by so rounding keeps it
     binding: list[str] = []  # soft groups at their limit: what to relax to make it cheaper
 
 

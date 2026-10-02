@@ -405,10 +405,12 @@ class _Builder:
 
     def _claims(self) -> None:
         liquid = C.is_liquid(self.tpl.form)
+        density = self.tpl.density_g_per_ml or 1.0  # set for every liquid (data validation)
+        dens = f"{density:g}".replace(".", ",")
         if liquid and self.spec.claims:
             self.assumptions.append(
-                "напій: пороги тверджень для рідин (на 100 мл) застосовано до 100 г, "
-                "густина ≈ 1 г/мл"
+                "напій: пороги тверджень для рідин (на 100 мл) перераховано на 100 г за густиною "
+                f"шаблону {dens} г/мл (поріг ÷ густина)"
             )
         for req in self.spec.claims:
             cid, phrase = req.claim, req.source_phrase
@@ -423,19 +425,20 @@ class _Builder:
             title = f"«{C.TITLE_UK[cid]}»"
             if cid in C.MAX_LIMITS:
                 n, solid_limit, liquid_limit = C.MAX_LIMITS[cid]
-                limit = liquid_limit if liquid else solid_limit
                 name, unit = NUTRIENT_UK[n]
-                self.row(
-                    g,
-                    self.nutrient(n),
-                    "<=",
-                    limit,
-                    unit,
-                    f"{title}: {name} ≤ {_fmt(limit)} {unit}",
-                    phrase=phrase,
-                )
+                limit, label = solid_limit, f"{title}: {name} ≤ {_fmt(solid_limit)} {unit}"
+                if liquid:
+                    limit = C.per_100g(liquid_limit, density)
+                    per_ml = unit.replace("100 г", "100 мл")
+                    label = (
+                        f"{title}: {name} ≤ {_fmt(liquid_limit)} {per_ml} "
+                        f"= {_fmt(limit)} {unit} (густина {dens})"
+                    )
+                self.row(g, self.nutrient(n), "<=", limit, unit, label, phrase=phrase)
             elif cid == "satfat_low":
-                limit = C.SATFAT_LIMITS[1 if liquid else 0] - C.SATFAT_MARGIN
+                limit = C.SATFAT_LIMITS[0] - C.SATFAT_MARGIN
+                if liquid:
+                    limit = C.per_100g(C.SATFAT_LIMITS[1] - C.SATFAT_MARGIN, density)
                 self.row(
                     f"{g}:g",
                     self.nutrient("saturates"),
