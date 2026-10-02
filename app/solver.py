@@ -46,6 +46,10 @@ MASS_TOL_G = 0.05  # the batch mass is rounded to 0.1 g (1111.1 g for a 10 % moi
 DROP_WEIGHT = 10.0  # the elastic LP prefers moving a number to dropping a requirement
 REPAIRS = 4  # rounds of "tighten the rows rounding broke" per margin (a row broken again: ×2)
 NUDGES = 3  # outward steps tried when a proposed number fails the re-solve after rounding
+# the rounding window: a limit the LP meets but no recipe weighed to 0.1 g does — the smallest
+# loosening tried, in steps of 0.01 UAH/kg for cost (≤ 0.05) or of the row's 3rd digit otherwise
+WINDOW_STEPS = 5
+WINDOW_COST_STEP = 0.01
 # UAH per gram of distance from the base recipe (1e-4 UAH/g = 0.1 UAH/kg price difference): the
 # penalty is at most 2·LAMBDA·batch mass ≈ 0.2 UAH/kg, below any price difference that matters
 LAMBDA = 1e-4
@@ -608,8 +612,51 @@ def explain(exp: Expansion, data: DataBundle) -> Infeasible:
     )
 
 
+def rounding_window(exp: Expansion, data: DataBundle, error: AppError) -> Infeasible:
+    """The LP meets every limit, but no recipe weighed to 0.1 g (0.01 g below 1 g) does: the
+    limit sits between the LP optimum and the cheapest rounded recipe. Not a 500: infeasible,
+    with the smallest loosening of one requirement (cost first) that a re-solve verifies.
+    Nothing verifies → the original error (a real bug, kept for audit)."""
+    rows = [r for r in exp.constraints if r.kind == "soft" and r.relax == "value" and r.auto_relax]
+    rows.sort(key=lambda r: (r.group != "cost_max", r.id))
+    for row in rows:
+        step = WINDOW_COST_STEP if row.group == "cost_max" else _step(row.rhs)
+        for k in range(1, WINDOW_STEPS + 1):
+            new = round(row.rhs + k * step if row.op == "<=" else max(row.rhs - k * step, 0.0), 6)
+            recipe = _try_solve(_with_rhs(exp, {row.id: new}), data)
+            if recipe is None:
+                continue
+            changes = _changes(exp, set(), {row.id: new}, recipe)
+            group = _soft_groups(exp)[row.group]
+            return Infeasible(
+                conflict=[
+                    ConflictItem(
+                        group=row.group,
+                        label_uk=_group_label(group),
+                        source_phrase=group[0].source_phrase,
+                    )
+                ],
+                relaxations=changes,
+                alternatives=changes,
+                other_options=[],
+                relaxed_recipe=recipe,
+                explanation=(
+                    f"межа «{row.label_uk}» досяжна лише в неокругленому розв'язку: після "
+                    "зважування з кроком 0,1 г (0,01 г нижче 1 г) жодна рецептура її не тримає "
+                    f"разом з іншими вимогами; мінімальне послаблення — до {_fmt(new)} {row.unit} "
+                    "(перевірено повторним розв'язком)"
+                ),
+            )
+    raise error
+
+
 def solve(exp: Expansion, data: DataBundle) -> Recipe | Infeasible:
     if exp.template_id is None:
         raise ValueError("solve() needs a supported template")
-    recipe = best_recipe(exp, data)
+    try:
+        recipe = best_recipe(exp, data)
+    except AppError as e:
+        if e.code != "rounding_failed":
+            raise
+        return rounding_window(exp, data, e)
     return recipe if recipe is not None else explain(exp, data)

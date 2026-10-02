@@ -276,13 +276,29 @@ def allergens_in_name(text: str) -> set[AllergenCategory]:
 # A specific tree nut in «без мигдалю» excludes only that nut, «без горіхів» — every nut (EU annex
 # II lists the nuts one by one). Words that do not name the species are skipped.
 _GENERIC_NUT_WORD = re.compile(r"горіх|nuts?$|смаж|roast|ядр")
+# the generic word anywhere in the phrase («без горіхів та мигдалю») means the whole category;
+# not when it is part of a species name («грецьких горіхів», «горіх мускатний» — masked first)
+_GENERIC_NUT = re.compile(r"(?<!\w)(?:горіх\w*|nuts?)(?!\w)")
+_NUT_SPECIES = re.compile(
+    r"(?:грецьк|волоськ|ліщинн|землян|мускатн|кокосов|кедров|бразильськ)\w*\s+горіх\w*"
+    r"|горіх\w*\s+(?:грецьк|волоськ|ліщинн|землян|мускатн|кокосов|кедров|бразильськ)\w*"
+    r"|(?:wal|hazel|pea|coco|pine|brazil\s)nuts?"
+)
+
+
+def names_all_nuts(text: str) -> bool:
+    """«горіхи / горіх / nuts» as a word of its own, not a part of a species name."""
+    return bool(_GENERIC_NUT.search(_NUT_SPECIES.sub(" ", text.casefold())))
 
 
 def named_nuts(text: str, ingredients) -> set[str]:
     """Ids of the tree nuts (allergen «nuts») that `text` names by species — a 5-letter stem of
     a word of the ingredient's name, aliases or id («мигдалю» → almonds_roasted). Empty: the
-    text names no particular nut (then a nut exclusion means all of them)."""
+    text names no particular nut, or also names nuts in general («без горіхів та мигдалю») —
+    then a nut exclusion means all of them."""
     t = text.casefold()
+    if names_all_nuts(t):
+        return set()
     out = set()
     for ing in ingredients:
         if "nuts" not in ing.allergens:

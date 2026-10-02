@@ -135,6 +135,7 @@ async def _solve_and_verify(out, spec, data, exp, solve_fn: SolveFn) -> None:
     out.alternatives = result.alternatives
     out.other_options = result.other_options
     out.template_rules = result.template_rules
+    out.explanation = result.explanation
     if result.relaxed_recipe is not None:
         checks, totals, lines = await asyncio.to_thread(
             _verified, result.relaxed_recipe, spec, data, exp, result.relaxations

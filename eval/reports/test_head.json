@@ -205,6 +205,7 @@
     "other_options": [],
     "relaxed_recipe": null,
     "template_rules": [],
+    "explanation": null,
     "assumptions": [
      "напій: пороги тверджень для рідин (на 100 мл) перераховано на 100 г за густиною шаблону 1,045 г/мл (поріг ÷ густина)",
      "«без доданого цукру»: шаблон «Сік 100 % (відновлений)» не містить таких інгредієнтів — виконано автоматично",
@@ -590,6 +591,7 @@
     "other_options": [],
     "relaxed_recipe": null,
     "template_rules": [],
+    "explanation": null,
     "assumptions": [
      "напій: пороги тверджень для рідин (на 100 мл) перераховано на 100 г за густиною шаблону 1,03 г/мл (поріг ÷ густина)",
      "«вегетаріанський»: шаблон «Йогурт питний» не містить таких інгредієнтів — виконано автоматично"
@@ -999,12 +1001,13 @@
     "other_options": [],
     "relaxed_recipe": null,
     "template_rules": [],
+    "explanation": null,
     "assumptions": [
      "«з арахісом»: частку не вказано — прийнято Арахіс смажений не менше 10 % (max(5 %, мінімум ролі), не більше дозволеного шаблоном)"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
     "data_version": "2a0190f7c83e",
-    "duration_ms": 2,
+    "duration_ms": 3,
     "error": null
    },
    "relax_check": []
@@ -1435,13 +1438,14 @@
     "other_options": [],
     "relaxed_recipe": null,
     "template_rules": [],
+    "explanation": null,
     "assumptions": [
      "«Вівсяне»: частку не вказано — прийнято Пластівці вівсяні не менше 15 % (max(5 %, мінімум ролі), не більше дозволеного шаблоном)",
      "втрата вологи при випіканні 10 %: 1111,11 г рецептури дають 1000 г продукту"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
     "data_version": "2a0190f7c83e",
-    "duration_ms": 4,
+    "duration_ms": 8,
     "error": null
    },
    "relax_check": []
@@ -1821,6 +1825,7 @@
     "other_options": [],
     "relaxed_recipe": null,
     "template_rules": [],
+    "explanation": null,
     "assumptions": [
      "«банан»: частку не вказано — прийнято Банан, пюре не менше 35 % (max(5 %, мінімум ролі), не більше дозволеного шаблоном)",
      "«полуниця»: частку не вказано — прийнято Полуниця заморожена (IQF) без цукру не менше 35 % (max(5 %, мінімум ролі), не більше дозволеного шаблоном)"
@@ -2271,12 +2276,13 @@
      ]
     },
     "template_rules": [],
+    "explanation": null,
     "assumptions": [
      "еталон «звичайного»: Звичайний фруктовий йогурт 2,5 % (з цукром) — типові значення фруктових йогуртів 2–3 % жиру (асортимент UA-ритейлу, оцінка автора); звірено за порядком з USDA FDC (yogurt, fruit, lowfat)"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
     "data_version": "2a0190f7c83e",
-    "duration_ms": 63,
+    "duration_ms": 62,
     "error": null
    },
    "relax_check": [
@@ -2552,6 +2558,7 @@
      ]
     },
     "template_rules": [],
+    "explanation": null,
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
     "data_version": "2a0190f7c83e",
@@ -3071,6 +3078,7 @@
      "на результат також впливає технологічне правило шаблону: роль «fat» не більше 10 % (не послаблюється)",
      "на результат також впливає технологічне правило шаблону: роль «seeds» не більше 15 % (не послаблюється)"
     ],
+    "explanation": null,
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
     "data_version": "2a0190f7c83e",
@@ -3498,12 +3506,13 @@
     "template_rules": [
      "на результат також впливає технологічне правило шаблону: роль «tomato» не менше 15 % (не послаблюється)"
     ],
+    "explanation": null,
     "assumptions": [
      "«з медом»: частку не вказано — прийнято Мед натуральний не менше 5 % (max(5 %, мінімум ролі), не більше дозволеного шаблоном)"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
     "data_version": "2a0190f7c83e",
-    "duration_ms": 8,
+    "duration_ms": 7,
     "error": null
    },
    "relax_check": [
@@ -3997,13 +4006,14 @@
      ]
     },
     "template_rules": [],
+    "explanation": null,
     "assumptions": [
      "«з мигдалем»: частку не вказано — прийнято Мигдаль смажений не менше 8 % (max(5 %, мінімум ролі), не більше дозволеного шаблоном)",
      "втрата вологи при випіканні 10 %: 1111,11 г рецептури дають 1000 г продукту"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
     "data_version": "2a0190f7c83e",
-    "duration_ms": 11,
+    "duration_ms": 10,
     "error": null
    },
    "relax_check": [
@@ -4523,10 +4533,11 @@
      "на результат також впливає технологічне правило шаблону: роль «base» не менше 55 % (не послаблюється)",
      "на результат також впливає технологічне правило шаблону: роль «fruit» не більше 25 % (не послаблюється)"
     ],
+    "explanation": null,
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
     "data_version": "2a0190f7c83e",
-    "duration_ms": 83,
+    "duration_ms": 76,
     "error": null
    },
    "relax_check": [
@@ -4929,6 +4940,7 @@
     "other_options": [],
     "relaxed_recipe": null,
     "template_rules": [],
+    "explanation": null,
     "assumptions": [
      "«зі шпинату»: частку не вказано — прийнято Шпинат заморожений не менше 10 % (max(5 %, мінімум ролі), не більше дозволеного шаблоном)",
      "«яблука»: частку не вказано — прийнято Яблучний сік (відновлений із концентрату) не менше 10 % (max(5 %, мінімум ролі), не більше дозволеного шаблоном)"
@@ -5302,6 +5314,7 @@
     "other_options": [],
     "relaxed_recipe": null,
     "template_rules": [],
+    "explanation": null,
     "assumptions": [
      "втрата вологи при випіканні 10 %: 1111,11 г рецептури дають 1000 г продукту"
     ],
@@ -5691,6 +5704,7 @@
     "other_options": [],
     "relaxed_recipe": null,
     "template_rules": [],
+    "explanation": null,
     "assumptions": [
      "еталон «звичайного»: Звичайний фруктовий йогурт 2,5 % (з цукром) — типові значення фруктових йогуртів 2–3 % жиру (асортимент UA-ритейлу, оцінка автора); звірено за порядком з USDA FDC (yogurt, fruit, lowfat)"
     ],
@@ -6017,6 +6031,7 @@
     "other_options": [],
     "relaxed_recipe": null,
     "template_rules": [],
+    "explanation": null,
     "assumptions": [
      "напій: пороги тверджень для рідин (на 100 мл) перераховано на 100 г за густиною шаблону 1,045 г/мл (поріг ÷ густина)",
      "«без консервантів»: шаблон «Соковмісний напій» не містить таких інгредієнтів — виконано автоматично",
@@ -6107,6 +6122,7 @@
     "other_options": [],
     "relaxed_recipe": null,
     "template_rules": [],
+    "explanation": null,
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
     "data_version": "2a0190f7c83e",
@@ -6197,6 +6213,7 @@
     "other_options": [],
     "relaxed_recipe": null,
     "template_rules": [],
+    "explanation": null,
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
     "data_version": "2a0190f7c83e",
@@ -6297,6 +6314,7 @@
     "other_options": [],
     "relaxed_recipe": null,
     "template_rules": [],
+    "explanation": null,
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
     "data_version": "2a0190f7c83e",
@@ -6393,6 +6411,7 @@
     "other_options": [],
     "relaxed_recipe": null,
     "template_rules": [],
+    "explanation": null,
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
     "data_version": "2a0190f7c83e",
@@ -6506,6 +6525,7 @@
     "other_options": [],
     "relaxed_recipe": null,
     "template_rules": [],
+    "explanation": null,
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
     "data_version": "2a0190f7c83e",

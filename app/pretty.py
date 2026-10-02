@@ -116,6 +116,8 @@ def render(out: dict) -> str:
             lines.append(f"  • {c['label_uk']}{phrase}")
         for rule in out.get("template_rules", []):
             lines.append(f"  • правило шаблону (не послаблюється): {rule}")
+        if out.get("explanation"):
+            lines.append(f"  ℹ️  {out['explanation']}")
 
     if out.get("relaxations"):
         lines += ["", "Що послабити разом (мінімально, перевірено повторним розв'язком):"]

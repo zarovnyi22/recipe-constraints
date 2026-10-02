@@ -187,3 +187,75 @@ def test_almonds_and_without_almonds_contradict():
     )
     (c,) = find_contradictions(spec, DATA, DATA.templates["cereal_bar"])
     assert c.requirements == ["must_include:0:almonds_roasted", "exclude:0:мигдаль"]
+
+
+# --- review 2: generic nut word, rounding window ----------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "fields",
+    [
+        {"exclude_allergens": [_ph("без горіхів та мигдалю", allergen="nuts")]},
+        {"exclude_ingredients": [_ph("без горіхів та мигдалю", ingredient="горіхи та мигдаль")]},
+    ],
+)
+async def test_generic_nut_word_excludes_every_nut_even_next_to_a_named_one(fields):
+    spec = _spec("cereal_bar", **fields)
+    exp = expand(spec, DATA)
+    (row,) = [r for r in exp.constraints if r.relax == "drop" and r.rhs == 0 and r.op == "<="]
+    tree_nuts = {"almonds_roasted", "hazelnuts_roasted", "walnuts"}
+    assert tree_nuts <= set(row.coeffs) and "peanuts_roasted" not in row.coeffs
+    out = await _run(spec)
+    assert out.status == "feasible" and not set(_grams(out)) & tree_nuts
+    # verify on its own: a hazelnut in the recipe fails the same phrase
+    grams = dict(_grams(out))
+    grams["hazelnuts_roasted"] = 10.0
+    grams["oat_flakes"] -= 10.0
+    (gid,) = [c.id for c in out.checks if c.source_phrase == "без горіхів та мигдалю"]
+    assert gid in {c.id for c in failed(verify(grams, spec, DATA)[0])}
+
+
+async def test_without_nuts_except_peanuts_keeps_peanuts():
+    spec = _spec(
+        "cereal_bar",
+        "peanuts",
+        "батончик з арахісом",
+        exclude_allergens=[_ph("без горіхів, крім арахісу", allergen="nuts")],
+    )
+    assert not find_contradictions(spec, DATA, DATA.templates["cereal_bar"])
+    out = await _run(spec)
+    assert out.status == "feasible"
+    grams = _grams(out)
+    assert grams["peanuts_roasted"] >= 100 - 1e-6  # peanuts: their own category
+    assert not set(grams) & {"almonds_roasted", "hazelnuts_roasted", "walnuts"}
+
+
+def test_a_species_name_with_the_word_nut_is_that_nut_only():
+    walnut = _ph("без грецьких горіхів", ingredient="грецький горіх")
+    spec = _spec("cereal_bar", exclude_ingredients=[walnut])
+    (row,) = [r for r in expand(spec, DATA).constraints if r.relax == "drop" and r.rhs == 0]
+    assert set(row.coeffs) == {"walnuts"}
+
+
+def _strawberry_smoothie(cost):
+    return _spec(
+        "smoothie",
+        "strawberry",
+        "полуничне смузі",
+        must_include=[_ph("білок 6 %", ingredient_or_role="protein", min_pct=6)],
+        cost_max=_ph(f"до {cost} грн/кг", max_uah_per_kg=cost),
+        claims=[_ph("з низьким вмістом цукру", claim="low_sugar")],
+    )
+
+
+@pytest.mark.parametrize("cost", [61.64, 61.65])  # LP 61.64, cheapest rounded recipe 61.65
+async def test_rounding_window_is_infeasible_with_the_smallest_cost_step(cost):
+    out = await _run(_strawberry_smoothie(cost))
+    assert out.status == "infeasible" and out.error is None
+    assert [c.group for c in out.conflicts] == ["cost_max"]
+    assert "зважування" in out.explanation
+    (change,) = out.relaxations
+    (row,) = change.rows
+    assert change.verified and 0.01 - 1e-9 <= row.to_rhs - cost <= 0.05 + 1e-9
+    assert out.relaxed_recipe.totals.cost_uah_per_kg <= row.to_rhs
+    assert not failed(out.relaxed_recipe.checks)

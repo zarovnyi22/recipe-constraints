@@ -510,12 +510,13 @@
     "template_rules": [
      "на результат також впливає технологічне правило шаблону: характерний інгредієнт (Полуниця заморожена (IQF) без цукру) не менше 10 % (не послаблюється)"
     ],
+    "explanation": null,
     "assumptions": [
      "еталон «звичайного»: Звичайний фруктовий йогурт 2,5 % (з цукром) — типові значення фруктових йогуртів 2–3 % жиру (асортимент UA-ритейлу, оцінка автора); звірено за порядком з USDA FDC (yogurt, fruit, lowfat)"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
     "data_version": "2a0190f7c83e",
-    "duration_ms": 74,
+    "duration_ms": 80,
     "error": null
    },
    "relax_check": [
@@ -959,12 +960,13 @@
     "other_options": [],
     "relaxed_recipe": null,
     "template_rules": [],
+    "explanation": null,
     "assumptions": [
      "еталон «звичайного»: Звичайний фруктовий йогурт 2,5 % (з цукром) — типові значення фруктових йогуртів 2–3 % жиру (асортимент UA-ритейлу, оцінка автора); звірено за порядком з USDA FDC (yogurt, fruit, lowfat)"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
     "data_version": "2a0190f7c83e",
-    "duration_ms": 8,
+    "duration_ms": 10,
     "error": null
    },
    "relax_check": []
@@ -1350,6 +1352,7 @@
     "other_options": [],
     "relaxed_recipe": null,
     "template_rules": [],
+    "explanation": null,
     "assumptions": [
      "«з горіхами»: частку не вказано — прийнято роль «nuts» не менше 10 % (max(5 %, мінімум ролі), не більше дозволеного шаблоном)"
     ],
@@ -1545,6 +1548,7 @@
     "other_options": [],
     "relaxed_recipe": null,
     "template_rules": [],
+    "explanation": null,
     "assumptions": [
      "напій: пороги тверджень для рідин (на 100 мл) перераховано на 100 г за густиною шаблону 1,045 г/мл (поріг ÷ густина)",
      "«без доданого цукру»: шаблон «Сік 100 % (відновлений)» не містить таких інгредієнтів — виконано автоматично",
@@ -1552,7 +1556,7 @@
     ],
     "model": "gemini:gemini-3.5-flash-lite",
     "data_version": "2a0190f7c83e",
-    "duration_ms": 0,
+    "duration_ms": 1,
     "error": null
    },
    "relax_check": []
@@ -1776,6 +1780,7 @@
      ]
     },
     "template_rules": [],
+    "explanation": null,
     "assumptions": [
      "напій: пороги тверджень для рідин (на 100 мл) перераховано на 100 г за густиною шаблону 1,045 г/мл (поріг ÷ густина)",
      "еталон «звичайного»: Звичайний сік 100 % (яблучний/апельсиновий, відновлений, без цукру) — типові значення 100 % соку (USDA FDC: apple juice, orange juice, усереднено; асортимент UA-ритейлу, оцінка автора)"
@@ -2160,6 +2165,7 @@
     "other_options": [],
     "relaxed_recipe": null,
     "template_rules": [],
+    "explanation": null,
     "assumptions": [
      "втрата вологи при випіканні 10 %: 1111,11 г рецептури дають 1000 г продукту"
     ],
@@ -2253,6 +2259,7 @@
     "other_options": [],
     "relaxed_recipe": null,
     "template_rules": [],
+    "explanation": null,
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
     "data_version": "2a0190f7c83e",
@@ -2627,10 +2634,11 @@
     "template_rules": [
      "на результат також впливає технологічне правило шаблону: роль «tomato» не менше 15 % (не послаблюється)"
     ],
+    "explanation": null,
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
     "data_version": "2a0190f7c83e",
-    "duration_ms": 5,
+    "duration_ms": 9,
     "error": null
    },
    "relax_check": [
@@ -3001,6 +3009,7 @@
     "other_options": [],
     "relaxed_recipe": null,
     "template_rules": [],
+    "explanation": null,
     "assumptions": [
      "напій: пороги тверджень для рідин (на 100 мл) перераховано на 100 г за густиною шаблону 1,05 г/мл (поріг ÷ густина)"
     ],
@@ -3325,12 +3334,13 @@
     "other_options": [],
     "relaxed_recipe": null,
     "template_rules": [],
+    "explanation": null,
     "assumptions": [
      "у базі немає безлактозних молочних інгредієнтів, тому «без лактози» виконано через виключення всієї молочної сировини"
     ],
     "model": "gemini:gemini-3.5-flash-lite",
     "data_version": "2a0190f7c83e",
-    "duration_ms": 7,
+    "duration_ms": 9,
     "error": null
    },
    "relax_check": []
@@ -3664,10 +3674,11 @@
     "other_options": [],
     "relaxed_recipe": null,
     "template_rules": [],
+    "explanation": null,
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
     "data_version": "2a0190f7c83e",
-    "duration_ms": 8,
+    "duration_ms": 9,
     "error": null
    },
    "relax_check": []
@@ -3756,6 +3767,7 @@
     "other_options": [],
     "relaxed_recipe": null,
     "template_rules": [],
+    "explanation": null,
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
     "data_version": "2a0190f7c83e",
@@ -4151,6 +4163,7 @@
     "template_rules": [
      "на результат також впливає технологічне правило шаблону: технологія «Печиво пісочне»: жири ≥ 15 г/100 г (не послаблюється)"
     ],
+    "explanation": null,
     "assumptions": [
      "еталон «звичайного»: Звичайне пісочне печиво з вершковим маслом — типові значення пісочного печива (UA-ритейл, оцінка автора); USDA FDC (cookies, butter)",
      "втрата вологи при випіканні 10 %: 1111,11 г рецептури дають 1000 г продукту",
@@ -4274,6 +4287,7 @@
     "template_rules": [
      "на результат також впливає технологічне правило шаблону: роль «cereal» не менше 25 % (не послаблюється)"
     ],
+    "explanation": null,
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
     "data_version": "2a0190f7c83e",
@@ -4668,10 +4682,11 @@
      ]
     },
     "template_rules": [],
+    "explanation": null,
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
     "data_version": "2a0190f7c83e",
-    "duration_ms": 37,
+    "duration_ms": 40,
     "error": null
    },
    "relax_check": [
@@ -5086,10 +5101,11 @@
     "template_rules": [
      "на результат також впливає технологічне правило шаблону: роль «tomato» не менше 15 % (не послаблюється)"
     ],
+    "explanation": null,
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
     "data_version": "2a0190f7c83e",
-    "duration_ms": 6,
+    "duration_ms": 7,
     "error": null
    },
    "relax_check": [
@@ -5446,6 +5462,7 @@
     "other_options": [],
     "relaxed_recipe": null,
     "template_rules": [],
+    "explanation": null,
     "assumptions": [],
     "model": "gemini:gemini-3.5-flash-lite",
     "data_version": "2a0190f7c83e",
