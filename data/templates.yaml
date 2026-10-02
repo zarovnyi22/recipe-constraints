@@ -32,7 +32,7 @@
       mode: one_of
       min_pct: 55
       max_pct: 90
-      ingredients: [milk_2_5, milk_whole_3_5, soy_drink, oat_drink, coconut_drink, almond_drink, pea_drink]
+      ingredients: [milk_2_5, milk_whole_3_5, soy_drink, oat_drink, coconut_drink, almond_drink, pea_drink, rice_drink]
     culture:
       mode: one_of
       min_pct: 0.01
@@ -43,7 +43,7 @@
       min_pct: 0
       max_pct: 25
       flavor_min_pct: 10
-      ingredients: [strawberry_frozen, raspberry_frozen, blueberry_frozen, banana_puree, apple_puree]
+      ingredients: [strawberry_frozen, raspberry_frozen, blueberry_frozen, banana_puree, apple_puree, mango_puree]
     sweetener:
       mode: blend
       min_pct: 0
@@ -63,7 +63,17 @@
       mode: blend
       min_pct: 0
       max_pct: 3
-      ingredients: [pectin, modified_starch, xanthan_gum]
+      ingredients: [pectin, modified_starch, xanthan_gum, gelatin, agar]
+    flavour:
+      mode: blend
+      min_pct: 0
+      max_pct: 5
+      ingredients: [cocoa_powder, vanillin, cinnamon]
+    cream:
+      mode: blend
+      min_pct: 0
+      max_pct: 15
+      ingredients: [coconut_cream]
   base_recipe: {milk_2_5: 760, dvs_culture_dairy: 0.2, strawberry_frozen: 150, sugar: 80, pectin: 5, skim_milk_powder: 4.8}
 
 - id: drinking_yogurt
@@ -87,7 +97,7 @@
       mode: one_of
       min_pct: 70
       max_pct: 95
-      ingredients: [milk_2_5, milk_whole_3_5, soy_drink, oat_drink, coconut_drink, almond_drink, pea_drink]
+      ingredients: [milk_2_5, milk_whole_3_5, soy_drink, oat_drink, coconut_drink, almond_drink, pea_drink, rice_drink]
     culture:
       mode: one_of
       min_pct: 0.01
@@ -98,7 +108,7 @@
       min_pct: 0
       max_pct: 15
       flavor_min_pct: 5
-      ingredients: [strawberry_frozen, raspberry_frozen, blueberry_frozen, banana_puree, apple_puree]
+      ingredients: [strawberry_frozen, raspberry_frozen, blueberry_frozen, banana_puree, apple_puree, mango_puree]
     sweetener:
       mode: blend
       min_pct: 0
@@ -119,6 +129,11 @@
       min_pct: 0
       max_pct: 1
       ingredients: [pectin, xanthan_gum]
+    flavour:
+      mode: blend
+      min_pct: 0
+      max_pct: 4
+      ingredients: [cocoa_powder, vanillin, cinnamon]
   base_recipe: {milk_2_5: 850, dvs_culture_dairy: 0.2, strawberry_frozen: 80, sugar: 65, skim_milk_powder: 4, pectin: 0.8}
 
 - id: juice_drink
@@ -191,12 +206,12 @@
       mode: blend
       min_pct: 35
       max_pct: 80
-      ingredients: [strawberry_frozen, raspberry_frozen, blueberry_frozen, banana_puree, apple_puree]
+      ingredients: [strawberry_frozen, raspberry_frozen, blueberry_frozen, banana_puree, apple_puree, mango_puree]
     base:
       mode: blend
       min_pct: 10
       max_pct: 55
-      ingredients: [oat_drink, soy_drink, milk_2_5, pea_drink, almond_drink, coconut_drink, apple_juice, orange_juice]
+      ingredients: [oat_drink, soy_drink, milk_2_5, pea_drink, almond_drink, coconut_drink, rice_drink, apple_juice, orange_juice]
     water:
       mode: blend
       min_pct: 0
@@ -221,7 +236,27 @@
       mode: blend
       min_pct: 0
       max_pct: 1.5
-      ingredients: [pectin, xanthan_gum]
+      ingredients: [pectin, xanthan_gum, agar]
+    veg:
+      mode: blend
+      min_pct: 0
+      max_pct: 25
+      ingredients: [spinach_frozen, carrot_puree]
+    seeds:
+      mode: blend
+      min_pct: 0
+      max_pct: 6
+      ingredients: [chia_seeds, flax_seeds]
+    cream:
+      mode: blend
+      min_pct: 0
+      max_pct: 15
+      ingredients: [coconut_cream]
+    flavour:
+      mode: blend
+      min_pct: 0
+      max_pct: 4
+      ingredients: [cocoa_powder, vanillin, cinnamon]
   base_recipe: {banana_puree: 300, strawberry_frozen: 250, oat_drink: 405, sugar: 40, pectin: 5}
 
 - id: cereal_bar
@@ -248,7 +283,7 @@
       mode: blend
       min_pct: 0
       max_pct: 25
-      ingredients: [almonds_roasted, peanuts_roasted]
+      ingredients: [almonds_roasted, peanuts_roasted, hazelnuts_roasted, walnuts]
     dried_fruit:
       mode: blend
       min_pct: 0
@@ -279,6 +314,16 @@
       min_pct: 0
       max_pct: 1
       ingredients: [salt]
+    seeds:
+      mode: blend
+      min_pct: 0
+      max_pct: 15
+      ingredients: [chia_seeds, flax_seeds, sesame_seeds]
+    flavour:
+      mode: blend
+      min_pct: 0
+      max_pct: 10
+      ingredients: [cocoa_powder, vanillin, cinnamon]
   base_recipe: {oat_flakes: 387, almonds_roasted: 100, glucose_syrup: 220, raisins: 100, sunflower_oil: 40, pea_protein_crisps: 130, sugar: 20, salt: 3}
 
 - id: cookie
@@ -331,7 +376,7 @@
       min_pct: 0
       max_pct: 15
       flavor_min_pct: 8
-      ingredients: [almonds_roasted, peanuts_roasted]
+      ingredients: [almonds_roasted, peanuts_roasted, hazelnuts_roasted, walnuts]
     leavening:
       mode: blend
       min_pct: 0
@@ -347,6 +392,16 @@
       min_pct: 0
       max_pct: 15
       ingredients: [water]
+    seeds:
+      mode: blend
+      min_pct: 0
+      max_pct: 8
+      ingredients: [chia_seeds, flax_seeds, sesame_seeds]
+    flavour:
+      mode: blend
+      min_pct: 0
+      max_pct: 12
+      ingredients: [cocoa_powder, vanillin, cinnamon]
   base_recipe: {wheat_flour: 557.1, butter_82: 250, sugar: 200, whole_egg: 100, salt: 2, baking_soda: 2}
 
 - id: ketchup_sauce

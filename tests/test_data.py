@@ -16,7 +16,7 @@ def data() -> DataBundle:
 
 
 def test_dataset_size_and_required_template(data):
-    assert 40 <= len(data.ingredients) <= 60
+    assert 40 <= len(data.ingredients) <= 70
     assert 6 <= len(data.templates) <= 8
     assert "yogurt_spoonable" in data.templates
     base = data.templates["yogurt_spoonable"].roles["base"].ingredients

@@ -911,3 +911,263 @@
   price_uah_per_kg: 170
   price_source: *p_nuts
   price_date: "2026-10"
+
+# ---------- типові інгредієнти (коміт «common ingredients»): ароматизатори, насіння, овочі, гелеутворювачі ----------
+# Нутрієнти — USDA FDC (типові значення) у конвенції цього файлу (carbs = total − клітковина);
+# енергія в межах Atwater/дод. XIV Рег. 1169/2011. Ціни — ОЦІНКИ (PRICES.md).
+- id: cocoa_powder
+  name_uk: Какао-порошок (10–12 % жиру)
+  aliases: [какао, какао порошок]
+  group: flavourings
+  per_100g: {energy_kcal: 350, protein: 19.6, fat: 13.7, saturates: 8.1, carbs: 24.7, sugars: 1.8, fibre: 33.2, salt: 0.05, polyols: 0}
+  nutrients_source: "USDA FDC (cocoa, dry powder, unsweetened); карбс = 57,9 − клітковина 33,2; енергія — типова для етикеток какао 10–12 % жиру (USDA 228 ккал рахує за специфічними коефіцієнтами, поза діапазоном Atwater цього набору)"
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0.02
+  max_dose_pct: 10
+  roles: [flavour]
+  price_uah_per_kg: 260
+  price_source: &p_flav "оцінка за порядком оптових цін на какао-порошок, ванілін, мелені спеції в UA, група flavourings (PRICES.md)"
+  price_date: "2026-10"
+
+- id: vanillin
+  name_uk: Ванілін (ароматизатор, ідентичний натуральному)
+  aliases: [ванілін, ваніль, ванільний ароматизатор]
+  group: flavourings
+  per_100g: {energy_kcal: 0, protein: 0, fat: 0, saturates: 0, carbs: 0, sugars: 0, fibre: 0, salt: 0, polyols: 0}
+  nutrients_source: "чиста речовина у дозі ≤ 0,1 %: внесок у нутрієнти нульовий (прийнято 0). Стручки натуральної ванілі не моделюємо — «ваніль» у запиті = ванільний ароматизатор"
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0
+  max_dose_pct: 0.1
+  roles: [flavour]
+  tags: [flavouring]
+  price_uah_per_kg: 1500
+  price_source: *p_flav
+  price_date: "2026-10"
+
+- id: cinnamon
+  name_uk: Кориця мелена
+  aliases: [кориця]
+  group: flavourings
+  per_100g: {energy_kcal: 247, protein: 4.0, fat: 1.2, saturates: 0.3, carbs: 27.5, sugars: 2.2, fibre: 53.1, salt: 0.03, polyols: 0}
+  nutrients_source: "USDA FDC (spices, cinnamon, ground); карбс = 80,6 − клітковина 53,1"
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0.02
+  max_dose_pct: 2
+  roles: [flavour]
+  price_uah_per_kg: 380
+  price_source: *p_flav
+  price_date: "2026-10"
+
+- id: hazelnuts_roasted
+  name_uk: Фундук смажений
+  aliases: [фундук, ліщинний горіх]
+  group: nuts_dried
+  per_100g: {energy_kcal: 628, protein: 15.0, fat: 60.8, saturates: 4.5, carbs: 7.0, sugars: 4.3, fibre: 9.7, salt: 0, polyols: 0}
+  nutrients_source: "USDA FDC (hazelnuts or filberts), типові значення; карбс = 16,7 − клітковина 9,7"
+  allergens: [nuts]
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0.04
+  max_dose_pct: 30
+  roles: [nuts]
+  price_uah_per_kg: 480
+  price_source: *p_nuts
+  price_date: "2026-10"
+
+- id: walnuts
+  name_uk: Горіх грецький (ядро)
+  aliases: [грецький горіх, волоський горіх, горіхи]
+  group: nuts_dried
+  per_100g: {energy_kcal: 654, protein: 15.2, fat: 65.2, saturates: 6.1, carbs: 7.0, sugars: 2.6, fibre: 6.7, salt: 0, polyols: 0}
+  nutrients_source: "USDA FDC (nuts, walnuts, english), типові значення; карбс = 13,7 − клітковина 6,7"
+  allergens: [nuts]
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0.025
+  max_dose_pct: 30
+  roles: [nuts]
+  price_uah_per_kg: 330
+  price_source: *p_nuts
+  price_date: "2026-10"
+
+- id: spinach_frozen
+  name_uk: Шпинат заморожений
+  aliases: [шпинат]
+  group: vegetables
+  per_100g: {energy_kcal: 29, protein: 3.2, fat: 0.3, saturates: 0.1, carbs: 2.2, sugars: 0.5, fibre: 2.4, salt: 0.18, polyols: 0}
+  nutrients_source: "USDA FDC (spinach, frozen, chopped or leaf, unprepared); карбс = 4,6 − клітковина 2,4"
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0.004
+  max_dose_pct: 25
+  roles: [veg]
+  price_uah_per_kg: 75
+  price_source: &p_veg "оцінка за порядком оптових цін на заморожені овочі та овочеві пюре в UA, група vegetables (PRICES.md)"
+  price_date: "2026-10"
+
+- id: carrot_puree
+  name_uk: Морква, пюре
+  aliases: [морква]
+  group: vegetables
+  per_100g: {energy_kcal: 41, protein: 0.9, fat: 0.2, saturates: 0, carbs: 6.8, sugars: 4.7, fibre: 2.8, salt: 0.17, polyols: 0}
+  nutrients_source: "USDA FDC (carrots, raw); карбс = 9,6 − клітковина 2,8"
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0.04
+  max_dose_pct: 30
+  roles: [veg]
+  price_uah_per_kg: 35
+  price_source: *p_veg
+  price_date: "2026-10"
+
+- id: mango_puree
+  name_uk: Манго, пюре
+  aliases: [манго]
+  group: fruit
+  per_100g: {energy_kcal: 60, protein: 0.8, fat: 0.4, saturates: 0.1, carbs: 13.4, sugars: 13.4, fibre: 1.6, salt: 0, polyols: 0}
+  nutrients_source: "USDA FDC (mangos, raw); карбс = 15,0 − клітковина 1,6; цукри 13,7 → 13,4 (не більше за карбс, округлення USDA)"
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0.135
+  max_dose_pct: 50
+  roles: [fruit]
+  price_uah_per_kg: 170
+  price_source: *p_fruit
+  price_date: "2026-10"
+
+- id: chia_seeds
+  name_uk: Насіння чіа
+  aliases: [чіа, насіння чіа]
+  group: seeds
+  per_100g: {energy_kcal: 486, protein: 16.5, fat: 30.7, saturates: 3.3, carbs: 7.7, sugars: 0, fibre: 34.4, salt: 0.04, polyols: 0}
+  nutrients_source: "USDA FDC (seeds, chia seeds, dried); карбс = 42,1 − клітковина 34,4"
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0
+  max_dose_pct: 8
+  roles: [seeds]
+  price_uah_per_kg: 330
+  price_source: &p_seeds "оцінка за порядком оптових цін на насіння чіа, льону, кунжуту в UA, група seeds (PRICES.md)"
+  price_date: "2026-10"
+
+- id: flax_seeds
+  name_uk: Насіння льону
+  aliases: [льон, лляне насіння, насіння льону]
+  group: seeds
+  per_100g: {energy_kcal: 534, protein: 18.3, fat: 42.2, saturates: 3.7, carbs: 1.6, sugars: 1.6, fibre: 27.3, salt: 0.08, polyols: 0}
+  nutrients_source: "USDA FDC (seeds, flaxseed); карбс = 28,9 − клітковина 27,3"
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0.015
+  max_dose_pct: 10
+  roles: [seeds]
+  price_uah_per_kg: 70
+  price_source: *p_seeds
+  price_date: "2026-10"
+
+- id: sesame_seeds
+  name_uk: Кунжут
+  aliases: [кунжут, насіння кунжуту]
+  group: seeds
+  per_100g: {energy_kcal: 573, protein: 17.7, fat: 49.7, saturates: 7.0, carbs: 11.7, sugars: 0.3, fibre: 11.8, salt: 0.03, polyols: 0}
+  nutrients_source: "USDA FDC (seeds, sesame seeds, whole, dried); карбс = 23,5 − клітковина 11,8"
+  allergens: [sesame]
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0.003
+  max_dose_pct: 10
+  roles: [seeds]
+  price_uah_per_kg: 120
+  price_source: *p_seeds
+  price_date: "2026-10"
+
+- id: coconut_cream
+  name_uk: Кокосові вершки (кокосовий крем, 20 % жиру)
+  aliases: [кокосові вершки, кокосовий крем]
+  group: plant_fats
+  per_100g: {energy_kcal: 200, protein: 1.8, fat: 20.0, saturates: 17.7, carbs: 3.2, sugars: 2.0, fibre: 0.7, salt: 0.03, polyols: 0}
+  nutrients_source: "USDA FDC (nuts, coconut cream) і етикетки кокосових вершків 20 % жиру, типові значення (оцінка)"
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0.018
+  max_dose_pct: 20
+  roles: [cream]
+  price_uah_per_kg: 170
+  price_source: "оцінка за порядком роздрібних цін на кокосові вершки/крем у банках в UA з поправкою на опт, група plant_fats (PRICES.md)"
+  price_date: "2026-10"
+
+- id: gelatin
+  name_uk: Желатин харчовий (тваринний, Е441)
+  aliases: [желатин]
+  group: additives
+  per_100g: {energy_kcal: 335, protein: 85.6, fat: 0.1, saturates: 0, carbs: 0, sugars: 0, fibre: 0, salt: 0.5, polyols: 0}
+  nutrients_source: "USDA FDC (gelatins, dry powder, unsweetened); Na 196 мг → сіль 0,5 г"
+  allergens: []
+  may_contain: []
+  vegan: false
+  added_sugar: false
+  sweetness: 0
+  max_dose_pct: 2
+  roles: [stabilizer]
+  tags: [thickener]
+  price_uah_per_kg: 480
+  price_source: *p_add
+  price_date: "2026-10"
+
+- id: agar
+  name_uk: Агар-агар (Е406)
+  aliases: [агар, агар-агар]
+  group: additives
+  per_100g: {energy_kcal: 150, protein: 2.0, fat: 0.3, saturates: 0, carbs: 3.0, sugars: 0, fibre: 74.0, salt: 0.6, polyols: 0}
+  nutrients_source: "типова специфікація (оцінка), USDA FDC (seaweed, agar, dried) для порядку; галактан — клітковина; енергія за Рег. 1169/2011 дод. XIV (клітковина 2 ккал/г): 74×2 + 2×4 + 0,3×9 + 3×4 ≈ 171, взято нижче значення в діапазоні Atwater"
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0
+  max_dose_pct: 1
+  roles: [stabilizer]
+  tags: [thickener]
+  price_uah_per_kg: 2800
+  price_source: *p_add
+  price_date: "2026-10"
+
+- id: rice_drink
+  name_uk: Рисовий напій
+  aliases: [рисове молоко]
+  group: plant_bases
+  per_100g: {energy_kcal: 47, protein: 0.3, fat: 1.0, saturates: 0.2, carbs: 9.2, sugars: 4.5, fibre: 0.3, salt: 0.1, polyols: 0}
+  nutrients_source: "USDA FDC (beverages, rice milk, unsweetened) і типові етикетки рисових напоїв; цукри — мальтоза/глюкоза з гідролізу рису, не додані"
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0.02
+  roles: [base]
+  price_uah_per_kg: 48
+  price_source: *p_plant
+  price_date: "2026-10"

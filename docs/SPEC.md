@@ -120,7 +120,7 @@ unsupported: [{phrase: "щільної текстури", reason: "..."}]   # з
 
 ## §6. Дані (`data/`)
 
-`ingredients.yaml` (≈ 40–60 інгредієнтів під шаблони):
+`ingredients.yaml` (≈ 40–70 інгредієнтів під шаблони):
 ```yaml
 - id: oat_drink
   name_uk: Вівсяний напій
