@@ -12,7 +12,13 @@ import re
 from app import claims as C
 from app.allergens import allergens_in_name
 from app.data import TAGS, AllergenCategory, DataBundle, Ingredient, RefNutrients, Role, Template
-from app.schemas import ConstraintSpec, Expansion, LinearConstraint, Unsupported
+from app.schemas import (
+    ConstraintSpec,
+    Expansion,
+    LinearConstraint,
+    Unsupported,
+    requirement_ids,
+)
 
 NUTRIENTS = list(RefNutrients.model_fields)
 NUTRIENT_UK = {
@@ -752,15 +758,26 @@ def expand(spec: ConstraintSpec, data: DataBundle) -> Expansion:
     tpl = find_template(spec.product.template, data)
     if tpl is None:
         supported = "; ".join(f"{t.name_uk} ({t.id})" for t in data.templates.values())
+        category = spec.product.template
+        # every other requirement is named too: without a category nothing of it was considered
+        rest = [
+            Unsupported(
+                id=rid,
+                phrase=phrase,
+                reason=f"категорія «{category}» не підтримується, тож цю вимогу не розглядали",
+            )
+            for rid, phrase in requirement_ids(spec)
+            if rid != "template"
+        ]
         return Expansion(
             template_id=None,
             unsupported=[
                 Unsupported(
                     id="template",
                     phrase=spec.product.source_phrase,
-                    reason=f"категорія «{spec.product.template}» не підтримується; "
-                    f"підтримуємо: {supported}",
-                )
+                    reason=f"категорія «{category}» не підтримується; підтримуємо: {supported}",
+                ),
+                *rest,
             ],
         )
     return _Builder(spec, data, tpl).build()

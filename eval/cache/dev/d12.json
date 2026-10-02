@@ -1,0 +1,16 @@
+{
+ "id": "d12",
+ "text_sha": "4d8a0742b4f80e3b17cc5198b4a02c86ee8278f770362122a3da9ca1b7513d27",
+ "prompt_sha": "ab4d91f24201fe68ef4bd358c0e4a40f74daf5da93971c9616582c5b5ba83451",
+ "prompt_version": "p2",
+ "model": "gemini:gemini-3.5-flash-lite",
+ "usage": {
+  "provider": "gemini",
+  "http_attempts": 1,
+  "input_tokens": 3689,
+  "output_tokens": 80,
+  "reasoning_tokens": 0,
+  "total_tokens": 3769
+ },
+ "raw_text": "{\n  \"product\": {\n    \"template\": \"морозиво\",\n    \"flavor\": null,\n    \"source_phrase\": \"морозиво\"\n  },\n  \"claims\": [\n    {\n      \"claim\": \"sugar_free\",\n      \"source_phrase\": \"без цукру\"\n    }\n  ]\n}"
+}

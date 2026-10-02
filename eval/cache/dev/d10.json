@@ -1,0 +1,16 @@
+{
+ "id": "d10",
+ "text_sha": "803bc2caf05df88f4eadf3d3d12ca1f2f924df29e7bc8e2304ce25da8d3ed46b",
+ "prompt_sha": "ab4d91f24201fe68ef4bd358c0e4a40f74daf5da93971c9616582c5b5ba83451",
+ "prompt_version": "p2",
+ "model": "gemini:gemini-3.5-flash-lite",
+ "usage": {
+  "provider": "gemini",
+  "http_attempts": 1,
+  "input_tokens": 3691,
+  "output_tokens": 84,
+  "reasoning_tokens": 0,
+  "total_tokens": 3775
+ },
+ "raw_text": "{\n  \"product\": {\n    \"template\": \"drinking_yogurt\",\n    \"flavor\": null,\n    \"source_phrase\": \"питний йогурт\"\n  },\n  \"exclude_allergens\": [\n    {\n      \"allergen\": \"milk\",\n      \"source_phrase\": \"без лактози\"\n    }\n  ]\n}"
+}

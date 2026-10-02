@@ -1,0 +1,16 @@
+{
+ "id": "d06",
+ "text_sha": "219f161758a76ea0d3f47170dcd53075a2ef0212fd6c88290658ec6a937f9378",
+ "prompt_sha": "ab4d91f24201fe68ef4bd358c0e4a40f74daf5da93971c9616582c5b5ba83451",
+ "prompt_version": "p2",
+ "model": "gemini:gemini-3.5-flash-lite",
+ "usage": {
+  "provider": "gemini",
+  "http_attempts": 1,
+  "input_tokens": 3703,
+  "output_tokens": 128,
+  "reasoning_tokens": 0,
+  "total_tokens": 3831
+ },
+ "raw_text": "{\n  \"product\": {\n    \"template\": \"cookie\",\n    \"flavor\": null,\n    \"source_phrase\": \"печиво\"\n  },\n  \"exclude_ingredients\": [\n    {\n      \"ingredient\": \"palm_oil\",\n      \"source_phrase\": \"без пальмової олії\"\n    }\n  ],\n  \"cost_max\": {\n    \"max_uah_per_kg\": 50,\n    \"source_phrase\": \"собівартість до 50 грн/кг\"\n  }\n}"
+}

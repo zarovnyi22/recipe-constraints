@@ -178,6 +178,20 @@ def test_template_by_alias_and_unknown_category(data):
     assert u.phrase == "піца" and "pizza" in u.reason and "Йогурт (yog)" in u.reason
 
 
+def test_unknown_category_names_every_other_requirement(data):
+    # «морозиво без цукру з нутелою»: the claim and the ingredient are not silently skipped
+    spec = _spec(
+        product={"template": "морозиво", "flavor": "nutella", "source_phrase": "морозиво"},
+        claims=[{"claim": "sugar_free", "source_phrase": "без цукру"}],
+        must_include=[{"ingredient_or_role": "нутела", "source_phrase": "з нутелою"}],
+    )
+    exp = expand(spec, data)
+    ids = [u.id for u in exp.unsupported]
+    assert ids == ["template", "flavor", "claim:sugar_free", "must_include:0:нутела"]
+    assert {u.phrase for u in exp.unsupported} == {"морозиво", "без цукру", "з нутелою"}
+    assert all("«морозиво» не підтримується" in u.reason for u in exp.unsupported)
+
+
 def test_flavor_is_a_hard_minimum_of_the_characteristic_ingredient(data):
     spec = _spec(product={"template": "yog", "flavor": "strawberry", "source_phrase": "полуничний"})
     row = _row(expand(spec, data), "flavor_min")

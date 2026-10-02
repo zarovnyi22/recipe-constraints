@@ -1,0 +1,16 @@
+{
+ "id": "d09",
+ "text_sha": "8448e035f0a0b5137cc722b9be1ea35f6a215b0f7ec4a92a68c1d6698d3174ba",
+ "prompt_sha": "ab4d91f24201fe68ef4bd358c0e4a40f74daf5da93971c9616582c5b5ba83451",
+ "prompt_version": "p2",
+ "model": "gemini:gemini-3.5-flash-lite",
+ "usage": {
+  "provider": "gemini",
+  "http_attempts": 1,
+  "input_tokens": 3704,
+  "output_tokens": 128,
+  "reasoning_tokens": 0,
+  "total_tokens": 3832
+ },
+ "raw_text": "{\n  \"product\": {\n    \"template\": \"smoothie\",\n    \"flavor\": null,\n    \"source_phrase\": \"смузі\"\n  },\n  \"cost_max\": {\n    \"max_uah_per_kg\": 30,\n    \"source_phrase\": \"собівартість до 30 грн/кг\"\n  },\n  \"claims\": [\n    {\n      \"claim\": \"protein_high\",\n      \"source_phrase\": \"з високим вмістом білка\"\n    }\n  ]\n}"
+}

@@ -1,0 +1,16 @@
+{
+ "id": "d04",
+ "text_sha": "88981cd5021a8df79abb24f908fc00ad2d86eaaf48566dae64fb29f277c702da",
+ "prompt_sha": "ab4d91f24201fe68ef4bd358c0e4a40f74daf5da93971c9616582c5b5ba83451",
+ "prompt_version": "p2",
+ "model": "gemini:gemini-3.5-flash-lite",
+ "usage": {
+  "provider": "gemini",
+  "http_attempts": 1,
+  "input_tokens": 3693,
+  "output_tokens": 88,
+  "reasoning_tokens": 0,
+  "total_tokens": 3781
+ },
+ "raw_text": "{\n  \"product\": {\n    \"template\": \"juice_100\",\n    \"flavor\": \"apple\",\n    \"source_phrase\": \"яблучний сік\"\n  },\n  \"claims\": [\n    {\n      \"claim\": \"no_added_sugar\",\n      \"source_phrase\": \"без доданого цукру\"\n    }\n  ]\n}"
+}
