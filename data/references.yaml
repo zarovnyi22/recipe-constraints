@@ -1,0 +1,39 @@
+# Еталони «звичайного» продукту для порівняльних тверджень (reduced_*, increased_protein).
+# per_100g — на 100 г готового продукту (конвенція ЄС: carbs без клітковини). Це ТИПОВІ значення
+# масового асортименту (UA-ритейл) і USDA FDC, зведені автором; не медіана виміряної вибірки
+# і не конкретний бренд. Змінити еталон = змінити результат порівняльних вимог.
+- id: yogurt_spoonable
+  template: yogurt_spoonable
+  name_uk: Звичайний фруктовий йогурт 2,5 % (з цукром)
+  per_100g: {energy_kcal: 94, protein: 3.2, fat: 2.5, saturates: 1.6, carbs: 14.0, sugars: 13.5, fibre: 0.2, salt: 0.12}
+  source: "типові значення фруктових йогуртів 2–3 % жиру (асортимент UA-ритейлу, оцінка автора); звірено за порядком з USDA FDC (yogurt, fruit, lowfat)"
+- id: drinking_yogurt
+  template: drinking_yogurt
+  name_uk: Звичайний питний йогурт 1,5–2 % (з цукром)
+  per_100g: {energy_kcal: 72, protein: 2.9, fat: 1.5, saturates: 1.0, carbs: 11.0, sugars: 10.5, fibre: 0.1, salt: 0.1}
+  source: "типові значення питних йогуртів (асортимент UA-ритейлу, оцінка автора)"
+- id: juice_drink
+  template: juice_drink
+  name_uk: Звичайний соковмісний напій (яблучно-апельсиновий, з цукром)
+  per_100g: {energy_kcal: 46, protein: 0.2, fat: 0.1, saturates: 0, carbs: 11.0, sugars: 10.8, fibre: 0.2, salt: 0}
+  source: "типові значення нектарів/соковмісних напоїв (UA-ритейл, оцінка автора); USDA FDC (fruit juice drink)"
+- id: smoothie
+  template: smoothie
+  name_uk: Звичайне фруктове смузі (без доданого цукру)
+  per_100g: {energy_kcal: 60, protein: 0.9, fat: 0.3, saturates: 0.1, carbs: 12.5, sugars: 11.5, fibre: 1.2, salt: 0.02}
+  source: "типові значення фруктових смузі в холодильній полиці (UA-ритейл, оцінка автора)"
+- id: cereal_bar
+  template: cereal_bar
+  name_uk: Звичайний злаковий батончик з сиропом
+  per_100g: {energy_kcal: 410, protein: 6.0, fat: 14.0, saturates: 3.0, carbs: 62.0, sugars: 28.0, fibre: 5.0, salt: 0.3}
+  source: "типові значення злакових/гранола-батончиків (UA-ритейл, оцінка автора); USDA FDC (granola bars)"
+- id: cookie
+  template: cookie
+  name_uk: Звичайне пісочне печиво з вершковим маслом
+  per_100g: {energy_kcal: 480, protein: 6.5, fat: 21.0, saturates: 12.0, carbs: 65.0, sugars: 24.0, fibre: 2.0, salt: 0.4}
+  source: "типові значення пісочного печива (UA-ритейл, оцінка автора); USDA FDC (cookies, butter)"
+- id: ketchup_sauce
+  template: ketchup_sauce
+  name_uk: Звичайний томатний кетчуп
+  per_100g: {energy_kcal: 100, protein: 1.2, fat: 0.1, saturates: 0, carbs: 23.0, sugars: 22.0, fibre: 0.8, salt: 1.9}
+  source: "типові значення кетчупів (UA-ритейл, оцінка автора); USDA FDC (catsup)"

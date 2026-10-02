@@ -1,0 +1,869 @@
+# Інгредієнти. per_100g — на 100 г інгредієнта, конвенція ЄС/України:
+#   carbs   = засвоювані вуглеводи БЕЗ клітковини і БЕЗ polyols (USDA «carbohydrate» мінус fibre);
+#   sugars  ⊂ carbs;  fibre і polyols — окремо;  salt = Na·2,5 (г);
+#   polyols = г «інших» вуглеводів з енергією ≠ 4 ккал/г: багатоатомні спирти (еритрит, мальтит),
+#             органічні кислоти (лимонна, оцтова) — їх енергія в energy_kcal, перевірка Atwater
+#             допускає діапазон 0…2,4 ккал/г для них і 0…2 ккал/г для клітковини.
+# sweetness — сахарозний еквівалент на 1 г інгредієнта (сахароза = 1): Σ x_i·sweetness_i = «г цукру-
+#   еквівалента». Розраховано: г цукрів/100 × відносна солодкість цукру (лактоза 0,16; мальтоза 0,4;
+#   глюкоза 0,7; сахароза 1; фруктоза 1,2; поліоли/інтенсивні — з довідників і spec-*.md з pet).
+# min_dose_pct / max_dose_pct — частка маси продукту, якщо інгредієнт у рецептурі взагалі є.
+# Ціни — ОЦІНКИ (грн/кг, дата price_date), порядок цифр — у PRICES.md.
+
+# ---------- молочні та їх рослинні основи ----------
+- id: milk_2_5
+  name_uk: Молоко пастеризоване 2,5 %
+  aliases: [молоко, коров'яче молоко]
+  group: dairy_bases
+  per_100g: {energy_kcal: 53, protein: 2.9, fat: 2.5, saturates: 1.6, carbs: 4.7, sugars: 4.7, fibre: 0, salt: 0.11, polyols: 0}
+  nutrients_source: &n_pet "корпус pet (spec-*.md), перераховано в конвенцію ЄС; USDA FDC для звірки порядку"
+  allergens: [milk]
+  may_contain: []
+  vegan: false
+  added_sugar: false
+  sweetness: 0.0075
+  roles: [base]
+  price_uah_per_kg: 25
+  price_source: &p_dairy "оцінка за порядком оптових цін на молочну сировину в UA, група dairy_bases (PRICES.md)"
+  price_date: "2026-10"
+
+- id: milk_whole_3_5
+  name_uk: Молоко пастеризоване 3,5 %
+  aliases: [цільне молоко]
+  group: dairy_bases
+  per_100g: {energy_kcal: 64, protein: 3.3, fat: 3.6, saturates: 2.3, carbs: 4.7, sugars: 4.7, fibre: 0, salt: 0.11, polyols: 0}
+  nutrients_source: *n_pet
+  allergens: [milk]
+  may_contain: []
+  vegan: false
+  added_sugar: false
+  sweetness: 0.0075
+  roles: [base]
+  price_uah_per_kg: 28
+  price_source: *p_dairy
+  price_date: "2026-10"
+
+- id: soy_drink
+  name_uk: Соєвий напій без цукру
+  aliases: [соєве молоко]
+  group: plant_bases
+  per_100g: {energy_kcal: 33, protein: 3.0, fat: 1.8, saturates: 0.3, carbs: 0.7, sugars: 0.5, fibre: 0.6, salt: 0.07, polyols: 0}
+  nutrients_source: "корпус pet (spec-soy-drink.md)"
+  allergens: [soybeans]
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0.005
+  roles: [base]
+  price_uah_per_kg: 45
+  price_source: &p_plant "оцінка за порядком B2B-цін на UHT-рослинні напої в UA, група plant_bases (PRICES.md)"
+  price_date: "2026-10"
+
+- id: oat_drink
+  name_uk: Вівсяний напій
+  aliases: [вівсяне молоко]
+  group: plant_bases
+  per_100g: {energy_kcal: 46, protein: 1.0, fat: 1.5, saturates: 0.2, carbs: 6.7, sugars: 4.0, fibre: 0.8, salt: 0.1, polyols: 0}
+  nutrients_source: "корпус pet (spec-oat-drink.md)"
+  allergens: [cereals]
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0.016
+  roles: [base]
+  price_uah_per_kg: 40
+  price_source: *p_plant
+  price_date: "2026-10"
+
+- id: coconut_drink
+  name_uk: Кокосовий напій
+  aliases: [кокосове молоко (напій)]
+  group: plant_bases
+  per_100g: {energy_kcal: 20, protein: 0.2, fat: 1.1, saturates: 1.0, carbs: 2.0, sugars: 1.8, fibre: 0, salt: 0.08, polyols: 0}
+  nutrients_source: "корпус pet (spec-milk-2-5.md, таблиця замінників: білок 0,2–0,5 г); USDA FDC (coconut milk beverage)"
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0.018
+  roles: [base]
+  price_uah_per_kg: 75
+  price_source: *p_plant
+  price_date: "2026-10"
+
+- id: almond_drink
+  name_uk: Мигдалевий напій без цукру
+  aliases: [мигдалеве молоко]
+  group: plant_bases
+  per_100g: {energy_kcal: 14, protein: 0.5, fat: 1.1, saturates: 0.1, carbs: 0.3, sugars: 0.1, fibre: 0.2, salt: 0.1, polyols: 0}
+  nutrients_source: "USDA FDC (almond milk, unsweetened), типові значення"
+  allergens: [nuts]
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0.001
+  roles: [base]
+  price_uah_per_kg: 95
+  price_source: *p_plant
+  price_date: "2026-10"
+
+- id: pea_drink
+  name_uk: Гороховий напій без цукру
+  aliases: [напій з гороху]
+  group: plant_bases
+  per_100g: {energy_kcal: 36, protein: 2.5, fat: 2.0, saturates: 0.2, carbs: 1.0, sugars: 0.5, fibre: 0.3, salt: 0.1, polyols: 0}
+  nutrients_source: "корпус pet (spec-soy-drink.md: «pea protein drink 2,0–2,5 г білка»); типова специфікація"
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0.005
+  roles: [base]
+  price_uah_per_kg: 65
+  price_source: *p_plant
+  price_date: "2026-10"
+
+# ---------- білкові добавки ----------
+- id: skim_milk_powder
+  name_uk: Сухе знежирене молоко
+  aliases: [СЗМ, сухе молоко]
+  group: protein
+  per_100g: {energy_kcal: 358, protein: 35.0, fat: 0.8, saturates: 0.5, carbs: 52.0, sugars: 52.0, fibre: 0, salt: 1.3, polyols: 0}
+  nutrients_source: "USDA FDC (milk, dry, nonfat), типові значення; pet spec-milk-2-5.md (1–2 % СЗМ)"
+  allergens: [milk]
+  may_contain: []
+  vegan: false
+  added_sugar: false
+  sweetness: 0.083
+  max_dose_pct: 8
+  roles: [protein]
+  price_uah_per_kg: 190
+  price_source: &p_prot "оцінка за порядком оптових цін на сухі молочні/рослинні білки, група protein (PRICES.md)"
+  price_date: "2026-10"
+
+- id: whey_protein_conc_80
+  name_uk: Концентрат сироваткового білка (WPC 80)
+  aliases: [сироватковий білок, WPC]
+  group: protein
+  per_100g: {energy_kcal: 400, protein: 80.0, fat: 6.0, saturates: 4.0, carbs: 5.0, sugars: 4.0, fibre: 0, salt: 0.5, polyols: 0}
+  nutrients_source: "типова специфікація WPC80 (оцінка за аналогами постачальників)"
+  allergens: [milk]
+  may_contain: []
+  vegan: false
+  added_sugar: false
+  sweetness: 0.0064
+  max_dose_pct: 8
+  roles: [protein]
+  price_uah_per_kg: 750
+  price_source: *p_prot
+  price_date: "2026-10"
+
+- id: pea_protein_isolate
+  name_uk: Ізолят горохового білка
+  aliases: [гороховий білок]
+  group: protein
+  per_100g: {energy_kcal: 380, protein: 80.0, fat: 6.0, saturates: 1.2, carbs: 3.0, sugars: 0.5, fibre: 1.5, salt: 3.0, polyols: 0}
+  nutrients_source: "типова специфікація ізоляту горохового білка (оцінка за аналогами)"
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0
+  max_dose_pct: 6
+  roles: [protein]
+  price_uah_per_kg: 380
+  price_source: *p_prot
+  price_date: "2026-10"
+
+- id: soy_protein_isolate
+  name_uk: Ізолят соєвого білка
+  aliases: [соєвий білок]
+  group: protein
+  per_100g: {energy_kcal: 375, protein: 85.0, fat: 3.0, saturates: 0.5, carbs: 2.0, sugars: 0.5, fibre: 2.0, salt: 2.0, polyols: 0}
+  nutrients_source: "USDA FDC (soy protein isolate), типові значення"
+  allergens: [soybeans]
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0
+  max_dose_pct: 6
+  roles: [protein]
+  price_uah_per_kg: 300
+  price_source: *p_prot
+  price_date: "2026-10"
+
+- id: pea_protein_crisps
+  name_uk: Гороховий білковий кріспс
+  aliases: [білкові кріспи]
+  group: protein
+  per_100g: {energy_kcal: 373, protein: 70.0, fat: 5.0, saturates: 1.0, carbs: 12.0, sugars: 3.0, fibre: 5.0, salt: 1.2, polyols: 0}
+  nutrients_source: "типова специфікація екструдованих білкових кріспсів (оцінка за аналогами)"
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0.03
+  max_dose_pct: 30
+  roles: [protein]
+  price_uah_per_kg: 400
+  price_source: *p_prot
+  price_date: "2026-10"
+
+# ---------- закваски ----------
+- id: bulk_starter_milk
+  name_uk: Закваска виробнича (ферментоване молоко 2,5 %)
+  aliases: [материнська закваска]
+  group: cultures
+  per_100g: {energy_kcal: 55, protein: 3.0, fat: 2.5, saturates: 1.6, carbs: 4.0, sugars: 3.6, fibre: 0, salt: 0.1, polyols: 0}
+  nutrients_source: "корпус pet (spec-yogurt-starter.md)"
+  allergens: [milk]
+  may_contain: []
+  vegan: false
+  added_sugar: false
+  sweetness: 0.006
+  min_dose_pct: 1
+  max_dose_pct: 3
+  roles: [culture]
+  price_uah_per_kg: 35
+  price_source: &p_cult "оцінка: виробнича закваска ≈ ціна молока + витрати; DVS-культури — порядок ціни за кг концентрату, група cultures (PRICES.md)"
+  price_date: "2026-10"
+
+- id: dvs_culture_dairy
+  name_uk: Закваска DVS молочна (сублімована)
+  aliases: [DVS закваска, йогуртова культура]
+  group: cultures
+  per_100g: {energy_kcal: 360, protein: 25.0, fat: 1.0, saturates: 0.7, carbs: 55.0, sugars: 50.0, fibre: 0, salt: 1.0, polyols: 0}
+  nutrients_source: "корпус pet (spec-yogurt-starter.md: носій — сухе знежирене молоко); значення оцінка"
+  allergens: [milk]
+  may_contain: []
+  vegan: false
+  added_sugar: false
+  sweetness: 0.08
+  min_dose_pct: 0.01
+  max_dose_pct: 0.05
+  roles: [culture]
+  price_uah_per_kg: 6000
+  price_source: *p_cult
+  price_date: "2026-10"
+
+- id: dvs_culture_plant
+  name_uk: Закваска DVS «без молочного» (сублімована, носій мальтодекстрин)
+  aliases: [веганська закваска, рослинна культура]
+  group: cultures
+  per_100g: {energy_kcal: 380, protein: 2.0, fat: 0.5, saturates: 0.1, carbs: 90.0, sugars: 5.0, fibre: 0, salt: 0, polyols: 0}
+  nutrients_source: "корпус pet (spec-yogurt-starter.md)"
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0.05
+  min_dose_pct: 0.01
+  max_dose_pct: 0.05
+  roles: [culture]
+  price_uah_per_kg: 9000
+  price_source: *p_cult
+  price_date: "2026-10"
+
+# ---------- фрукти і соки ----------
+- id: strawberry_frozen
+  name_uk: Полуниця заморожена (IQF) без цукру
+  aliases: [полуниця, суниця]
+  group: fruit
+  per_100g: {energy_kcal: 35, protein: 0.4, fat: 0.1, saturates: 0, carbs: 7.0, sugars: 4.6, fibre: 2.1, salt: 0, polyols: 0}
+  nutrients_source: "корпус pet (spec-strawberry-frozen.md); карбс = 9,1 − клітковина 2,1"
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0.045
+  max_dose_pct: 35
+  roles: [fruit]
+  price_uah_per_kg: 110
+  price_source: &p_fruit "оцінка за порядком оптових цін на заморожені ягоди/пюре в UA, група fruit (PRICES.md)"
+  price_date: "2026-10"
+
+- id: raspberry_frozen
+  name_uk: Малина заморожена (IQF) без цукру
+  aliases: [малина]
+  group: fruit
+  per_100g: {energy_kcal: 52, protein: 1.2, fat: 0.65, saturates: 0, carbs: 5.4, sugars: 4.4, fibre: 6.5, salt: 0, polyols: 0}
+  nutrients_source: "USDA FDC (raspberries), типові значення; карбс = 11,9 − клітковина 6,5"
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0.044
+  max_dose_pct: 35
+  roles: [fruit]
+  price_uah_per_kg: 190
+  price_source: *p_fruit
+  price_date: "2026-10"
+
+- id: blueberry_frozen
+  name_uk: Лохина заморожена (IQF) без цукру
+  aliases: [лохина, чорниця]
+  group: fruit
+  per_100g: {energy_kcal: 57, protein: 0.7, fat: 0.3, saturates: 0, carbs: 12.1, sugars: 10.0, fibre: 2.4, salt: 0, polyols: 0}
+  nutrients_source: "USDA FDC (blueberries), типові значення; карбс = 14,5 − клітковина 2,4"
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0.09
+  max_dose_pct: 35
+  roles: [fruit]
+  price_uah_per_kg: 230
+  price_source: *p_fruit
+  price_date: "2026-10"
+
+- id: banana_puree
+  name_uk: Банан, пюре
+  aliases: [банан]
+  group: fruit
+  per_100g: {energy_kcal: 89, protein: 1.1, fat: 0.3, saturates: 0.1, carbs: 20.2, sugars: 12.2, fibre: 2.6, salt: 0, polyols: 0}
+  nutrients_source: "USDA FDC (bananas, raw), типові значення; карбс = 22,8 − клітковина 2,6"
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0.12
+  max_dose_pct: 50
+  roles: [fruit]
+  price_uah_per_kg: 75
+  price_source: *p_fruit
+  price_date: "2026-10"
+
+- id: apple_puree
+  name_uk: Яблучне пюре без цукру
+  aliases: [яблуко, яблучне пюре]
+  group: fruit
+  per_100g: {energy_kcal: 48, protein: 0.3, fat: 0.2, saturates: 0, carbs: 9.8, sugars: 9.6, fibre: 1.6, salt: 0, polyols: 0}
+  nutrients_source: "USDA FDC (applesauce, unsweetened), типові значення; карбс = 11,4 − клітковина 1,6"
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0.1
+  max_dose_pct: 50
+  roles: [fruit]
+  price_uah_per_kg: 38
+  price_source: *p_fruit
+  price_date: "2026-10"
+
+- id: apple_juice
+  name_uk: Яблучний сік (відновлений із концентрату)
+  aliases: [яблучний сік]
+  group: juice
+  per_100g: {energy_kcal: 46, protein: 0.1, fat: 0.1, saturates: 0, carbs: 11.1, sugars: 9.6, fibre: 0.2, salt: 0, polyols: 0}
+  nutrients_source: "USDA FDC (apple juice), типові значення; карбс = 11,3 − клітковина 0,2"
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0.1
+  roles: [juice, base]
+  price_uah_per_kg: 28
+  price_source: &p_juice "оцінка: ціна концентрату (UA/ЄС) у перерахунку на 11–12 °Bx, група juice (PRICES.md)"
+  price_date: "2026-10"
+
+- id: orange_juice
+  name_uk: Апельсиновий сік (відновлений із концентрату)
+  aliases: [апельсиновий сік]
+  group: juice
+  per_100g: {energy_kcal: 45, protein: 0.7, fat: 0.2, saturates: 0, carbs: 10.2, sugars: 8.4, fibre: 0.2, salt: 0, polyols: 0}
+  nutrients_source: "USDA FDC (orange juice), типові значення; карбс = 10,4 − клітковина 0,2"
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0.085
+  roles: [juice, base]
+  price_uah_per_kg: 55
+  price_source: *p_juice
+  price_date: "2026-10"
+
+# ---------- цукри, підсолоджувачі, об'ємоутворювачі ----------
+- id: sugar
+  name_uk: Цукор білий (сахароза)
+  aliases: [цукор, цукор-пісок]
+  group: sweeteners
+  per_100g: {energy_kcal: 400, protein: 0, fat: 0, saturates: 0, carbs: 100.0, sugars: 100.0, fibre: 0, salt: 0, polyols: 0}
+  nutrients_source: "корпус pet (spec-sucrose.md)"
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: true
+  sweetness: 1.0
+  roles: [sweetener]
+  price_uah_per_kg: 24
+  price_source: &p_sweet "оцінка за порядком оптових/роздрібних цін в UA, група sweeteners (PRICES.md)"
+  price_date: "2026-10"
+
+- id: glucose_syrup
+  name_uk: Глюкозний сироп DE 40
+  aliases: [глюкозний сироп, глюкоза]
+  group: sweeteners
+  per_100g: {energy_kcal: 320, protein: 0, fat: 0, saturates: 0, carbs: 80.0, sugars: 40.0, fibre: 0, salt: 0, polyols: 0}
+  nutrients_source: "типова специфікація глюкозного сиропу DE 40–45, ≈ 80 % сухих речовин; цукри (глюкоза + мальтоза) ≈ 40 г/100 г (оцінка за аналогами)"
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: true
+  sweetness: 0.4
+  roles: [sweetener, binder]
+  price_uah_per_kg: 55
+  price_source: *p_sweet
+  price_date: "2026-10"
+
+- id: honey
+  name_uk: Мед натуральний
+  aliases: [мед]
+  group: sweeteners
+  per_100g: {energy_kcal: 304, protein: 0.3, fat: 0, saturates: 0, carbs: 82.1, sugars: 82.1, fibre: 0.2, salt: 0, polyols: 0}
+  nutrients_source: "USDA FDC (honey), типові значення; карбс = 82,3 − клітковина 0,2"
+  allergens: []
+  may_contain: []
+  vegan: false
+  added_sugar: true
+  sweetness: 1.0
+  roles: [sweetener, binder]
+  price_uah_per_kg: 170
+  price_source: *p_sweet
+  price_date: "2026-10"
+
+- id: erythritol
+  name_uk: Еритрит (Е968)
+  aliases: [еритритол]
+  group: sweeteners
+  per_100g: {energy_kcal: 0, protein: 0, fat: 0, saturates: 0, carbs: 0, sugars: 0, fibre: 0, salt: 0, polyols: 100.0}
+  nutrients_source: "корпус pet (spec-erythritol.md): 0 ккал/г, солодкість 0,6–0,7"
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0.65
+  max_dose_pct: 15
+  roles: [bulking]
+  price_uah_per_kg: 230
+  price_source: *p_sweet
+  price_date: "2026-10"
+
+- id: polydextrose
+  name_uk: Полідекстроза (Е1200)
+  aliases: [полідекстроза]
+  group: sweeteners
+  per_100g: {energy_kcal: 100, protein: 0, fat: 0, saturates: 0, carbs: 4.0, sugars: 0, fibre: 90.0, salt: 0, polyols: 0}
+  nutrients_source: "корпус pet (spec-polydextrose.md): 1 ккал/г, клітковина 90 г"
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0.05
+  max_dose_pct: 10
+  roles: [bulking]
+  price_uah_per_kg: 190
+  price_source: *p_sweet
+  price_date: "2026-10"
+
+- id: stevia
+  name_uk: Стевіолові глікозиди (Reb A 95 %, Е960а)
+  aliases: [стевія]
+  group: sweeteners
+  per_100g: {energy_kcal: 0, protein: 0, fat: 0, saturates: 0, carbs: 0, sugars: 0, fibre: 0, salt: 0, polyols: 0}
+  nutrients_source: "корпус pet (spec-stevia.md): внесок поживних речовин нульовий при дозах ≤ 0,05 %"
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 250
+  max_dose_pct: 0.05
+  roles: [sweetener]
+  price_uah_per_kg: 3500
+  price_source: *p_sweet
+  price_date: "2026-10"
+
+- id: maltitol_syrup
+  name_uk: Мальтитовий сироп (Е965 ii)
+  aliases: [мальтитол]
+  group: sweeteners
+  per_100g: {energy_kcal: 190, protein: 0, fat: 0, saturates: 0, carbs: 5.0, sugars: 2.0, fibre: 0, salt: 0, polyols: 70.0}
+  nutrients_source: "типова специфікація мальтитового сиропу 75 % с.р. (оцінка); поліоли 2,4 ккал/г"
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0.42
+  max_dose_pct: 30
+  roles: [binder]
+  price_uah_per_kg: 140
+  price_source: *p_sweet
+  price_date: "2026-10"
+
+- id: date_paste
+  name_uk: Фініки, паста
+  aliases: [фінікова паста]
+  group: sweeteners
+  per_100g: {energy_kcal: 282, protein: 2.5, fat: 0.4, saturates: 0.1, carbs: 67.0, sugars: 63.0, fibre: 8.0, salt: 0, polyols: 0}
+  nutrients_source: "USDA FDC (dates, medjool), типові значення; карбс = 75 − клітковина 8"
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: true   # використовується як підсолоджувач/зв'язка: «без доданого цукру» не підходить
+  sweetness: 0.57
+  roles: [sweetener, binder]
+  price_uah_per_kg: 130
+  price_source: *p_sweet
+  price_date: "2026-10"
+
+# ---------- кислоти, стабілізатори ----------
+- id: citric_acid
+  name_uk: Лимонна кислота (Е330)
+  aliases: [лимонна кислота]
+  group: additives
+  per_100g: {energy_kcal: 247, protein: 0, fat: 0, saturates: 0, carbs: 0, sugars: 0, fibre: 0, salt: 0, polyols: 100.0}
+  nutrients_source: "довідкове значення 2,47 ккал/г; Рег. 1169/2011 дод. XIV (органічні кислоти — окремий коефіцієнт)"
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0
+  max_dose_pct: 1
+  roles: [acid]
+  price_uah_per_kg: 75
+  price_source: &p_add "оцінка за порядком оптових цін на харчові добавки в UA, група additives (PRICES.md)"
+  price_date: "2026-10"
+
+- id: pectin
+  name_uk: Пектин яблучний (Е440)
+  aliases: [пектин]
+  group: additives
+  per_100g: {energy_kcal: 170, protein: 0, fat: 0, saturates: 0, carbs: 5.0, sugars: 0, fibre: 85.0, salt: 0, polyols: 0}
+  nutrients_source: "довідкове значення: клітковина 2 ккал/г; типова специфікація (оцінка)"
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0
+  max_dose_pct: 1.5
+  roles: [stabilizer]
+  price_uah_per_kg: 900
+  price_source: *p_add
+  price_date: "2026-10"
+
+- id: modified_starch
+  name_uk: Крохмаль модифікований (Е1422/Е1442)
+  aliases: [модифікований крохмаль]
+  group: additives
+  per_100g: {energy_kcal: 355, protein: 0.3, fat: 0.1, saturates: 0, carbs: 88.0, sugars: 0.5, fibre: 0, salt: 0.05, polyols: 0}
+  nutrients_source: "типова специфікація модифікованого крохмалю кукурудзяного (оцінка)"
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0.005
+  max_dose_pct: 6
+  roles: [stabilizer]
+  price_uah_per_kg: 85
+  price_source: *p_add
+  price_date: "2026-10"
+
+- id: xanthan_gum
+  name_uk: Ксантанова камедь (Е415)
+  aliases: [ксантан]
+  group: additives
+  per_100g: {energy_kcal: 20, protein: 0, fat: 0, saturates: 0, carbs: 5.0, sugars: 0, fibre: 80.0, salt: 0.3, polyols: 0}
+  nutrients_source: "типова специфікація ксантану (оцінка; енергія майже нульова)"
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0
+  max_dose_pct: 0.5
+  roles: [stabilizer]
+  price_uah_per_kg: 420
+  price_source: *p_add
+  price_date: "2026-10"
+
+# ---------- борошно, крупи, жири, яйце, розпушувачі ----------
+- id: wheat_flour
+  name_uk: Борошно пшеничне вищого ґатунку
+  aliases: [борошно, пшеничне борошно]
+  group: bakery
+  per_100g: {energy_kcal: 345, protein: 10.0, fat: 1.0, saturates: 0.2, carbs: 67.0, sugars: 0.7, fibre: 4.0, salt: 0.01, polyols: 0}
+  nutrients_source: "корпус pet (spec-wheat-flour.md); карбс = 71 − клітковина 4"
+  allergens: [cereals]
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0.007
+  roles: [flour]
+  price_uah_per_kg: 22
+  price_source: &p_bak "оцінка за порядком оптових цін на борошно, крупи, олію, яйце в UA, група bakery (PRICES.md)"
+  price_date: "2026-10"
+
+- id: rice_flour
+  name_uk: Борошно рисове
+  aliases: [рисове борошно]
+  group: bakery
+  per_100g: {energy_kcal: 360, protein: 6.0, fat: 1.4, saturates: 0.4, carbs: 78.7, sugars: 0.2, fibre: 1.3, salt: 0.01, polyols: 0}
+  nutrients_source: "USDA FDC (rice flour, white), типові значення; карбс = 80 − клітковина 1,3"
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0.002
+  roles: [flour]
+  price_uah_per_kg: 60
+  price_source: *p_bak
+  price_date: "2026-10"
+
+- id: oat_flakes
+  name_uk: Пластівці вівсяні
+  aliases: [вівсяні пластівці, геркулес]
+  group: bakery
+  per_100g: {energy_kcal: 379, protein: 13.2, fat: 6.5, saturates: 1.1, carbs: 57.6, sugars: 1.0, fibre: 10.1, salt: 0.02, polyols: 0}
+  nutrients_source: "USDA FDC (oats), типові значення; карбс = 67,7 − клітковина 10,1"
+  allergens: [cereals]
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0.01
+  roles: [cereal]
+  price_uah_per_kg: 35
+  price_source: *p_bak
+  price_date: "2026-10"
+
+- id: sunflower_oil
+  name_uk: Олія соняшникова рафінована
+  aliases: [олія]
+  group: bakery
+  per_100g: {energy_kcal: 900, protein: 0, fat: 100.0, saturates: 11.0, carbs: 0, sugars: 0, fibre: 0, salt: 0, polyols: 0}
+  nutrients_source: "USDA FDC (sunflower oil), типові значення"
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0
+  roles: [fat]
+  price_uah_per_kg: 85
+  price_source: *p_bak
+  price_date: "2026-10"
+
+- id: butter_82
+  name_uk: Масло вершкове 82 % несолоне
+  aliases: [масло, вершкове масло]
+  group: bakery
+  per_100g: {energy_kcal: 740, protein: 0.7, fat: 82.0, saturates: 52.0, carbs: 0.6, sugars: 0.6, fibre: 0, salt: 0.02, polyols: 0}
+  nutrients_source: "корпус pet (spec-butter.md)"
+  allergens: [milk]
+  may_contain: []
+  vegan: false
+  added_sugar: false
+  sweetness: 0.001
+  roles: [fat]
+  price_uah_per_kg: 340
+  price_source: *p_bak
+  price_date: "2026-10"
+
+- id: plant_margarine
+  name_uk: Маргарин рослинний 80 % (кондитерський)
+  aliases: [маргарин]
+  group: bakery
+  per_100g: {energy_kcal: 722, protein: 0.2, fat: 80.0, saturates: 32.0, carbs: 0.5, sugars: 0.3, fibre: 0, salt: 0.2, polyols: 0}
+  nutrients_source: "корпус pet (spec-butter.md: рослинний блок 80 % жиру, перевірити лецитин сої); типова специфікація"
+  allergens: [soybeans]   # лецитин сої (консервативно)
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0.0005
+  roles: [fat]
+  price_uah_per_kg: 115
+  price_source: *p_bak
+  price_date: "2026-10"
+
+- id: whole_egg
+  name_uk: Яйце куряче (меланж)
+  aliases: [яйце, яйця]
+  group: bakery
+  per_100g: {energy_kcal: 143, protein: 12.6, fat: 9.5, saturates: 3.1, carbs: 0.7, sugars: 0.4, fibre: 0, salt: 0.36, polyols: 0}
+  nutrients_source: "корпус pet (spec-whole-egg.md)"
+  allergens: [eggs]
+  may_contain: []
+  vegan: false
+  added_sugar: false
+  sweetness: 0
+  max_dose_pct: 25
+  roles: [egg]
+  price_uah_per_kg: 85
+  price_source: *p_bak
+  price_date: "2026-10"
+
+- id: aquafaba
+  name_uk: Аквафаба (відвар нуту, стандартизований)
+  aliases: [відвар нуту]
+  group: bakery
+  per_100g: {energy_kcal: 20, protein: 1.2, fat: 0.2, saturates: 0, carbs: 3.2, sugars: 0.4, fibre: 0, salt: 0.05, polyols: 0}
+  nutrients_source: "корпус pet (spec-aquafaba.md)"
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0.004
+  max_dose_pct: 15
+  roles: [egg]
+  price_uah_per_kg: 40
+  price_source: *p_bak
+  price_date: "2026-10"
+
+- id: baking_soda
+  name_uk: Сода харчова (розпушувач, Е500)
+  aliases: [розпушувач, сода]
+  group: additives
+  per_100g: {energy_kcal: 0, protein: 0, fat: 0, saturates: 0, carbs: 0, sugars: 0, fibre: 0, salt: 68.0, polyols: 0}
+  nutrients_source: "розрахунок: NaHCO3 — Na 27 % × 2,5 = 68 г солі-еквівалента/100 г"
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0
+  max_dose_pct: 1
+  roles: [leavening]
+  price_uah_per_kg: 45
+  price_source: *p_add
+  price_date: "2026-10"
+
+- id: salt
+  name_uk: Сіль кухонна
+  aliases: [сіль]
+  group: additives
+  per_100g: {energy_kcal: 0, protein: 0, fat: 0, saturates: 0, carbs: 0, sugars: 0, fibre: 0, salt: 100.0, polyols: 0}
+  nutrients_source: "за визначенням: 100 г солі"
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0
+  max_dose_pct: 3
+  roles: [salt]
+  price_uah_per_kg: 10
+  price_source: *p_add
+  price_date: "2026-10"
+
+# ---------- соуси ----------
+- id: tomato_paste_28
+  name_uk: Томатна паста 28 % сухих речовин
+  aliases: [томатна паста, паста томатна]
+  group: sauce
+  per_100g: {energy_kcal: 82, protein: 4.3, fat: 0.5, saturates: 0.1, carbs: 15.0, sugars: 12.0, fibre: 4.0, salt: 0.2, polyols: 0}
+  nutrients_source: "USDA FDC (tomato paste), типові значення; карбс = 19 − клітковина 4"
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0.1
+  roles: [tomato]
+  price_uah_per_kg: 85
+  price_source: &p_sauce "оцінка за порядком оптових цін на томатну пасту, оцет, спеції в UA, група sauce (PRICES.md)"
+  price_date: "2026-10"
+
+- id: spirit_vinegar_9
+  name_uk: Оцет спиртовий 9 %
+  aliases: [оцет]
+  group: sauce
+  per_100g: {energy_kcal: 20, protein: 0, fat: 0, saturates: 0, carbs: 0, sugars: 0, fibre: 0, salt: 0, polyols: 9.0}
+  nutrients_source: "розрахунок: оцтова кислота 9 г × ≈ 2,2–3 ккал/г; Рег. 1169/2011 дод. XIV"
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0
+  max_dose_pct: 10
+  roles: [acid]
+  price_uah_per_kg: 22
+  price_source: *p_sauce
+  price_date: "2026-10"
+
+- id: spice_blend
+  name_uk: Суміш спецій для кетчупу (цибуля, часник, паприка, перець)
+  aliases: [спеції]
+  group: sauce
+  per_100g: {energy_kcal: 280, protein: 10.0, fat: 6.0, saturates: 1.0, carbs: 35.0, sugars: 8.0, fibre: 25.0, salt: 0.1, polyols: 0}
+  nutrients_source: "USDA FDC (spices, paprika/onion/garlic powder), усереднено (оцінка)"
+  allergens: []
+  may_contain: [celery, mustard]
+  vegan: true
+  added_sugar: false
+  sweetness: 0.07
+  max_dose_pct: 2
+  roles: [spice]
+  price_uah_per_kg: 450
+  price_source: *p_sauce
+  price_date: "2026-10"
+
+- id: water
+  name_uk: Вода питна
+  aliases: [вода]
+  group: filler
+  per_100g: {energy_kcal: 0, protein: 0, fat: 0, saturates: 0, carbs: 0, sugars: 0, fibre: 0, salt: 0, polyols: 0}
+  nutrients_source: "за визначенням"
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0
+  roles: [water]
+  price_uah_per_kg: 0.1
+  price_source: "оцінка: тариф на питну воду (порядок 0,03–0,1 грн/кг з підготовкою), група filler (PRICES.md)"
+  price_date: "2026-10"
+
+# ---------- горіхи, сухофрукти ----------
+- id: almonds_roasted
+  name_uk: Мигдаль смажений
+  aliases: [мигдаль]
+  group: nuts_dried
+  per_100g: {energy_kcal: 579, protein: 21.2, fat: 49.9, saturates: 3.8, carbs: 9.1, sugars: 4.4, fibre: 12.5, salt: 0, polyols: 0}
+  nutrients_source: "USDA FDC (almonds), типові значення; карбс = 21,6 − клітковина 12,5"
+  allergens: [nuts]
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0.04
+  max_dose_pct: 30
+  roles: [nuts]
+  price_uah_per_kg: 540
+  price_source: &p_nuts "оцінка за порядком оптових цін на горіхи/сухофрукти в UA, група nuts_dried (PRICES.md)"
+  price_date: "2026-10"
+
+- id: peanuts_roasted
+  name_uk: Арахіс смажений
+  aliases: [арахіс]
+  group: nuts_dried
+  per_100g: {energy_kcal: 585, protein: 24.0, fat: 50.0, saturates: 7.0, carbs: 12.0, sugars: 4.0, fibre: 9.0, salt: 0.01, polyols: 0}
+  nutrients_source: "USDA FDC (peanuts, dry-roasted), типові значення; карбс = 21 − клітковина 9"
+  allergens: [peanuts]
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0.04
+  max_dose_pct: 30
+  roles: [nuts]
+  price_uah_per_kg: 130
+  price_source: *p_nuts
+  price_date: "2026-10"
+
+- id: raisins
+  name_uk: Родзинки
+  aliases: [родзинки, ізюм]
+  group: nuts_dried
+  per_100g: {energy_kcal: 299, protein: 3.1, fat: 0.5, saturates: 0.1, carbs: 75.3, sugars: 59.0, fibre: 3.7, salt: 0.1, polyols: 0}
+  nutrients_source: "USDA FDC (raisins), типові значення; карбс = 79 − клітковина 3,7"
+  allergens: []
+  may_contain: []
+  vegan: true
+  added_sugar: false
+  sweetness: 0.55
+  max_dose_pct: 25
+  roles: [dried_fruit]
+  price_uah_per_kg: 170
+  price_source: *p_nuts
+  price_date: "2026-10"

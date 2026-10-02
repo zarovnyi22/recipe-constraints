@@ -40,6 +40,7 @@ ENV PATH="/app/.venv/bin:$PATH" \
 
 COPY --from=builder /app/.venv /app/.venv
 COPY migrations ./migrations
+COPY data ./data
 COPY app ./app
 
 EXPOSE 8000

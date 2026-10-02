@@ -1,0 +1,350 @@
+# Шаблони продуктів (жорстка технологія). Одиниці: %, г.
+# roles.<роль>: min_pct/max_pct — сума ролі у % маси рецептури; mode: one_of = рівно один
+#   інгредієнт ролі (розв'язувач перебирає варіанти), blend = будь-яка суміш;
+#   flavor_min_pct — мінімум ролі, якщо технолог просить смак/характерний інгредієнт.
+# dose_limits_pct — суворіші за ingredients.yaml межі доз для цього продукту (еритрит ≤ 8 % у м'яких).
+# sweetness_min — мінімум сахарозного еквівалента, г на 100 г ГОТОВОГО продукту (щоб «без цукру»
+#   не дав несолодкий продукт). moisture_loss_pct — частка маси сирої рецептури, що випаровується
+#   (лише печиво): маса рецептури = 1000 / (1 − loss/100), відсотки ролей — від маси рецептури.
+# base_recipe — робоча відправна рецептура (грами на масу рецептури), НЕ оптимум: перевіряється тестами.
+
+- id: yogurt_spoonable
+  name_uk: Йогурт густий (ложковий)
+  aliases: [йогурт, густий йогурт, термостатний йогурт, йогурт ложковий]
+  form: spoonable
+  description: Ферментована основа (молочна або рослинна) із закваскою, фруктами, підсолоджувачем.
+  reference: yogurt_spoonable
+  sweetness_min: 7.0
+  moisture_loss_pct: 0
+  dose_limits_pct: {erythritol: 8}
+  roles:
+    base:
+      mode: one_of
+      min_pct: 55
+      max_pct: 90
+      ingredients: [milk_2_5, milk_whole_3_5, soy_drink, oat_drink, coconut_drink, almond_drink, pea_drink]
+    culture:
+      mode: one_of
+      min_pct: 0.01
+      max_pct: 3
+      ingredients: [bulk_starter_milk, dvs_culture_dairy, dvs_culture_plant]
+    fruit:
+      mode: blend
+      min_pct: 0
+      max_pct: 25
+      flavor_min_pct: 10
+      ingredients: [strawberry_frozen, raspberry_frozen, blueberry_frozen, banana_puree, apple_puree]
+    sweetener:
+      mode: blend
+      min_pct: 0
+      max_pct: 15
+      ingredients: [sugar, honey, glucose_syrup, stevia]
+    bulking:
+      mode: blend
+      min_pct: 0
+      max_pct: 10
+      ingredients: [erythritol, polydextrose]
+    protein:
+      mode: blend
+      min_pct: 0
+      max_pct: 8
+      ingredients: [skim_milk_powder, whey_protein_conc_80, pea_protein_isolate, soy_protein_isolate]
+    stabilizer:
+      mode: blend
+      min_pct: 0
+      max_pct: 3
+      ingredients: [pectin, modified_starch, xanthan_gum]
+  base_recipe: {milk_2_5: 760, dvs_culture_dairy: 0.2, strawberry_frozen: 150, sugar: 80, pectin: 5, skim_milk_powder: 4.8}
+
+- id: drinking_yogurt
+  name_uk: Йогурт питний
+  aliases: [питний йогурт, йогурт для пиття]
+  form: drinkable
+  description: Рідкий ферментований напій на молочній або рослинній основі.
+  reference: drinking_yogurt
+  sweetness_min: 6.0
+  moisture_loss_pct: 0
+  dose_limits_pct: {erythritol: 8}
+  roles:
+    base:
+      mode: one_of
+      min_pct: 70
+      max_pct: 95
+      ingredients: [milk_2_5, milk_whole_3_5, soy_drink, oat_drink, coconut_drink, almond_drink, pea_drink]
+    culture:
+      mode: one_of
+      min_pct: 0.01
+      max_pct: 3
+      ingredients: [bulk_starter_milk, dvs_culture_dairy, dvs_culture_plant]
+    fruit:
+      mode: blend
+      min_pct: 0
+      max_pct: 15
+      flavor_min_pct: 5
+      ingredients: [strawberry_frozen, raspberry_frozen, blueberry_frozen, banana_puree, apple_puree]
+    sweetener:
+      mode: blend
+      min_pct: 0
+      max_pct: 12
+      ingredients: [sugar, honey, glucose_syrup, stevia]
+    bulking:
+      mode: blend
+      min_pct: 0
+      max_pct: 8
+      ingredients: [erythritol, polydextrose]
+    protein:
+      mode: blend
+      min_pct: 0
+      max_pct: 6
+      ingredients: [skim_milk_powder, whey_protein_conc_80, pea_protein_isolate, soy_protein_isolate]
+    stabilizer:
+      mode: blend
+      min_pct: 0
+      max_pct: 1
+      ingredients: [pectin, xanthan_gum]
+  base_recipe: {milk_2_5: 850, dvs_culture_dairy: 0.2, strawberry_frozen: 80, sugar: 65, skim_milk_powder: 4, pectin: 0.8}
+
+- id: juice_drink
+  name_uk: Соковмісний напій
+  aliases: [сокомісний напій, нектар, напій із соком]
+  form: drinkable
+  description: Вода + сік (не менше 10 %) + цукри/підсолоджувачі + кислота. Мінімум соку 10 % — технологічне припущення (див. README).
+  reference: juice_drink
+  sweetness_min: 8.0
+  moisture_loss_pct: 0
+  dose_limits_pct: {erythritol: 8}
+  roles:
+    juice:
+      mode: blend
+      min_pct: 10
+      max_pct: 60
+      ingredients: [apple_juice, orange_juice]
+    water:
+      mode: blend
+      min_pct: 20
+      max_pct: 85
+      ingredients: [water]
+    sweetener:
+      mode: blend
+      min_pct: 0
+      max_pct: 10
+      ingredients: [sugar, honey, glucose_syrup, stevia]
+    bulking:
+      mode: blend
+      min_pct: 0
+      max_pct: 5
+      ingredients: [erythritol, polydextrose]
+    acid:
+      mode: blend
+      min_pct: 0
+      max_pct: 1
+      ingredients: [citric_acid]
+  base_recipe: {apple_juice: 250, orange_juice: 100, sugar: 50, citric_acid: 0.5, water: 599.5}
+
+- id: smoothie
+  name_uk: Смузі
+  aliases: [смузі, фруктове смузі]
+  form: drinkable
+  description: Фруктове пюре (не менше 35 %) на рідкій основі, за потреби з білком і підсолоджувачем.
+  reference: smoothie
+  sweetness_min: 7.0
+  moisture_loss_pct: 0
+  dose_limits_pct: {erythritol: 8}
+  roles:
+    fruit:
+      mode: blend
+      min_pct: 35
+      max_pct: 80
+      ingredients: [strawberry_frozen, raspberry_frozen, blueberry_frozen, banana_puree, apple_puree]
+    base:
+      mode: blend
+      min_pct: 10
+      max_pct: 55
+      ingredients: [oat_drink, soy_drink, milk_2_5, pea_drink, almond_drink, coconut_drink, apple_juice, orange_juice]
+    water:
+      mode: blend
+      min_pct: 0
+      max_pct: 30
+      ingredients: [water]
+    sweetener:
+      mode: blend
+      min_pct: 0
+      max_pct: 8
+      ingredients: [sugar, honey, glucose_syrup, stevia, date_paste]
+    bulking:
+      mode: blend
+      min_pct: 0
+      max_pct: 5
+      ingredients: [erythritol, polydextrose]
+    protein:
+      mode: blend
+      min_pct: 0
+      max_pct: 8
+      ingredients: [skim_milk_powder, whey_protein_conc_80, pea_protein_isolate, soy_protein_isolate]
+    stabilizer:
+      mode: blend
+      min_pct: 0
+      max_pct: 1.5
+      ingredients: [pectin, xanthan_gum]
+  base_recipe: {banana_puree: 300, strawberry_frozen: 250, oat_drink: 405, sugar: 40, pectin: 5}
+
+- id: cereal_bar
+  name_uk: Батончик злаковий
+  aliases: [злаковий батончик, мюслі-батончик, гранола-батончик, батончик]
+  form: bar
+  description: Пластівці на зв'язці (сироп/мед/паста), з горіхами, білком, сухофруктами.
+  reference: cereal_bar
+  sweetness_min: 12.0
+  moisture_loss_pct: 0
+  dose_limits_pct: {erythritol: 10}
+  roles:
+    cereal:
+      mode: blend
+      min_pct: 25
+      max_pct: 55
+      ingredients: [oat_flakes]
+    binder:
+      mode: blend
+      min_pct: 15
+      max_pct: 40
+      ingredients: [glucose_syrup, honey, date_paste, maltitol_syrup]
+    nuts:
+      mode: blend
+      min_pct: 0
+      max_pct: 25
+      ingredients: [almonds_roasted, peanuts_roasted]
+    dried_fruit:
+      mode: blend
+      min_pct: 0
+      max_pct: 25
+      ingredients: [raisins]
+    protein:
+      mode: blend
+      min_pct: 0
+      max_pct: 30
+      ingredients: [pea_protein_crisps, whey_protein_conc_80, pea_protein_isolate, soy_protein_isolate]
+    fat:
+      mode: blend
+      min_pct: 0
+      max_pct: 10
+      ingredients: [sunflower_oil, butter_82, plant_margarine]
+    sweetener:
+      mode: blend
+      min_pct: 0
+      max_pct: 10
+      ingredients: [sugar, stevia]
+    bulking:
+      mode: blend
+      min_pct: 0
+      max_pct: 10
+      ingredients: [erythritol, polydextrose]
+    salt:
+      mode: blend
+      min_pct: 0
+      max_pct: 1
+      ingredients: [salt]
+  base_recipe: {oat_flakes: 387, almonds_roasted: 100, glucose_syrup: 220, raisins: 100, sunflower_oil: 40, pea_protein_crisps: 130, sugar: 20, salt: 3}
+
+- id: cookie
+  name_uk: Печиво пісочне
+  aliases: [печиво, пісочне печиво, кукіз]
+  form: baked
+  description: Тісто (борошно, жир, цукор, яйце) з випіканням; вологи втрачається moisture_loss_pct.
+  reference: cookie
+  sweetness_min: 15.0
+  moisture_loss_pct: 10
+  dose_limits_pct: {erythritol: 15, polydextrose: 10}
+  roles:
+    flour:
+      mode: blend
+      min_pct: 35
+      max_pct: 60
+      ingredients: [wheat_flour, rice_flour]
+    fat:
+      mode: blend
+      min_pct: 15
+      max_pct: 32
+      ingredients: [butter_82, plant_margarine, sunflower_oil]
+    sweetener:
+      mode: blend
+      min_pct: 0
+      max_pct: 30
+      ingredients: [sugar, honey, glucose_syrup, stevia]
+    bulking:
+      mode: blend
+      min_pct: 0
+      max_pct: 20
+      ingredients: [erythritol, polydextrose]
+    egg:
+      mode: blend
+      min_pct: 0
+      max_pct: 15
+      ingredients: [whole_egg, aquafaba]
+    leavening:
+      mode: blend
+      min_pct: 0
+      max_pct: 1
+      ingredients: [baking_soda]
+    salt:
+      mode: blend
+      min_pct: 0
+      max_pct: 1
+      ingredients: [salt]
+    water:
+      mode: blend
+      min_pct: 0
+      max_pct: 15
+      ingredients: [water]
+  base_recipe: {wheat_flour: 500, butter_82: 250, sugar: 200, whole_egg: 100, salt: 2, baking_soda: 2, water: 57.1}
+
+- id: ketchup_sauce
+  name_uk: Кетчуп
+  aliases: [кетчуп, томатний соус, соус]
+  form: sauce
+  description: Томатна паста (не менше 15 %), цукор, оцет, крохмаль, спеції, сіль.
+  reference: ketchup_sauce
+  sweetness_min: 10.0
+  moisture_loss_pct: 0
+  dose_limits_pct: {erythritol: 8}
+  roles:
+    tomato:
+      mode: blend
+      min_pct: 15
+      max_pct: 50
+      ingredients: [tomato_paste_28]
+    water:
+      mode: blend
+      min_pct: 20
+      max_pct: 70
+      ingredients: [water]
+    sweetener:
+      mode: blend
+      min_pct: 0
+      max_pct: 20
+      ingredients: [sugar, honey, glucose_syrup, stevia]
+    bulking:
+      mode: blend
+      min_pct: 0
+      max_pct: 10
+      ingredients: [erythritol, polydextrose]
+    acid:
+      mode: blend
+      min_pct: 2
+      max_pct: 10
+      ingredients: [spirit_vinegar_9]
+    stabilizer:
+      mode: blend
+      min_pct: 0
+      max_pct: 6
+      ingredients: [modified_starch, xanthan_gum]
+    spice:
+      mode: blend
+      min_pct: 0.5
+      max_pct: 2
+      ingredients: [spice_blend]
+    salt:
+      mode: blend
+      min_pct: 0.5
+      max_pct: 3
+      ingredients: [salt]
+  base_recipe: {tomato_paste_28: 300, sugar: 160, spirit_vinegar_9: 60, modified_starch: 40, spice_blend: 15, salt: 15, water: 410}

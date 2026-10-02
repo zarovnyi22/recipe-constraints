@@ -10,7 +10,7 @@ from app.config import get_settings
 from app.db import apply_migrations, create_pool
 from app.errors import register_error_handlers
 from app.logs import request_id_var, setup_logging
-from app.routers import health
+from app.routers import health, ingredients, templates
 
 setup_logging(get_settings().log_level)
 logger = logging.getLogger("app.http")
@@ -30,6 +30,8 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="Recipe Constraints", version="0.1.0", lifespan=lifespan)
 register_error_handlers(app)
 app.include_router(health.router)
+app.include_router(ingredients.router)
+app.include_router(templates.router)
 
 
 @app.middleware("http")
